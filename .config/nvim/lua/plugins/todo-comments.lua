@@ -4,10 +4,26 @@ return {
 	config = true,
 	init = function()
 		require("todo-comments").setup({
+			keywords = {
+				TODO = { icon = "󱒔 ", color = "info" },
+				FIXME = { icon = " ", color = "warning" },
+			},
 			highlight = {
-				multiline = true, -- Resalta comentarios multilinea
-				pattern = [[.*<(KEYWORDS)\s*:?]], -- Patrón para detectar palabras clave
+				-- Resalta comentarios a través de varias lineas
+				multiline = true,
+				-- Patrón para detectar palabras clave
+				pattern = [[(KEYWORDS)\s*]],
+				keyword = "fg",
+				-- Mostrar solo en los comentarios
+				comments_only = true,
 			},
 		})
+		vim.keymap.set("n", "]t", function()
+			require("todo-comments").jump_next()
+		end, { desc = "Siguiente TODO" })
+
+		vim.keymap.set("n", "[t", function()
+			require("todo-comments").jump_prev()
+		end, { desc = "Anterior TODO" })
 	end,
 }

@@ -27,6 +27,7 @@ Puedes consultar los atajos de teclado leyendo el código en `config.def.h` (`st
   - Hacer clic derecho abre un menú para elegir el layout: [dwm-layoutmenu-6.2.diff](http://dwm.suckless.org/patches/layoutmenu/dwm-layoutmenu-6.2.diff)
   - Las ventanas flotantes nuevas aparecerán centradas: [dwm-alwayscenter-20200625-f04cac6.diff](http://dwm.suckless.org/patches/alwayscenter/dwm-alwayscenter-20200625-f04cac6.diff)
   - Las ventanas nuevas aparecerán al final del stack: [dwm-attachbottom-6.3.diff](http://dwm.suckless.org/patches/attachbottom/dwm-attachbottom-6.3.diff)
+  - Se usa el caracter unicode "…" cuando el texto es demasiado largo para la barra de estado en vez de "..." [dwm-unicode_ellipsis-20222909-d3f93c7.diff](https://dwm.suckless.org/patches/unicode-ellipsis/dwm-unicode_ellipsis-20222909-d3f93c7.diff)
   - Se pueden usar colores en la barra de estado: [dwm-status2d-6.3.diff](https://dwm.suckless.org/patches/status2d/dwm-status2d-6.3.diff)
   - La barra de estado se puede clicar para ejecutar comandos: [dwm-statuscmd-nosignal-status2d-20210402-60bb3df.diff](https://dwm.suckless.org/patches/statuscmd/dwm-statuscmd-nosignal-status2d-20210402-60bb3df.diff)
     - Se deben de añadir unas lineas para ignorar también los _^_

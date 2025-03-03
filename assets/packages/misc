@@ -55,7 +55,6 @@ tk
 extra/j4-dmenu-desktop
 bash-language-server
 acpi
-neovim-remote
 android-tools
 unclutter
 junit

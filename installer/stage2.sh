@@ -90,9 +90,6 @@ arch_support() {
 
 			[multilib]
 			Include = /etc/pacman.d/mirrorlist-arch
-
-			[community]
-			Include = /etc/pacman.d/mirrorlist-arch
 		EOF
 
 	# Actualizar cambios
@@ -101,8 +98,9 @@ arch_support() {
 	pacinstall reflector
 
 	# Escoger mirrors más rápidos de los repositorios de Arch
-	reflector --verbose --latest 10 --sort rate --download-timeout 1 \
-		--connection-timeout 1 --threads "$(nproc)" \
+	reflector --verbose --fastest 10 --age 6 \
+		--connection-timeout 1 --download-timeout 1 \
+		--threads "$(nproc)" \
 		--save /etc/pacman.d/mirrorlist-arch
 
 	# Configurar cronie para actualizar automáticamente los mirrors de Arch
@@ -111,7 +109,7 @@ arch_support() {
 		PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
 		# Escoger los mejores repositorios para Arch Linux
-		@hourly root ping gnu.org -c 1 && reflector --verbose --latest 10 --sort rate --save /etc/pacman.d/mirrorlist-arch
+		@hourly root ping gnu.org -c 1 && reflector --fastest 10 --age 6 --connection-timeout 1 --download-timeout 1 --save /etc/pacman.d/mirrorlist-arch
 	EOF
 }
 

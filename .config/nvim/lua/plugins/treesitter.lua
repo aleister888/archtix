@@ -24,6 +24,7 @@ return {
 			"scss",
 			"zathurarc",
 			"ruby",
+			"diff",
 		},
 	},
 	config = function(_, opts)

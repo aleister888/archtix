@@ -1,5 +1,3 @@
-local opt = vim.opt
-
 -- Título de la ventana: Título del archivo
 vim.opt.title = true
 -- Codificación de caracteres: UTF-8
