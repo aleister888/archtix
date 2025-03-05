@@ -14,8 +14,8 @@ return {
 				-- Patrón para detectar palabras clave
 				pattern = [[(KEYWORDS)\s*]],
 				keyword = "fg",
-				-- Mostrar solo en los comentarios
-				comments_only = true,
+				-- Mostrar no solo en los comentarios
+				comments_only = false,
 			},
 		})
 		vim.keymap.set("n", "]t", function()

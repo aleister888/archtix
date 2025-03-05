@@ -51,6 +51,7 @@ install() {
 uninstall() {
 	rm -rf "$INSTALL_DIR"
 	sudo rm $RUN_SCRIPT
+	rm -rf "${XDG_CACHE_HOME:-$HOME/.cache}"/Eclipse
 	rm -rf "${XDG_DATA_HOME:-$HOME/.local/share}"/Eclipse
 	rm -rf "${XDG_DATA_HOME:-$HOME/.local/share}"/eclipse-workspace
 	rm -rf ~/.m2
