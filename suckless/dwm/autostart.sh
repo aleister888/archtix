@@ -27,67 +27,12 @@ for id in $(grep -v "^$my_id$" "$processlist"); do
 	kill -9 "$id" 2>/dev/null
 done
 
-# Cerramos eww
-pkill eww
-
 # Permite al usuario root conectarse al servidor X (p.e. Para compartir el porta-papeles)
 xhost +SI:localuser:root
 
 #############
 # Funciones #
 #############
-
-# Función para ajustar el tamaño del widget de eww en función de la resolución
-# y abrirlo solo si hay un único monitor y ninguna ventana abierta
-ewwspawn() {
-	while true; do
-		local monitors
-		local resolution
-		# Contamos el numero de monitores activos
-		monitors=$(xrandr | awk '/ connected/ { print $1 }' | wc -l)
-		# Definir el archivo al que apunta el enlace simbólico actual
-		current_link=$(readlink -f "$XDG_CONFIG_HOME/eww/dashboard.scss")
-
-		# Definir los archivos de los que se crearán los enlaces simbólicos
-		file_1080="$HOME/.dotfiles/.config/eww/dashboard/dashboard1080p.scss"
-		file_2160="$HOME/.dotfiles/.config/eww/dashboard/dashboard2160p.scss"
-
-		# Ejecutar xrandr y obtener la resolución vertical del monitor primario
-		resolution=$(
-			xrandr |
-				grep -E ' connected (primary )?[0-9]+x[0-9]+' |
-				awk -F '[x+]' '{print $2}'
-		)
-
-		# Verificar y crear enlaces simbólicos según los rangos de resolución
-		if [[ $resolution -ge 2160 ]]; then
-			[[ "$current_link" != "$file_2160" ]] &&
-				ln -sf "$file_2160" "$XDG_CONFIG_HOME/eww/dashboard.scss"
-		else
-			[[ "$current_link" != "$file_1080" ]] &&
-				ln -sf "$file_1080" "$XDG_CONFIG_HOME/eww/dashboard.scss"
-		fi
-
-		# Cerrar el widget si hay mas de un monitor en uso o alguna
-		# ventana activa
-		if
-			[ "$monitors" -gt 1 ] ||
-				xdotool getactivewindow &>/dev/null ||
-				pgrep i3lock &>/dev/null
-		then
-			pkill eww
-
-		# Invocar nuestro widget si hay un solo monitor activo y eww no esta
-		# ya en ejecución
-		elif [ "$monitors" -lt 2 ] && ! pgrep eww >/dev/null; then
-			eww open dashboard &
-		fi
-
-		# Esperar antes de ejecutar el bucle otra vez
-		sleep 0.2
-
-	done
-}
 
 virtualmic() {
 	# Contador para evitar bucles infinitos
@@ -158,7 +103,6 @@ pgrep dunst || dunst &
 # Esperar a que se incie wireplumber para activar el micrófono virtual
 # (Para compartir el audio de las aplicaciones através del micrófono)
 virtualmic &
-ewwspawn &
 
 # Salvapantallas
 xautolock -time 5 -locker screensaver &

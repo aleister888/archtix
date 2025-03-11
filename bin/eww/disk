@@ -1,5 +1,0 @@
-#!/bin/sh
-
-# Imprime el % de uso del disco duro
-
-df --output=pcent / | tail -n 1 | tr -d '%' | xargs
