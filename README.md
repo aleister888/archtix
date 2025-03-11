@@ -4,7 +4,7 @@
 
 ---
 
-Auto-instalador de Artix Linux (OpenRC) con dmw, dmenu y mi configuración personal.
+Auto-instalador de Artix Linux (OpenRC) con dwm, dmenu y mi configuración personal.
 
 <p float="center">
 <img src="https://raw.githubusercontent.com/aleister888/artix-installer/refs/heads/main/assets/screenshots/screenshot1.jpg" width="49%" />

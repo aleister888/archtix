@@ -1,5 +1,6 @@
 #!/bin/bash
 # shellcheck disable=SC2046
+# shellcheck disable=SC2086
 
 # Instalador de ajustes para Artix OpenRC
 # por aleister888 <pacoe1000@gmail.com>
@@ -45,8 +46,19 @@ REPO_PKG="$(cat \
 	"$HOME"/.dotfiles/assets/packages/system \
 	"$HOME"/.dotfiles/assets/packages/x11 2>/dev/null)"
 
-yay -Sy --noconfirm --needed --asexplicit \
-	$(echo "$REPO_PKG" | grep -v "$(yay -Qq)" | tr '\n' ' ') >/dev/null 2>&1
+# Extraemos solo el nombre del paquete (lo que está después del primer "/")
+REPO_PKG_NAMES="${REPO_PKG//[a-zA-Z0-9-]*\//}"
+
+# Obtenemos los paquetes instalados
+INSTALLED_PKGS=$(yay -Qq)
+
+# Filtramos los paquetes que no están instalados
+PKGS_TO_INSTALL=$(echo "$REPO_PKG_NAMES" | grep -vxF -f <(echo "$INSTALLED_PKGS"))
+
+# Si hay paquetes por instalar, los instalamos
+if [ -n "$PKGS_TO_INSTALL" ]; then
+	yay -Sy --noconfirm --needed --asexplicit $PKGS_TO_INSTALL >/dev/null 2>&1
+fi
 
 #######################################
 # Archivos de configuración y scripts #

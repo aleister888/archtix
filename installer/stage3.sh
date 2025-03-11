@@ -233,9 +233,11 @@ scripts_link
 # Crear el directorio /.Trash con permisos adecuados
 trash_dir
 
-# Configurar syncthing para que se inicie con el ordenador
-echo "@reboot $USER syncthing --no-browser --no-default-folder" |
-	sudo tee -a /etc/crontab >/dev/null
+# Configurar cronie para iniciar syncthing con el ordenador y asignar la swap
+cat <<-EOF | sudo tee -a /etc/crontab >/dev/null
+	@reboot $USER syncthing --no-browser --no-default-folder
+	@reboot root sleep 5 && swapon /swap/swapfile
+EOF
 
 # Si estamos usando una máquina virtual, configuramos X11 para funcionar a 1080p
 [ "$graphic_driver" == "virtual" ] &&

@@ -1,4 +1,5 @@
 #!/bin/sh
+# shellcheck disable=SC1091
 
 # Abreviaciones
 . "${XDG_CONFIG_HOME:-$HOME/.config}/zsh/aliasrc"
@@ -27,7 +28,7 @@ if [ -d "$HOME/.local/bin/utils" ]; then
 fi
 
 # Definir cursor usado por X11
-export XCURSOR_PATH=/usr/share/icons:${XDG_DATA_HOME}/icons
+export XCURSOR_PATH="/usr/share/icons:${XDG_DATA_HOME}/icons"
 export XCURSOR_PATH=/usr/share/icons/
 export XCURSOR_THEME=capitaine-cursors
 export XCURSOR_SIZE=64
