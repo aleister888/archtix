@@ -142,6 +142,7 @@ static const Rule rules[] = {
 	{ "gnome-contacts",        NULL,  NULL,  1<<12,  0,  0,  0,  0,  -1,    0 },
 	{ "Standard Notes",        NULL,  NULL,  1<<13,  0,  0,  0,  0,  -1,    0 },
 	{ TERMC,                   NULL,  NULL,      0,  0,  0,  1,  0,  -1,    0 },
+	{ BROWSER,                 NULL,  NULL,      0,  0,  0,  1,  0,  -1,    0 },
 	{ NULL,  NULL,     "scratchpad",             0,  1,  0,  0,  0,  -1,  's' },
 	{ NULL,  NULL,   "Media viewer",             0,  1,  0,  0,  0,  -1,    0 },
 };

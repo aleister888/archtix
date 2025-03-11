@@ -38,12 +38,12 @@ return {
 				vim.keymap.set("v", "`", "s`<C-r>\"'", { noremap = true, silent = true })
 				vim.keymap.set("v", "<leader>`", "s``<C-r>\"''", { noremap = true, silent = true })
 				-- Modos de texto
-				vim.keymap.set("v", "e", 's\\emph{<C-r>"}', { silent = true })
-				vim.keymap.set("v", "b", 's\\textbf{<C-r>"}', { silent = true })
-				vim.keymap.set("v", "i", 's\\textit{<C-r>"}', { silent = true })
-				vim.keymap.set("v", "t", 's\\text{<C-r>"}', { silent = true })
-				vim.keymap.set("v", "m", 's\\texttt{<C-r>"}', { silent = true })
-				vim.keymap.set("v", "h", 's\\hl{<C-r>"}', { silent = true })
+				vim.keymap.set("v", "<leader>e", 's\\emph{<C-r>"}', { silent = true })
+				vim.keymap.set("v", "<leader>b", 's\\textbf{<C-r>"}', { silent = true })
+				vim.keymap.set("v", "<leader>i", 's\\textit{<C-r>"}', { silent = true })
+				vim.keymap.set("v", "<leader>t", 's\\text{<C-r>"}', { silent = true })
+				vim.keymap.set("v", "<leader>m", 's\\texttt{<C-r>"}', { silent = true })
+				vim.keymap.set("v", "<leader>h", 's\\hl{<C-r>"}', { silent = true })
 			end,
 		})
 	end,

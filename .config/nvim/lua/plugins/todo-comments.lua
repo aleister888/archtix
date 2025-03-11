@@ -8,6 +8,7 @@ return {
 				TODO = { icon = "󱒔 ", color = "info" },
 				FIXME = { icon = " ", color = "warning" },
 			},
+			merge_keywords = false,
 			highlight = {
 				-- Resalta comentarios a través de varias lineas
 				multiline = true,

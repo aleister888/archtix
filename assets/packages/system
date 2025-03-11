@@ -47,3 +47,5 @@ zsh
 timeshift
 memtest86+-efi
 maven
+hunspell-es_es
+hunspell-en_us

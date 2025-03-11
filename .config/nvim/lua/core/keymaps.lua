@@ -21,14 +21,6 @@ vim.keymap.set("n", "<C-Down>", "5j", { noremap = true, silent = true })
 vim.keymap.set("n", "=", "$", { noremap = true, silent = true })
 vim.keymap.set("v", "=", "$h", { noremap = true, silent = true })
 
--- Alternar corrección ortográfica en español con F4
-vim.keymap.set("n", "<F4>", ":setlocal spell! spelllang=es_es<CR>", { silent = true })
-vim.keymap.set("i", "<F4>", "<C-O>:setlocal spell! spelllang=es_es<CR>", { silent = true })
-
--- Alternar corrección ortográfica en inglés con F5
-vim.keymap.set("n", "<F5>", ":setlocal spell! spelllang=en_us<CR>", { silent = true })
-vim.keymap.set("i", "<F5>", "<C-O>:setlocal spell! spelllang=en_us<CR>", { silent = true })
-
 -- Encapsular texto seleccionado
 vim.keymap.set("v", '"', 's"<C-r>""', { noremap = true, silent = true })
 vim.keymap.set("v", "'", "s'<C-r>\"'", { noremap = true, silent = true })

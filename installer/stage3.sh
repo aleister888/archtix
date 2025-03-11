@@ -246,15 +246,18 @@ sudo cp "$HOME/.dotfiles/assets/udev/99-steam-controller-perms.rules" \
 	/usr/lib/udev/rules.d/
 
 # Activar servicios
-service_add syslog-ng
 service_add elogind
 service_add earlyoom
 service_add tlp
 
+# Configurar y activar syslog-ng
+service_add syslog-ng
+sudo cp -f "$HOME/.dotfiles/assets/configs/syslog-ng.conf" /etc/syslog-ng/syslog-ng.conf
+
 # Configurar y activar xdm
 service_add xdm
-sudo cp "$HOME/.dotfiles/assets/xdm/Xresources" /etc/X11/xdm/Xresources
-sudo cp "$HOME/.dotfiles/assets/xdm/Xsetup_0" /etc/X11/xdm/Xsetup_0
+sudo cp -f "$HOME/.dotfiles/assets/xdm/Xresources" /etc/X11/xdm/Xresources
+sudo cp -f "$HOME/.dotfiles/assets/xdm/Xsetup_0" /etc/X11/xdm/Xsetup_0
 
 # Activar WiFi y Bluetooth
 sudo rfkill unblock wifi

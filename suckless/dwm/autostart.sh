@@ -30,6 +30,9 @@ done
 # Cerramos eww
 pkill eww
 
+# Permite al usuario root conectarse al servidor X (p.e. Para compartir el porta-papeles)
+xhost +SI:localuser:root
+
 #############
 # Funciones #
 #############

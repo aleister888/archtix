@@ -1,2 +1,10 @@
 syslog-ng
 syslog-ng-openrc
+librabbitmq-c
+librabbitmq-c
+libesmtp
+libdbi
+libmaxminddb
+librdkafka
+hiredis
+mongo-c-driver

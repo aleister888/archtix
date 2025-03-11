@@ -18,6 +18,8 @@ vim.g.mapleader = ","
 require("core.options")
 require("core.indent")
 require("core.keymaps")
+require("core.spell")
+require("core.java")
 
 require("lazy").setup("plugins", {
 	change_detection = {

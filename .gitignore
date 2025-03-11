@@ -15,6 +15,10 @@ bookmarks
 .config/nvim/spell/es.utf-8.spl
 .config/nvim/spell/es.utf-8.sug
 .config/nvim/spell/es.utf-8.add.spl
+.config/nvim/spell/en_US.aff
+.config/nvim/spell/en_US.dic
+.config/nvim/spell/es_ES.aff
+.config/nvim/spell/es_ES.dic
 .config/nvim/lazy-lock.json
 .config/nvim/.luarc.json
 

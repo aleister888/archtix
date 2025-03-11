@@ -1,14 +1,9 @@
 /* Borrar botón para listar todas las pestañas */
 #alltabs-button {
-	display: none !important;
+  display: none !important;
 }
 
 /* Desactivar el icono para las carpetas en marcadores */
 #personal-bookmarks .bookmark-item[container="true"] .toolbarbutton-icon {
-	display: none !important;
-}
-
-/* Ocultar el botón de cerrar en las pestañas */
-.tab-close-button {
-	display: none !important;
+  display: none !important;
 }
