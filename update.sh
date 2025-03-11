@@ -320,6 +320,21 @@ for entry in "${desktopent[@]}"; do
 	fi
 done >/dev/null
 
+#############################
+# Añadir diccionarios a vim #
+#############################
+
+[ ! -d "$DATA_DIR/nvim/site/spell" ] &&
+	mkdir -p "$DATA_DIR/nvim/site/spell"
+
+[ ! -f "$DATA_DIR/nvim/site/spell/es.utf-8.spl" ] &&
+	wget 'https://ftp.nluug.nl/pub/vim/runtime/spell/es.utf-8.spl' -q -O \
+		"$DATA_DIR/nvim/site/spell/es.utf-8.spl"
+
+[ ! -f "$DATA_DIR/nvim/site/spell/es.utf-8.sug" ] &&
+	wget 'https://ftp.nluug.nl/pub/vim/runtime/spell/es.utf-8.sug' -q -O \
+		"$DATA_DIR/nvim/site/spell/es.utf-8.sug"
+
 ####################################
 # Actualizar iconos y colores (lf) #
 ####################################
