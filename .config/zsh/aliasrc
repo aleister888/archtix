@@ -1,7 +1,5 @@
 #!/bin/sh
 
-REPO_URL="https://github.com/aleister888/artix-installer"
-
 # Alias para herramientas comunes
 alias wget='wget --hsts-file="$XDG_CONFIG_HOME"/wget-hsts'
 alias gpg2='gpg2 --homedir "$XDG_DATA_HOME"/gnupg'
@@ -170,31 +168,6 @@ pac() {
 	done
 }
 
-whip_msg() {
-	whiptail --backtitle "$REPO_URL" --title "$1" --msgbox "$2" 10 60
-}
-
-whip_yes() {
-	whiptail --backtitle "$REPO_URL" --title "$1" --yesno "$2" 10 60
-}
-
-whip_menu() {
-	TITLE="$1"
-	MENU="$2"
-	shift 2
-	# shellcheck disable=SC2068
-	whiptail --backtitle "$REPO_URL" \
-		--title "$TITLE" --menu "$MENU" 15 60 5 $@ 3>&1 1>&2 2>&3
-}
-
-whip_input() {
-	TITLE=$1
-	INPUTBOX=$2
-	whiptail --backtitle "$REPO_URL" \
-		--title "$TITLE" --inputbox "$INPUTBOX" \
-		10 60 3>&1 1>&2 2>&3
-}
-
 # Función para validar la indentación de un archivo
 indent_check() {
 	# Validar que el número de espacios es un entero
@@ -217,97 +190,45 @@ indent_check() {
 }
 
 # Función para ver el historial de commits
-view_commits() {
+git_view_commits() {
 	git log --oneline --graph --decorate | nvim -
 }
 
-# Función para hacer commit y push
-commit_and_push() {
-	git add .
-	git commit || {
-		whip_msg "Error" "El commit no se completó correctamente."
-		return 1
-	}
-	if git push; then
-		whip_msg "Éxito" "Commit y push realizados con éxito."
-	else
-		whip_msg "Error" "El push no se completó correctamente."
-	fi
-}
-
 # Función para restaurar con git reset --hard origin
-reset_hard() {
-	if whip_yes \
-		"Restaurar" \
-		"¿Estás seguro? Se perderán los cambios locales."; then
+git_reset_hard() {
+	unset respuesta
+
+	echo "¿Estás seguro? Se perderán los cambios locales (s/N)"
+
+	read -r respuesta
+
+	if [ "$respuesta" = "s" ] || [ "$respuesta" = "S" ]; then
 		git reset --hard origin
 	else
-		whip_msg "Cancelado" "Operación cancelada."
+		echo "Operación cancelada."
 	fi
 }
 
 # Función para hacer reset a un commit específico
-reset_to_commit() {
-	# Usamos un inputbox para pedir el hash del commit al usuario
-	commit_hash=$(whip_input "Introducir hash del commit" "Por favor, introduce el hash del commit:")
+git_reset_to_commit() {
+	unset commitHash
+	unset respuesta
 
-	# Verificar si el hash no está vacío
-	if [ -z "$commit_hash" ]; then
-		whip_msg "Error" "No se introdujo un hash de commit."
-		return 1
-	fi
+	echo "Por favor, introduce el hash del commit:"
+
+	read -r commitHash
 
 	# Confirmar antes de hacer el reset
-	if whip_yes "Restaurar commit" "¿Estás seguro de que quieres retroceder al commit $commit_hash? Se perderán los cambios después de este commit."; then
+	echo "¿Estás seguro de que quieres retroceder al commit $commitHash? (s/N)"
+
+	read -r respuesta
+
+	if [ "$respuesta" = "s" ] || [ "$respuesta" = "S" ]; then
 		# Realizar el reset al commit seleccionado
-		git reset --hard "$commit_hash"
-		# Hacer push forzado al repositorio remoto
-		if git push origin HEAD --force; then
-			whip_msg "Éxito" "Repositorio remoto actualizado con éxito."
-		else
-			whip_msg "Error" "El push forzado no se completó correctamente."
-		fi
+		git reset --hard "$commitHash"
 	else
-		whip_msg "Cancelado" "Operación cancelada."
+		echo "Operación cancelada."
 	fi
-}
-
-githelp() {
-	# Comprobar si estamos en un directorio de Git
-	if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-		return 1
-	fi
-
-	# Menú principal
-	while true; do
-		choice=$(
-			whip_menu \
-				"GitHub" "Selecciona una opción:" \
-				"1" "Ver historial de commits" \
-				"2" "Hacer commit y push" \
-				"3" "Restaurar con git reset --hard origin" \
-				"4" "Restaurar a un commit específico" \
-				"5" "Cambiar el mensaje del último commit" \
-				"6" "Salir"
-		)
-
-		case $choice in
-		1) view_commits ;;
-		2) commit_and_push ;;
-		3) reset_hard ;;
-		4) reset_to_commit ;;
-		5)
-			git commit --amend &&
-				git push origin +HEAD
-			;;
-		6)
-			whip_yes "Salir" \
-				"¿Estás seguro de que quieres salir?" &&
-				break
-			;;
-		*) break ;;
-		esac
-	done
 }
 
 code_format() {
