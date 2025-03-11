@@ -331,7 +331,7 @@ code_format() {
 				echo "Formateado: $archivo"
 			;;
 		text/x-java)
-			astyle --style=allman --indent=spaces=4 -n "$archivo" &&
+			astyle --style=allman --indent=tab=8 -n "$archivo" &&
 				echo "Formateado: $archivo"
 			;;
 		text/x-tex)

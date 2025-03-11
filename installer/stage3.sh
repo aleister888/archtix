@@ -291,7 +291,6 @@ sudo install -m 755 "$HOME/.dotfiles/assets/system/nm-restart" \
 cat <<-'EOF' | sudo tee -a /etc/environment
 	CARGO_HOME="~/.local/share/cargo"
 	GNUPGHOME="~/.local/share/gnupg"
-	_JAVA_OPTIONS=-Djava.util.prefs.userRoot="~/.config/java"
 EOF
 
 WINEPREFIX="$HOME/.config/wineprefixes" winetricks -q mfc42

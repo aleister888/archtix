@@ -14,6 +14,21 @@ vim.api.nvim_create_autocmd("FileType", {
 	end,
 })
 
+-- Fstab
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "fstab",
+	callback = function()
+		local opt = vim.opt_local
+		opt.smartindent = false
+		opt.cindent = false
+		opt.expandtab = false
+		opt.copyindent = true
+		opt.preserveindent = true
+		opt.tabstop = 8
+		opt.shiftwidth = 8
+	end,
+})
+
 -- Java
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = "java",

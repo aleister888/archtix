@@ -14,7 +14,6 @@ return {
 	},
 	{
 		"williamboman/mason-lspconfig.nvim",
-		dependencies = { "rcarriga/nvim-notify" },
 		opts = function()
 			vim.keymap.set("n", "<leader>A", vim.lsp.buf.code_action, {})
 			-- Mostrar diagnóstico en una ventana flotante
@@ -45,23 +44,6 @@ return {
 				":lua vim.diagnostic.goto_prev()<CR>",
 				{ noremap = true, silent = true }
 			)
-			local diagnostics_active = true
-			function ToggleDiagnostics()
-				diagnostics_active = not diagnostics_active
-				if diagnostics_active then
-					vim.diagnostic.enable()
-					vim.notify("Análisis activado")
-				else
-					vim.diagnostic.disable()
-					vim.notify("Análisis desactivado")
-				end
-			end
-			vim.api.nvim_set_keymap(
-				"n",
-				"<leader>dt",
-				":lua ToggleDiagnostics()<CR>",
-				{ noremap = true, silent = true }
-			)
 			return {
 				ensure_installed = servers,
 			}
@@ -72,16 +54,24 @@ return {
 		dependencies = {
 			"williamboman/mason.nvim",
 			"williamboman/mason-lspconfig.nvim",
+			"WhoIsSethDaniel/mason-tool-installer.nvim",
 		},
 		config = function()
 			local lspconfig = require("lspconfig")
 			local capabilities = vim.lsp.protocol.make_client_capabilities()
 			-- Configurar servidores LSP
 			for _, lsp in ipairs(servers) do
-				lspconfig[lsp].setup({
-					capabilities = capabilities,
-				})
+				if lsp ~= "jdtls" then
+					lspconfig[lsp].setup({
+						capabilities = capabilities,
+					})
+				end
 			end
+			require("mason-tool-installer").setup({
+				ensure_installed = { "java-debug-adapter", "java-test" },
+				auto_update = true,
+				run_on_start = true,
+			})
 		end,
 	},
 	{

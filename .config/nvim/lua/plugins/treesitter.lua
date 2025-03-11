@@ -25,6 +25,7 @@ return {
 			"zathurarc",
 			"ruby",
 			"diff",
+			"gitcommit",
 		},
 	},
 	config = function(_, opts)

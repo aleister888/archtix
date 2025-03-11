@@ -13,8 +13,8 @@ static const char *fonts[] = {
 
 static const char *prompt = NULL;
 static const char *colors[SchemeLast][2] = {
-	[SchemeNorm] = { "#EBDBB2", "#1D2021" },
-	[SchemeSel]  = { "#EBDBB2", "#282828" },
+	[SchemeNorm] = { "#EBDBB2", "#282828" },
+	[SchemeSel]  = { "#EBDBB2", "#3c3836" },
 	[SchemeOut]  = { "#000000", "#00ffff" },
 };
 

@@ -129,35 +129,6 @@ ins_left({
 	},
 })
 
--- Separador (para insertar texto en el centro)
-ins_left({
-	function()
-		return "%="
-	end,
-})
-
--- Mostrar el LSP activo
-ins_left({
-	function()
-		local msg = "Ningún Lsp Activo"
-		local buf_ft = vim.api.nvim_get_option_value("filetype", { buf = 0 })
-		local clients = vim.lsp.get_clients()
-		if next(clients) == nil then
-			return msg
-		end
-		for _, client in ipairs(clients) do
-			local filetypes = client.config.filetypes
-			if filetypes and vim.fn.index(filetypes, buf_ft) ~= -1 then
-				return client.name
-			end
-		end
-
-		return msg
-	end,
-	icon = "󰒋  LSP:",
-	color = { fg = colors.fg, gui = "bold" },
-})
-
 -- Muestra si el spellcheck está activado y con que idioma
 ins_left({
 	function()
@@ -173,6 +144,15 @@ ins_left({
 	cond = conditions.hide_in_width,
 	color = { fg = colors.orange, gui = "bold" },
 })
+
+-- Mostrar el tipo de archivo
+ins_right({
+	"filetype",
+	fmt = string.upper,
+	icons_enabled = false,
+	color = { fg = colors.fg, gui = "bold" },
+})
+
 -- Mostrar el formato del archivo
 ins_right({
 	"fileformat",
