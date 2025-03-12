@@ -14,6 +14,21 @@ vim.api.nvim_create_autocmd("FileType", {
 	end,
 })
 
+-- json
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "json",
+	callback = function()
+		local opt = vim.opt_local
+		opt.smartindent = true
+		opt.cindent = false
+		opt.expandtab = true
+		opt.copyindent = true
+		opt.preserveindent = true
+		opt.tabstop = 2
+		opt.shiftwidth = 2
+	end,
+})
+
 -- Fstab
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = "fstab",

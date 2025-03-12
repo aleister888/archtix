@@ -1,0 +1,50 @@
+{
+  "neovim": [
+    "python-pynvim",
+    "hunspell-es_es",
+    "hunspell-en_us"
+  ],
+  "wine": [
+    "wine",
+    "wine-mono",
+    "wine-gecko",
+    "winetricks"
+  ],
+  "zathura": [
+    "zathura",
+    "zathura-cb",
+    "zathura-pdf-mupdf",
+    "poppler",
+    "tesseract-data-spa"
+  ],
+  "mozilla": [
+    "arkenfox-user.js",
+    "firefox",
+    "thunderbird",
+    "ca-certificates",
+    "ca-certificates-mozilla",
+    "thunderbird-dark-reader"
+  ],
+  "tauon": [
+    "tauon-music-box",
+    "python-pypresence"
+  ],
+  "lf": [
+    "lf",
+    "dragon-drop",
+    "imagemagick",
+    "inkscape",
+    "rsync",
+    "trash-cli",
+    "ueberzug"
+  ],
+  "otros": [
+    "keepassxc",
+    "qbittorrent",
+    "handbrake",
+    "handbrake-cli",
+    "vlc",
+    "gimp",
+    "bleachbit"
+  ]
+}

@@ -261,6 +261,9 @@ basestrap_install() {
 	# Instalamos go y sudo para poder compilar yay más adelante (s3)
 	basestrap_packages+=" go sudo"
 
+	# Para procesar los .json con los paquetes a instalar
+	basestrap_packages+=" jq"
+
 	# Añadimos el paquete con el microcódigo de CPU correspodiente
 	local manufacturer
 	manufacturer=$(

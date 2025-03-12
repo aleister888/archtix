@@ -1,0 +1,109 @@
+{
+  "general": [
+    "lib32-gnutls",
+    "libcamera",
+    "squashfuse",
+    "realtime-privileges",
+    "libappimage",
+    "mailcap",
+    "man-db",
+    "net-tools",
+    "zsh",
+    "fluidsynth",
+    "libjpeg6-turbo",
+    "lib32-libjpeg-turbo",
+    "lib32-libjpeg6-turbo",
+    "acpi",
+    "dash",
+    "dashbinsh",
+    "gnupg",
+    "kernel-modules-hook",
+    "android-tools"
+  ],
+  "pacman": [
+    "lostfiles",
+    "downgrade",
+    "pacman-contrib",
+    "rebuild-detector"
+  ],
+  "mesa_vid": [
+    "lib32-mesa",
+    "mesa",
+    "mesa-utils"
+  ],
+  "utilidades": [
+    "dosfstools",
+    "gawk",
+    "glow"
+  ],
+  "zsh": [
+    "zsh-autosuggestions",
+    "zsh-syntax-highlighting",
+    "zsh-history-substring-search"
+  ],
+  "vnc": [
+    "remmina",
+    "freerdp",
+    "gtk-vnc",
+    "libvncserver",
+    "tigervnc"
+  ],
+  "fuentes": [
+    "gnu-free-fonts",
+    "noto-fonts-cjk",
+    "noto-fonts-emoji",
+    "ttc-iosevka-ss05",
+    "ttf-dejavu",
+    "ttf-liberation",
+    "ttf-linux-libertine",
+    "ttf-nerd-fonts-symbols",
+    "ttf-nerd-fonts-symbols-mono",
+    "ttf-opensans",
+    "ttf-roboto"
+  ],
+  "archivos_comprimidos": [
+    "xarchiver",
+    "atool",
+    "tar",
+    "unrar",
+    "gzip",
+    "unzip",
+    "zip",
+    "lha",
+    "lrzip",
+    "lzip",
+    "lzop",
+    "unarj",
+    "7zip"
+  ],
+  "audio": [
+    "alsa-plugins",
+    "alsa-tools",
+    "alsa-utils",
+    "lib32-pipewire-jack",
+    "lib32-pipewire",
+    "lib32-libpipewire"
+  ],
+  "grub": [
+    "grub-hook",
+    "memtest86+-efi"
+  ],
+  "java": [
+    "java-environment-common",
+    "jdk-openjdk",
+    "jdk17-openjdk",
+    "jdk21-openjdk",
+    "maven"
+  ],
+  "x11": [
+    "libx11",
+    "libxft",
+    "libxinerama",
+    "xclip",
+    "xdotool",
+    "xorg",
+    "xorg-twm",
+    "xorg-xinit",
+    "xorg-xkill"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "syslog-ng": [
+    "syslog-ng",
+    "syslog-ng-openrc",
+    "hiredis",
+    "libdbi",
+    "libesmtp",
+    "libmaxminddb",
+    "librabbitmq-c",
+    "librabbitmq-c",
+    "librdkafka",
+    "mongo-c-driver"
+  ],
+  "otros": [
+    "earlyoom-openrc",
+    "xorg-xdm",
+    "xdm-openrc",
+    "tlp",
+    "timeshift",
+    "syncthing",
+    "tlp-openrc"
+  ]
+}

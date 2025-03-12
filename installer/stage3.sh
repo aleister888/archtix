@@ -25,7 +25,7 @@ service_add() { # Activar servicio
 # Guardamos nuestros paquetes en un array con mapfile desde los
 # diferentes archivos
 mapfile -t packages < <(
-	cat "$HOME"/.dotfiles/assets/packages/* 2>/dev/null | grep -v "^#"
+	jq -r '.[] | .[]' "$HOME"/.dotfiles/assets/packages/*.json
 )
 
 driver_add() {
