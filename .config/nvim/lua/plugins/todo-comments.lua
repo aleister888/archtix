@@ -21,10 +21,10 @@ return {
 		})
 		vim.keymap.set("n", "]t", function()
 			require("todo-comments").jump_next()
-		end, { desc = "Siguiente TODO" })
+		end, {})
 
 		vim.keymap.set("n", "[t", function()
 			require("todo-comments").jump_prev()
-		end, { desc = "Anterior TODO" })
+		end, {})
 	end,
 }

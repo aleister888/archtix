@@ -24,7 +24,6 @@ return {
 		dependencies = {
 			"nvim-lua/plenary.nvim",
 			"nvim-treesitter/nvim-treesitter",
-			"antoinemadec/FixCursorHold.nvim",
 			"rcasia/neotest-java",
 			"nvim-neotest/nvim-nio",
 		},
@@ -36,14 +35,14 @@ return {
 			})
 
 			local function download_junit_jar()
-				local junit_jar_path =
-					vim.fn.expand("~/.local/share/nvim/neotest-java/junit-platform-console-standalone-1.10.1.jar")
+				local jar_name = "junit-platform-console-standalone-1.10.1.jar"
+				local junit_jar_path = vim.fn.expand("~/.local/share/nvim/neotest-java/") .. jar_name
 
 				-- Verificar si el archivo JAR ya existe
 				if vim.fn.filereadable(junit_jar_path) == 0 then
 					-- Si el archivo no existe, usar wget para descargarlo
-					local url =
-						"https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone/1.10.1/junit-platform-console-standalone-1.10.1.jar"
+					local url = "https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone/1.10.1/"
+						.. jar_name
 					local cmd = "wget -O " .. junit_jar_path .. " " .. url .. " >/dev/null 2>&1"
 					os.execute(cmd)
 				end
