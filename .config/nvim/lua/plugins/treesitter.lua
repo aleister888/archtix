@@ -12,6 +12,7 @@ return {
 		indent = { enable = true },
 		auto_install = true,
 		ensure_installed = {
+			"json",
 			"lua",
 			"c",
 			"bash",

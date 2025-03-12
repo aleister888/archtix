@@ -1,50 +1,50 @@
 {
+  "general": [
+    "bleachbit",
+    "gimp",
+    "handbrake",
+    "handbrake-cli",
+    "keepassxc",
+    "qbittorrent",
+    "vlc"
+  ],
   "neovim": [
-    "python-pynvim",
+    "hunspell-en_us",
     "hunspell-es_es",
-    "hunspell-en_us"
+    "python-pynvim"
   ],
   "wine": [
     "wine",
-    "wine-mono",
     "wine-gecko",
+    "wine-mono",
     "winetricks"
   ],
   "zathura": [
+    "poppler",
+    "tesseract-data-spa",
     "zathura",
     "zathura-cb",
-    "zathura-pdf-mupdf",
-    "poppler",
-    "tesseract-data-spa"
+    "zathura-pdf-mupdf"
   ],
   "mozilla": [
     "arkenfox-user.js",
-    "firefox",
-    "thunderbird",
     "ca-certificates",
     "ca-certificates-mozilla",
+    "firefox",
+    "thunderbird",
     "thunderbird-dark-reader"
   ],
   "tauon": [
-    "tauon-music-box",
-    "python-pypresence"
+    "python-pypresence",
+    "tauon-music-box"
   ],
   "lf": [
-    "lf",
     "dragon-drop",
     "imagemagick",
     "inkscape",
+    "lf",
     "rsync",
     "trash-cli",
     "ueberzug"
-  ],
-  "otros": [
-    "keepassxc",
-    "qbittorrent",
-    "handbrake",
-    "handbrake-cli",
-    "vlc",
-    "gimp",
-    "bleachbit"
   ]
 }

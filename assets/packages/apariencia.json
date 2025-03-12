@@ -1,12 +1,12 @@
 {
   "qt": [
-    "qt6ct",
+    "qt5-tools",
     "qt5ct",
-    "qt5-tools"
+    "qt6ct"
   ],
   "iconos_temas_y_cursores": [
-    "papirus-icon-theme",
+    "capitaine-cursors",
     "gruvbox-dark-gtk",
-    "capitaine-cursors"
+    "papirus-icon-theme"
   ]
 }

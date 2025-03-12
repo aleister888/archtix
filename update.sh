@@ -41,7 +41,7 @@ fi
 # Instalar paquetes faltantes #
 ###############################
 
-REPO_PKG="$(jq -r '.[] | .[]' "$ASSETDIR"/packages/*.json)"
+REPO_PKG="$(jq -r '.[] | .[]' "$HOME"/.dotfiles/assets/packages/*.json)"
 
 # Extraemos solo el nombre del paquete (lo que está después del primer "/")
 REPO_PKG_NAMES="${REPO_PKG//[a-zA-Z0-9-]*\//}"

@@ -1,28 +1,28 @@
 {
   "general": [
+    "acpi",
+    "android-tools",
+    "dash",
+    "dashbinsh",
+    "fluidsynth",
+    "gnupg",
+    "kernel-modules-hook",
     "lib32-gnutls",
-    "libcamera",
-    "squashfuse",
-    "realtime-privileges",
+    "lib32-libjpeg-turbo",
+    "lib32-libjpeg6-turbo",
     "libappimage",
+    "libcamera",
+    "libjpeg6-turbo",
     "mailcap",
     "man-db",
     "net-tools",
-    "zsh",
-    "fluidsynth",
-    "libjpeg6-turbo",
-    "lib32-libjpeg-turbo",
-    "lib32-libjpeg6-turbo",
-    "acpi",
-    "dash",
-    "dashbinsh",
-    "gnupg",
-    "kernel-modules-hook",
-    "android-tools"
+    "realtime-privileges",
+    "squashfuse",
+    "zsh"
   ],
   "pacman": [
-    "lostfiles",
     "downgrade",
+    "lostfiles",
     "pacman-contrib",
     "rebuild-detector"
   ],
@@ -38,14 +38,14 @@
   ],
   "zsh": [
     "zsh-autosuggestions",
-    "zsh-syntax-highlighting",
-    "zsh-history-substring-search"
+    "zsh-history-substring-search",
+    "zsh-syntax-highlighting"
   ],
   "vnc": [
-    "remmina",
     "freerdp",
     "gtk-vnc",
     "libvncserver",
+    "remmina",
     "tigervnc"
   ],
   "fuentes": [
@@ -62,27 +62,27 @@
     "ttf-roboto"
   ],
   "archivos_comprimidos": [
-    "xarchiver",
+    "7zip",
     "atool",
-    "tar",
-    "unrar",
     "gzip",
-    "unzip",
-    "zip",
     "lha",
     "lrzip",
     "lzip",
     "lzop",
+    "tar",
     "unarj",
-    "7zip"
+    "unrar",
+    "unzip",
+    "xarchiver",
+    "zip"
   ],
   "audio": [
     "alsa-plugins",
     "alsa-tools",
     "alsa-utils",
-    "lib32-pipewire-jack",
+    "lib32-libpipewire",
     "lib32-pipewire",
-    "lib32-libpipewire"
+    "lib32-pipewire-jack"
   ],
   "grub": [
     "grub-hook",

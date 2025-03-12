@@ -1,74 +1,75 @@
 {
-  "otros": [
-    "mediainfo",
+  "general": [
+    "extra/j4-dmenu-desktop",
     "feh",
-    "yt-dlp",
-    "pfetch-rs-bin",
     "i3lock-fancy-rapid-git",
-    "zenity",
-    "yad",
+    "mediainfo",
+    "pfetch-rs-bin",
     "tk",
-    "extra/j4-dmenu-desktop"
+    "xmenu",
+    "yad",
+    "yt-dlp",
+    "zenity"
   ],
   "musica": [
-    "python-eyed3",
+    "atomicparsley",
     "glyr",
-    "atomicparsley"
+    "python-eyed3"
   ],
   "servicios": [
-    "polkit-gnome",
-    "gnome-keyring",
     "dunst",
-    "redshift",
+    "gnome-keyring",
     "picom",
-    "xautolock",
-    "unclutter"
+    "polkit-gnome",
+    "redshift",
+    "unclutter",
+    "xautolock"
   ],
   "discos": [
     "gnome-disk-utility",
-    "udiskie",
+    "ntfs-3g",
     "simple-mtpfs",
-    "ntfs-3g"
+    "udiskie"
   ],
   "funcionalidades": [
-    "xdg-desktop-portal-gtk",
-    "xdg-user-dirs",
+    "desktop-file-utils",
+    "libqalculate",
     "perl-file-mimeinfo",
     "perl-image-exiftool",
-    "desktop-file-utils",
-    "libqalculate"
+    "xdg-desktop-portal-gtk",
+    "xdg-user-dirs"
   ],
   "utilidades_cli": [
-    "stow",
-    "parallel",
-    "playerctl",
-    "pamixer",
-    "shellcheck-bin",
-    "fzf",
-    "ripgrep",
     "bat",
     "cdrtools",
+    "eza",
     "ffmpegthumbnailer",
+    "fzf",
     "odt2txt",
-    "eza"
+    "pamixer",
+    "parallel",
+    "playerctl",
+    "ripgrep",
+    "shellcheck-bin",
+    "stow"
   ],
   "bandeja_sistema": [
-    "stalonetray",
-    "network-manager-applet"
+    "network-manager-applet",
+    "stalonetray"
   ],
   "aplicaciones_gui": [
-    "nitrogen",
     "arandr",
+    "gcolor3",
     "gnome-firmware",
     "mpv",
     "mpv-mpris",
-    "sxiv",
+    "nitrogen",
     "nsxiv",
     "qalculate-gtk",
-    "gcolor3"
+    "sxiv"
   ],
   "aplicaciones_tui": [
-    "pulsemixer",
-    "htop"
+    "htop",
+    "pulsemixer"
   ]
 }
