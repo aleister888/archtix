@@ -27,24 +27,21 @@ if [ "$OGHASH" != "$HASH" ]; then
 	exec "$0" "$@"
 fi
 
+###########
+# Módulos #
+###########
+
+# Instalar/actualizar archivos de configuración
+"$HOME"/.dotfiles/modules/system-conf >/dev/null 2>&1
+
+# Compilar aplicaciones suckless
+"$HOME"/.dotfiles/modules/suckless-compile >/dev/null 2>&1
+
 ###############################
 # Instalar paquetes faltantes #
 ###############################
 
-REPO_PKG="$(cat \
-	"$HOME"/.dotfiles/assets/packages/appearance \
-	"$HOME"/.dotfiles/assets/packages/cli-tools \
-	"$HOME"/.dotfiles/assets/packages/compress \
-	"$HOME"/.dotfiles/assets/packages/documents \
-	"$HOME"/.dotfiles/assets/packages/fonts \
-	"$HOME"/.dotfiles/assets/packages/gui-apps \
-	"$HOME"/.dotfiles/assets/packages/misc \
-	"$HOME"/.dotfiles/assets/packages/mozilla \
-	"$HOME"/.dotfiles/assets/packages/multimedia \
-	"$HOME"/.dotfiles/assets/packages/pipewire \
-	"$HOME"/.dotfiles/assets/packages/services \
-	"$HOME"/.dotfiles/assets/packages/system \
-	"$HOME"/.dotfiles/assets/packages/x11 2>/dev/null)"
+REPO_PKG="$(cat "$HOME"/.dotfiles/assets/packages/* 2>/dev/null | grep -v "^#")"
 
 # Extraemos solo el nombre del paquete (lo que está después del primer "/")
 REPO_PKG_NAMES="${REPO_PKG//[a-zA-Z0-9-]*\//}"
@@ -91,12 +88,6 @@ find "$CONF_DIR" -type l ! -exec test -e {} \; -delete
 ln -sf ~/.dotfiles/suckless/dwm/autostart.sh \
 	~/.local/share/dwm/autostart.sh
 
-##################################
-# Compilar aplicaciones suckless #
-##################################
-
-"$HOME"/.dotfiles/modules/suckless-compile >/dev/null 2>&1
-
 #########################
 # Configurar apariencia #
 #########################
@@ -133,9 +124,9 @@ fi
 
 # Copiar la configuración de GTK
 rm -rf ~/.config/gtk-[2-4].0
-cp -rf "$ASSETDIR/gtk-2.0" ~/.config/gtk-2.0
-cp -rf "$ASSETDIR/gtk-3.0" ~/.config/gtk-3.0
-cp -rf "$ASSETDIR/gtk-4.0" ~/.config/gtk-4.0
+cp -rf "$ASSETDIR/gtk/gtk-2.0" ~/.config/gtk-2.0
+cp -rf "$ASSETDIR/gtk/gtk-3.0" ~/.config/gtk-3.0
+cp -rf "$ASSETDIR/gtk/gtk-4.0" ~/.config/gtk-4.0
 
 if [ "$hadBookmarks" = "false" ]; then
 	# Definimos nuestros directorios anclados
@@ -155,9 +146,9 @@ sudo sh -c "
 	if [ ! -e /root/.gtkrc-2.0 ]; then
 		mkdir -p /root/.config
 		rm -rf /root/.gtkrc-2.0 /root/.config/gtk-3.0 /root/.config/gtk-4.0
-		cp -f  \"$ASSETDIR/.gtkrc-2.0\" /root/.gtkrc-2.0
-		cp -rf \"$ASSETDIR/gtk-3.0\"    /root/.config/gtk-3.0/
-		cp -rf \"$ASSETDIR/gtk-4.0\"    /root/.config/gtk-4.0/
+		cp -f  \"$ASSETDIR/gtk/gtk-2.0/gtkrc\" /root/.gtkrc-2.0
+		cp -rf \"$ASSETDIR/gtk/gtk-3.0\"    /root/.config/gtk-3.0/
+		cp -rf \"$ASSETDIR/gtk/gtk-4.0\"    /root/.config/gtk-4.0/
 	fi
 "
 

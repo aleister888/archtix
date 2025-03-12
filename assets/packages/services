@@ -1,10 +1,20 @@
+# Servicio para administrar los logs
 syslog-ng
 syslog-ng-openrc
-librabbitmq-c
-librabbitmq-c
-libesmtp
-libdbi
-libmaxminddb
-librdkafka
+# Dependencias de syslog-ng
 hiredis
+libdbi
+libesmtp
+libmaxminddb
+librabbitmq-c
+librabbitmq-c
+librdkafka
 mongo-c-driver
+# Mata procesos antes de que el sistema se quede sin RAM y se congele
+earlyoom-openrc
+# Pantalla de inicio
+xorg-xdm
+xdm-openrc
+# Administrador de energía
+tlp
+tlp-openrc

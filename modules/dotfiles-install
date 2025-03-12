@@ -2,7 +2,7 @@
 
 # Script para establecer zsh como el shell de nuestro usuario e instalar los
 # archivos de configuracioń
-# - Invocado en /installer/stage3.sh
+# - Invocado por /installer/stage3.sh
 
 if [ "$(id -u)" -eq 0 ]; then
 	echo "Error: Este script no debe ejecutarse como root." >&2

@@ -16,7 +16,7 @@ makeuserjs() {
 	overrides="$pdir/user-overrides.js"
 	userjs="$pdir/user.js"
 
-	ln -fs "$HOME/.dotfiles/assets/configs/user-overrides.js" \
+	ln -fs "$HOME/.dotfiles/assets/configs/apps/firefox/user-overrides.js" \
 		"$overrides"
 
 	[ ! -f "$arkenfox" ] &&
@@ -32,7 +32,7 @@ makeuserjs() {
 	sudo chmod 755 /usr/local/lib/arkenfox-auto-update
 
 	# Ejecutar la actualización cuando sea necesario mediante un hook de pacman.
-	sudo cp "$HOME/.dotfiles/assets/system/arkenfox.hook" \
+	sudo cp -f "$HOME/.dotfiles/assets/system/arkenfox.hook" \
 		/etc/pacman.d/hooks/arkenfox.hook
 }
 
@@ -96,7 +96,7 @@ installffaddons() {
 
 installtheme() {
 	mkdir -p "$pdir/chrome/"
-	ln -fs "$HOME/.dotfiles/assets/configs/userChrome.css" "$pdir/chrome/"
+	ln -fs "$HOME/.dotfiles/assets/configs/apps/firefox/userChrome.css" "$pdir"/chrome/
 }
 
 # Ruta base de perfiles de Firefox

@@ -40,14 +40,8 @@ tigervnc
 gnome-firmware
 i3lock-fancy-rapid-git
 stalonetray
-gruvbox-dark-gtk
-capitaine-cursors
-xorg-xdm
-xdm-openrc
 network-manager-applet
 desktop-file-utils
-tlp-openrc
-tlp
 arandr
 pulsemixer
 tk

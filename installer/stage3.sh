@@ -25,20 +25,7 @@ service_add() { # Activar servicio
 # Guardamos nuestros paquetes en un array con mapfile desde los
 # diferentes archivos
 mapfile -t packages < <(
-	cat \
-		"$HOME"/.dotfiles/assets/packages/appearance \
-		"$HOME"/.dotfiles/assets/packages/cli-tools \
-		"$HOME"/.dotfiles/assets/packages/compress \
-		"$HOME"/.dotfiles/assets/packages/documents \
-		"$HOME"/.dotfiles/assets/packages/fonts \
-		"$HOME"/.dotfiles/assets/packages/gui-apps \
-		"$HOME"/.dotfiles/assets/packages/misc \
-		"$HOME"/.dotfiles/assets/packages/mozilla \
-		"$HOME"/.dotfiles/assets/packages/multimedia \
-		"$HOME"/.dotfiles/assets/packages/pipewire \
-		"$HOME"/.dotfiles/assets/packages/services \
-		"$HOME"/.dotfiles/assets/packages/system \
-		"$HOME"/.dotfiles/assets/packages/x11
+	cat "$HOME"/.dotfiles/assets/packages/* 2>/dev/null | grep -v "^#"
 )
 
 driver_add() {
@@ -129,13 +116,6 @@ vim_spell_download() {
 		-q -O "$HOME/.local/share/nvim/site/spell/es.utf-8.sug"
 }
 
-# Configurar keepassxc para que siga el tema de QT
-keepass_configure() {
-	[ ! -d "$HOME/.config/keepassxc" ] && mkdir -p "$HOME/.config/keepassxc"
-	cp "$HOME/.dotfiles/assets/configs/keepassxc.ini" \
-		"$HOME/.config/keepassxc/keepassxc.ini"
-}
-
 # Crear enlaces simbólicos a /usr/local/bin para ciertos scripts
 scripts_link() {
 	files=(
@@ -204,20 +184,6 @@ sudo chown "$USER" /mnt/ANDROID
 # Configuramos Tauon Music Box (Nuestro reproductor de música)
 "$HOME/.dotfiles/bin/tauon-config"
 
-# Creamos nuestro xinitrc
-sudo cp "$HOME/.dotfiles/assets/configs/xinitrc" /etc/X11/xinit/xinitrc
-
-# Configurar keepassxc para que siga el tema de QT
-keepass_configure
-
-# Suspender de forma automatica cuando la bateria cae por debajo del 10%
-[ -e /sys/class/power_supply/BAT0 ] && autosuspend-conf
-
-# Permitir hacer click tocando el trackpad (X11) <luke@lukesmith.xyz>
-[ -e /sys/class/power_supply/BAT0 ] &&
-	sudo cp "$HOME/.dotfiles/assets/configs/40-libinput.conf" \
-		"/etc/X11/xorg.conf.d/40-libinput.conf"
-
 # Establecemos la versión de java por defecto
 sudo archlinux-java set java-21-openjdk
 
@@ -241,36 +207,19 @@ EOF
 
 # Si estamos usando una máquina virtual, configuramos X11 para funcionar a 1080p
 [ "$graphic_driver" == "virtual" ] &&
-	sudo cp "$HOME/.dotfiles/assets/configs/xorg.conf" /etc/X11/xorg.conf
-
-# Permitir a Steam controlar mandos de PlayStation 4
-sudo cp "$HOME/.dotfiles/assets/udev/99-steam-controller-perms.rules" \
-	/usr/lib/udev/rules.d/
+	sudo cp "$HOME/.dotfiles/assets/system/xorg/xorg.conf" /etc/X11/xorg.conf
 
 # Activar servicios
 service_add elogind
 service_add earlyoom
 service_add tlp
-
-# Configurar y activar syslog-ng
-service_add syslog-ng
-sudo cp -f "$HOME/.dotfiles/assets/configs/syslog-ng.conf" /etc/syslog-ng/syslog-ng.conf
-
-# Configurar y activar xdm
 service_add xdm
-sudo cp -f "$HOME/.dotfiles/assets/xdm/Xresources" /etc/X11/xdm/Xresources
-sudo cp -f "$HOME/.dotfiles/assets/xdm/Xsetup_0" /etc/X11/xdm/Xsetup_0
+service_add syslog-ng
 
 # Activar WiFi y Bluetooth
 sudo rfkill unblock wifi
 { lspci | grep -i bluetooth || lsusb | grep -i bluetooth; } >/dev/null &&
 	sudo rfkill unblock bluetooth
-
-# Permitir al usuario escanear redes Wi-Fi y cambiar ajustes de red
-sudo usermod -aG network "$USER"
-[ -e /sys/class/power_supply/BAT0 ] &&
-	sudo cp "$HOME/.dotfiles/assets/udev/50-org.freedesktop.NetworkManager.rules" \
-		"/etc/polkit-1/rules.d/50-org.freedesktop.NetworkManager.rules"
 
 # /etc/polkit-1/rules.d/99-artix.rules
 sudo usermod -aG storage,input,users "$USER"
@@ -284,10 +233,6 @@ sudo usermod -aG storage,input,users "$USER"
 sudo audio-setup
 # Configuramos el reloj según la zona horaria escogida
 sudo set-clock
-
-# Scripts de elogind
-sudo install -m 755 "$HOME/.dotfiles/assets/system/nm-restart" \
-	/lib/elogind/system-sleep/nm-restart
 
 # Añadir entradas a /etc/environment
 cat <<-'EOF' | sudo tee -a /etc/environment
