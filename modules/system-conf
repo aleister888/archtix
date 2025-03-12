@@ -37,10 +37,12 @@ sudo cp -f "$HOME/.dotfiles/assets/system/xorg/xinitrc" \
 # Aplicaciones #
 ################
 
-# Configurar keepassxc para que siga el tema de QT
-[ ! -d "$HOME/.config/keepassxc" ] && mkdir -p "$HOME/.config/keepassxc"
-cp "$HOME/.dotfiles/assets/configs/apps/keepassxc/keepassxc.ini" \
-	"$HOME"/.config/keepassxc/
+# Configurar keepassxc para que siga el tema de QT (Si no está ya configurado)
+if [ ! -f "$HOME/.config/keepassxc/keepassxc.ini" ]; then
+	mkdir -p "$HOME/.config/keepassxc"
+	cp "$HOME/.dotfiles/assets/configs/apps/keepassxc/keepassxc.ini" \
+		"$HOME"/.config/keepassxc/
+fi
 
 #############
 # Servicios #
