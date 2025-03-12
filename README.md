@@ -1,4 +1,4 @@
-<img src="https://raw.githubusercontent.com/aleister888/artix-installer/master/assets/artix-linux.png" align="left" height="90px" hspace="10px" vspace="0px">
+<img src="https://artixlinux.org/img/artix-logo.png" align="left" height="90px" hspace="10px" vspace="0px">
 
 ### Artix Linux (OpenRC) - dotfiles
 
