@@ -3,10 +3,7 @@
 # Script que crea enlaces simbólicos en /usr/local/bin para ciertos scripts
 # - Invocado por /update.sh
 
-if [ "$(id -u)" -eq 0 ]; then
-	echo "Error: Este script no debe ejecutarse como root." >&2
-	exit 1
-fi
+[ "$(id -u)" -eq 0 ] && exit 1
 
 files=(
 	"rdp-connect"

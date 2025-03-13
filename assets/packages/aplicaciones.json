@@ -11,7 +11,8 @@
   "neovim": [
     "hunspell-en_us",
     "hunspell-es_es",
-    "python-pynvim"
+    "python-pynvim",
+    "tree-sitter-cli"
   ],
   "wine": [
     "wine",

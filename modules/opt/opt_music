@@ -3,7 +3,7 @@
 [ "$(id -u)" -eq 0 ] && exit 1
 
 yay -S --noconfirm --disable-download-timeout --needed \
-	$(cat "$RHOME"/.dotfiles/assets/packages/opt/music | xargs)
+	$(cat "$HOME"/.dotfiles/assets/packages/opt/music | xargs)
 
 # Instalar lrcput
 LRCPUT_TARGET="$HOME/.local/bin/lrcput"

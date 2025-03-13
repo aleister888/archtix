@@ -7,11 +7,7 @@
 # Se termina la ejecución de toda la tubería despúes del primer fallo
 set -o pipefail
 
-# Verificar si el script se ejecuta como root
-if [ "$(id -u)" -ne 0 ]; then
-	echo "Error: Este script debe ejecutarse como root." >&2
-	exit 1
-fi
+[ "$(id -u)" -ne 0 ] && exit 1
 
 # Obtener la zona horaria actual
 TIMEZONE="$(readlink -f /etc/localtime | sed 's|.*/zoneinfo/||')"

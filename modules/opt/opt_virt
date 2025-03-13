@@ -8,7 +8,7 @@
 # Instalar y configurar libvirt
 virt_install() {
 	yay -S --noconfirm --disable-download-timeout --needed \
-		$(cat "$RHOME"/.dotfiles/assets/packages/opt/virt | xargs)
+		$(cat "$HOME"/.dotfiles/assets/packages/opt/virt | xargs)
 
 	# Configurar QEMU para usar el usuario actual
 	sudo sed -i "s/^#user = .*/user = \"$USER\"/" /etc/libvirt/qemu.conf
@@ -45,7 +45,7 @@ virt_remove() {
 
 	# Desinstalar los paquetes
 	yay -Rcns --noconfirm \
-		$(cat "$RHOME"/.dotfiles/assets/packages/opt/virt | xargs)
+		$(cat "$HOME"/.dotfiles/assets/packages/opt/virt | xargs)
 
 	# Borrar archivos restantes
 	sudo rm -rf /var/lib/libvirt

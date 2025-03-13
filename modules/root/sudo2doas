@@ -3,11 +3,7 @@
 # Script para sustituir sudo por OpenDoas durante la instalación del SO
 # - Invocado en /installer/stage3.sh
 
-# Verificar si el script se ejecuta como root
-if [ "$(id -u)" -ne 0 ]; then
-	echo "Error: Este script debe ejecutarse como root." >&2
-	exit 1
-fi
+[ "$(id -u)" -ne 0 ] && exit 1
 
 # Obtener el nombre de usuario con UID 1000 (generalmente el primer usuario no root)
 RUSER="$(getent passwd 1000 | cut -d: -f1)"

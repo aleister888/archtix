@@ -6,10 +6,7 @@
 
 # Configurar el audio de baja latencia
 
-if [ "$(id -u)" -eq 0 ]; then
-	echo "Error: Este script no debe ejecutarse como root." >&2
-	exit 1
-fi
+[ "$(id -u)" -eq 0 ] && exit 1
 
 # Añadimos el usuario a los grupos desados
 sudo usermod -aG realtime,audio,video,optical,uucp "$USER"

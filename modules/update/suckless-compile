@@ -6,10 +6,7 @@
 # Se termina la ejecución de toda la tubería despúes del primer fallo
 set -o pipefail
 
-if [ "$(id -u)" -eq 0 ]; then
-	echo "Error: Este script no debe ejecutarse como root." >&2
-	exit 1
-fi
+[ "$(id -u)" -eq 0 ] && exit 1
 
 # Obtener el DPI desde Xresources
 DPI="$(grep -oP "Xft.dpi:\K[0-9]*" "$HOME"/.config/Xresources)"
@@ -44,21 +41,3 @@ compile_suckless_app() {
 for app in dmenu dwm dwmblocks st; do
 	compile_suckless_app "$app" || echo "Error: Falló la compilación de $app."
 done
-
-# Configurar Eclipse para HDPI (si está instalado)
-if command -v eclipse &>/dev/null; then
-	ECLIPSE_WRAPPER="/usr/local/bin/eclipse"
-	# Si no existe ya el script wrapper o no está configurado para HDPI
-	if [ ! -f "$ECLIPSE_WRAPPER" ] || ! grep -q "GDK_DPI_SCALE=0.5 GDK_SCALE=2" "$ECLIPSE_WRAPPER" 2>/dev/null; then
-		# Crear el script y hacerlo ejecutable
-		cat <<-EOF | sudo tee "$ECLIPSE_WRAPPER"
-			#!/bin/bash
-			GDK_DPI_SCALE=0.5 GDK_SCALE=2 /usr/bin/eclipse "\$@"
-		EOF
-		chmod +x "$ECLIPSE_WRAPPER"
-
-		echo "Eclipse configurado para HDPI."
-	fi
-else
-	echo "Eclipse no está instalado, omitiendo configuración."
-fi

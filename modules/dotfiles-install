@@ -4,10 +4,7 @@
 # archivos de configuracioń
 # - Invocado por /installer/stage3.sh
 
-if [ "$(id -u)" -eq 0 ]; then
-	echo "Error: Este script no debe ejecutarse como root." >&2
-	exit 1
-fi
+[ "$(id -u)" -eq 0 ] && exit 1
 
 # Crear la carpeta ~/.config
 mkdir -p "$HOME/.config"

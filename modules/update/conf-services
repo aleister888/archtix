@@ -7,6 +7,8 @@ user_service_add() { # Activar servicio
 	rc-update add "$1" default -U
 }
 
+[ "$(id -u)" -eq 0 ] && exit 1
+
 # Activar servicios
 service_add elogind
 service_add earlyoom

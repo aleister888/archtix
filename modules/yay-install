@@ -3,10 +3,7 @@
 # Script para construir e instalar yay
 # - Invocado por /installer/stage3.sh
 
-if [ "$(id -u)" -eq 0 ]; then
-	echo "Error: Este script no debe ejecutarse como root." >&2
-	exit 1
-fi
+[ "$(id -u)" -eq 0 ] && exit 1
 
 # Directorio temporal para clonar el repositorio de yay
 TMP_DIR="/tmp/yay_install_temp"
