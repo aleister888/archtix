@@ -76,14 +76,6 @@
     "xarchiver",
     "zip"
   ],
-  "audio": [
-    "alsa-plugins",
-    "alsa-tools",
-    "alsa-utils",
-    "lib32-libpipewire",
-    "lib32-pipewire",
-    "lib32-pipewire-jack"
-  ],
   "grub": [
     "grub-hook",
     "memtest86+-efi"

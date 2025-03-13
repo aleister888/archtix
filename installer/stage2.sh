@@ -12,7 +12,7 @@
 #   - Driver de video a usar ($graphic_driver)
 #   - El tipo de partición de la instalación ($ROOT_FILESYSTEM)
 #   - Variables con el software opcional elegido
-#     - $virt, $music, $noprivacy, $office, $latex, $audioProd
+#     - $virt, $music, $latex, $audioProd
 
 pacinstall() {
 	pacman -Sy --noconfirm --disable-download-timeout --needed "$@"
@@ -200,8 +200,6 @@ su "$username" -c "
 	ROOT_FILESYSTEM=$ROOT_FILESYSTEM \
 	virt=$virt \
 	music=$music \
-	noprivacy=$noprivacy \
-	office=$office \
 	latex=$latex \
 	audioProd=$audioProd
 

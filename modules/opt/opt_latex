@@ -1,0 +1,6 @@
+#!/bin/sh
+
+[ "$(id -u)" -eq 0 ] && exit 1
+
+yay -S --noconfirm --disable-download-timeout --needed \
+	$(cat "$RHOME"/.dotfiles/assets/packages/opt/latex | xargs)

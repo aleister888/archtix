@@ -1,0 +1,61 @@
+#!/bin/bash
+
+# Script para configurar libvirt de forma que nuestro usuario pueda usar
+# virt-manager sin tener que introducir la contraseña cada vez
+
+[ "$(id -u)" -eq 0 ] && exit 1
+
+# Instalar y configurar libvirt
+virt_install() {
+	yay -S --noconfirm --disable-download-timeout --needed \
+		$(cat "$RHOME"/.dotfiles/assets/packages/opt/virt | xargs)
+
+	# Configurar QEMU para usar el usuario actual
+	sudo sed -i "s/^#user = .*/user = \"$USER\"/" /etc/libvirt/qemu.conf
+	sudo sed -i "s/^#group = .*/group = \"$USER\"/" /etc/libvirt/qemu.conf
+
+	# Configurar libvirt
+	sudo sed -i "s/^#unix_sock_group = .*/unix_sock_group = \"$USER\"/" \
+		/etc/libvirt/libvirtd.conf
+	sudo sed -i "s/^#unix_sock_rw_perms = .*/unix_sock_rw_perms = \"0770\"/" \
+		/etc/libvirt/libvirtd.conf
+
+	# Agregar el usuario a los grupos necesarios para la virtualización
+	sudo usermod -aG libvirt,libvirt-qemu,kvm "$USER"
+
+	# Activar los servicios necesarios
+	sudo rc-update add libvirtd default
+	sudo rc-update add virtlogd default
+}
+
+# Desinstalar libvirt por completo
+virt_remove() {
+	# Detener servicios
+	sudo rc-service libvirtd stop
+	sudo rc-service virtlogd stop
+
+	# Borrar servicios del runlevel default
+	sudo rc-update del libvirtd default
+	sudo rc-update del virtlogd default
+
+	# Borrar al usuario de los grupos
+	for group in libvirt libvirt-qemu kvm; do
+		sudo gpasswd -d "$USER" $group
+	done
+
+	# Desinstalar los paquetes
+	yay -Rcns --noconfirm \
+		$(cat "$RHOME"/.dotfiles/assets/packages/opt/virt | xargs)
+
+	# Borrar archivos restantes
+	sudo rm -rf /var/lib/libvirt
+	sudo rm -rf /etc/libvirt
+
+	sync
+}
+
+if [ "$1" = "del" ]; then
+	virt_remove >/dev/null 2>&1
+else
+	virt_install
+fi

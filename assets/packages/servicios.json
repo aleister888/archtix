@@ -3,6 +3,17 @@
     "syncthing",
     "timeshift"
   ],
+  "audio": [
+    "alsa-plugins",
+    "alsa-tools",
+    "alsa-utils",
+    "lib32-libpipewire",
+    "lib32-pipewire",
+    "lib32-pipewire-jack",
+    "pipewire-openrc",
+    "pipewire-pulse-openrc",
+    "wireplumber-openrc"
+  ],
   "openrc": [
     "earlyoom-openrc",
     "tlp",

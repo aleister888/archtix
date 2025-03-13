@@ -9,11 +9,10 @@ if [ "$(id -u)" -eq 0 ]; then
 fi
 
 files=(
+	"rdp-connect"
+	"tray-toggle"
 	"wakeat"
 	"wakeme"
-	"pipewire-start"
-	"tray-toggle"
-	"rdp-connect"
 )
 for file in "${files[@]}"; do
 	sudo ln -sf "$HOME/.dotfiles/assets/bin/$file" "/usr/local/bin/$file"

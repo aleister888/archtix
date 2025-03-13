@@ -16,10 +16,6 @@ yayinstall() { # Instalar paquetes con yay
 	yay -Sy --noconfirm --needed "$@"
 }
 
-service_add() { # Activar servicio
-	sudo rc-update add "$1" default
-}
-
 # Paquetes
 
 # Guardamos nuestros paquetes en un array con mapfile desde los
@@ -66,38 +62,6 @@ driver_add() {
 	esac
 }
 
-# Elegir el software a instalar
-packages_add() {
-	# Agregamos paquetes al array dependiendo de que se eligió
-	if [ "$virt" == "true" ]; then
-		while IFS= read -r package; do
-			packages+=("$package")
-		done <"$HOME/.dotfiles/assets/packages/opt/virt"
-	fi
-	if [ "$latex" == "true" ]; then
-		while IFS= read -r package; do
-			packages+=("$package")
-		done <"$HOME/.dotfiles/assets/packages/opt/latex"
-	fi
-	if [ "$audioProd" == "true" ]; then
-		while IFS= read -r package; do
-			packages+=("$package")
-		done <"$HOME/.dotfiles/assets/packages/opt/daw"
-	fi
-
-	[ "$music" == "true" ] &&
-		packages+=(
-			"easytag" "picard" "flacon"
-			"cuetools" "lrcget-bin" "python-tqdm"
-		)
-
-	[ "$noprivacy" == "true" ] &&
-		packages+=("discord" "telegram-desktop")
-
-	[ "$office" == "true" ] &&
-		packages+=("libreoffice" "libreoffice-fresh-es")
-}
-
 # Configurar Xresources
 xresources_make() {
 	mkdir -p "$HOME/.config"
@@ -141,9 +105,6 @@ ln -s /tmp/ "$HOME/Descargas"
 
 # Escogemos que drivers de vídeo instalar
 driver_add
-
-# Elegimos que paquetes instalar
-packages_add
 
 # Calcular el DPI de nuestra pantalla y configurar Xresources
 xresources_make
@@ -192,13 +153,6 @@ EOF
 [ "$graphic_driver" == "virtual" ] &&
 	sudo cp "$HOME/.dotfiles/assets/system/xorg/xorg.conf" /etc/X11/xorg.conf
 
-# Activar servicios
-service_add elogind
-service_add earlyoom
-service_add tlp
-service_add xdm
-service_add syslog-ng
-
 # Activar WiFi y Bluetooth
 sudo rfkill unblock wifi
 { lspci | grep -i bluetooth || lsusb | grep -i bluetooth; } >/dev/null &&
@@ -208,9 +162,10 @@ sudo rfkill unblock wifi
 sudo usermod -aG storage,input,users "$USER"
 
 # Configurar el software de instalación opcional
-[ "$virt" == "true" ] && sudo virt-conf
-[ "$audioProd" == "true" ] && sudo audioProd-conf
-[ "$music" == "true" ] && lrcput-install
+[ "$virt" == "true" ] && opt_virt
+[ "$latex" == "true" ] && opt_latex
+[ "$audioProd" == "true" ] && opt_audioProd
+[ "$music" == "true" ] && opt_music
 
 # Configurar el audio de baja latencia
 audio-setup

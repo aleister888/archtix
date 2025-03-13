@@ -38,6 +38,14 @@
     "python-pypresence",
     "tauon-music-box"
   ],
+  "not-foss": [
+    "discord",
+    "telegram-desktop"
+  ],
+  "oficina": [
+    "libreoffice",
+    "libreoffice-fresh-es"
+  ],
   "lf": [
     "dragon-drop",
     "imagemagick",

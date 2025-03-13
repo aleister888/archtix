@@ -65,9 +65,6 @@ fi
 # Ocultar el cursor si no se está usando
 pgrep unclutter || unclutter --start-hidden --timeout 2 &
 
-# Pipewire
-pgrep pipewire || pipewire-start &
-
 # Iniciar el compositor (Solo en maquinas real.)
 grep "Q35\|VMware" /sys/devices/virtual/dmi/id/product_name ||
 	pgrep picom || picom &

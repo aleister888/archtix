@@ -27,6 +27,22 @@ if [ "$OGHASH" != "$HASH" ]; then
 	exec "$0" "$@"
 fi
 
+###############################
+# Instalar paquetes faltantes #
+###############################
+
+REPO_PKG="$(jq -r '.[] | .[]' "$HOME"/.dotfiles/assets/packages/*.json)"
+# Extraemos solo el nombre del paquete (lo que está después del primer "/")
+REPO_PKG_NAMES="${REPO_PKG//[a-zA-Z0-9-]*\//}"
+# Obtenemos los paquetes instalados
+INSTALLED_PKGS=$(yay -Qq)
+# Filtramos los paquetes que no están instalados
+PKGS_TO_INSTALL=$(echo "$REPO_PKG_NAMES" | grep -vxF -f <(echo "$INSTALLED_PKGS"))
+# Si hay paquetes por instalar, los instalamos
+if [ -n "$PKGS_TO_INSTALL" ]; then
+	yay -Sy --noconfirm --needed --asexplicit $PKGS_TO_INSTALL >/dev/null 2>&1
+fi
+
 ###########
 # Módulos #
 ###########
@@ -37,26 +53,8 @@ fi
 "$HOME"/.dotfiles/modules/update/install-bin >/dev/null 2>&1
 # Compilar aplicaciones suckless
 "$HOME"/.dotfiles/modules/update/suckless-compile >/dev/null 2>&1
-
-###############################
-# Instalar paquetes faltantes #
-###############################
-
-REPO_PKG="$(jq -r '.[] | .[]' "$HOME"/.dotfiles/assets/packages/*.json)"
-
-# Extraemos solo el nombre del paquete (lo que está después del primer "/")
-REPO_PKG_NAMES="${REPO_PKG//[a-zA-Z0-9-]*\//}"
-
-# Obtenemos los paquetes instalados
-INSTALLED_PKGS=$(yay -Qq)
-
-# Filtramos los paquetes que no están instalados
-PKGS_TO_INSTALL=$(echo "$REPO_PKG_NAMES" | grep -vxF -f <(echo "$INSTALLED_PKGS"))
-
-# Si hay paquetes por instalar, los instalamos
-if [ -n "$PKGS_TO_INSTALL" ]; then
-	yay -Sy --noconfirm --needed --asexplicit $PKGS_TO_INSTALL >/dev/null 2>&1
-fi
+# Activar los servicios necesarios
+"$HOME"/.dotfiles/modules/update/conf-services >/dev/null 2>&1
 
 #######################################
 # Archivos de configuración y scripts #

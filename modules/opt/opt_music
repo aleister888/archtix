@@ -1,23 +1,17 @@
 #!/bin/sh
 
-# Script para instalar lrcput, un script en Python que
-# adjunta las letras de las canciones a archivos de música.
+[ "$(id -u)" -eq 0 ] && exit 1
 
-if [ "$(id -u)" -eq 0 ]; then
-	echo "Error: Este script no debe ejecutarse como root." >&2
-	exit 1
-fi
+yay -S --noconfirm --disable-download-timeout --needed \
+	$(cat "$RHOME"/.dotfiles/assets/packages/opt/music | xargs)
 
+# Instalar lrcput
 LRCPUT_TARGET="$HOME/.local/bin/lrcput"
-
 # Crear el directorio donde guardar el script
 mkdir -p "$HOME/.local/bin"
-
 # Descargar el script
 wget -q "https://raw.githubusercontent.com/JustOptimize/lrcput/refs/heads/main/lrcput.py" -O "$LRCPUT_TARGET"
-
 # Añadir un shebang indicando que es un script de python
 sed -i '1i #!/usr/bin/python' "$LRCPUT_TARGET"
-
 # Hacer el script ejecutable
 chmod +x "$LRCPUT_TARGET"

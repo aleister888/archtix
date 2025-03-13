@@ -492,11 +492,14 @@ driver_choose() {
 }
 
 packages_choose() {
-	local noprivacy office latex
-
 	while true; do
 
-		variables=("virt" "music" "noprivacy" "audioProd" "office" "latex")
+		variables=(
+			"audioProd"
+			"latex"
+			"music"
+			"virt"
+		)
 
 		# Reiniciamos las variables si no confirmamos la selección
 		for var in "${variables[@]}"; do eval "$var=false"; done
@@ -508,14 +511,6 @@ packages_choose() {
 		whip_yes "Musica" \
 			"¿Deseas instalar software para manejar tu coleccion de musica?" &&
 			music="true"
-
-		whip_yes "Privacidad" \
-			"¿Deseas instalar Discord y Telegram?" &&
-			noprivacy="true"
-
-		whip_yes "Oficina" \
-			"¿Deseas instalar software de ofimatica?" &&
-			office="true"
 
 		whip_yes "laTeX" \
 			"¿Deseas instalar laTeX?" &&
@@ -541,8 +536,6 @@ packages_show() {
 	scheme="Se instalaran:\n"
 	[ "$virt" == "true" ] && scheme+="libvirt\n"
 	[ "$music" == "true" ] && scheme+="Softw. Gestión de Música\n"
-	[ "$noprivacy" == "true" ] && scheme+="Telegram y Discord\n"
-	[ "$office" == "true" ] && scheme+="Softw. Ofimatica\n"
 	[ "$latex" == "true" ] && scheme+="laTeX\n"
 	[ "$audioProd" == "true" ] && scheme+="Softw. Prod. Musical\n"
 
@@ -640,8 +633,6 @@ artix-chroot /mnt sh -c "
 	graphic_driver=$graphic_driver \
 	virt=$virt \
 	music=$music \
-	noprivacy=$noprivacy \
-	office=$office \
 	latex=$latex \
 	audioProd=$audioProd
 
