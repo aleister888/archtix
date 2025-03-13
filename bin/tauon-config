@@ -3,14 +3,16 @@
 # Script para auto-configurar TauonMusicBox
 # https://github.com/Taiko2k/TauonMusicBox
 
-rm "$HOME"/.local/share/TauonMusicBox/state*
+mkdir -p "$HOME"/.local/share
 rm "$HOME"/.local/share/TauonMusicBox/tauon.conf
 
 # Iniciamos tauon para que se cree el archivo de configuración
 tauon >/dev/null &
-sleep 5
+sleep 10
 kill $(pgrep tauonmb)
-sleep 1
+while pgrep tauonmb; do
+	sleep 1
+done
 
 # Extraemos los temas
 aunpack "$HOME/.dotfiles/assets/themes.tar.gz" \

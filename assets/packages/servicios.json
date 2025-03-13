@@ -19,6 +19,7 @@
     "librabbitmq-c",
     "librdkafka",
     "mongo-c-driver",
+    "net-snmp",
     "syslog-ng",
     "syslog-ng-openrc"
   ]
