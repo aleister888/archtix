@@ -7,12 +7,8 @@ mkdir -p "$HOME"/.local/share
 rm "$HOME"/.local/share/TauonMusicBox/tauon.conf
 
 # Iniciamos tauon para que se cree el archivo de configuración
-xvfb-run tauon >/dev/null &
-sleep 10
-kill $(pgrep tauonmb)
-while pgrep tauonmb; do
-	sleep 1
-done
+timeout -k 1s 10s xvfb-run tauon >/dev/null &
+sleep 12
 
 # Extraemos los temas
 aunpack "$HOME/.dotfiles/assets/themes.tar.gz" \
