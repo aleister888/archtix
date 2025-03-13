@@ -116,20 +116,6 @@ vim_spell_download() {
 		-q -O "$HOME/.local/share/nvim/site/spell/es.utf-8.sug"
 }
 
-# Crear enlaces simbólicos a /usr/local/bin para ciertos scripts
-scripts_link() {
-	files=(
-		"wakeat"
-		"wakeme"
-		"pipewire-start"
-		"tray-toggle"
-		"rdp-connect"
-	)
-	for file in "${files[@]}"; do
-		sudo ln -sf "$HOME/.dotfiles/bin/$file" "/usr/local/bin/$file"
-	done
-}
-
 # Crear el directorio /.Trash con permisos adecuados
 trash_dir() {
 	sudo mkdir --parent /.Trash
@@ -193,9 +179,6 @@ vim_spell_download
 # Instalar los archivos de configuración e instalar plugins de zsh
 dotfiles-install
 
-# Crear enlaces simbólicos a /usr/local/bin/ para ciertos scripts
-scripts_link
-
 # Crear el directorio /.Trash con permisos adecuados
 trash_dir
 
@@ -230,7 +213,7 @@ sudo usermod -aG storage,input,users "$USER"
 [ "$music" == "true" ] && lrcput-install
 
 # Configurar el audio de baja latencia
-sudo audio-setup
+audio-setup
 # Configuramos el reloj según la zona horaria escogida
 sudo set-clock
 

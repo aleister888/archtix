@@ -32,10 +32,11 @@ fi
 ###########
 
 # Instalar/actualizar archivos de configuración
-"$HOME"/.dotfiles/modules/system-conf >/dev/null 2>&1
-
+"$HOME"/.dotfiles/modules/update/install-conf >/dev/null 2>&1
+# Crear enlaces simbólicos en /usr/local/bin para ciertos scripts
+"$HOME"/.dotfiles/modules/update/install-bin >/dev/null 2>&1
 # Compilar aplicaciones suckless
-"$HOME"/.dotfiles/modules/suckless-compile >/dev/null 2>&1
+"$HOME"/.dotfiles/modules/update/suckless-compile >/dev/null 2>&1
 
 ###############################
 # Instalar paquetes faltantes #

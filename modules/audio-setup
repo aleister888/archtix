@@ -6,25 +6,17 @@
 
 # Configurar el audio de baja latencia
 
-# Verificar si el script se ejecuta como root
-if [ "$(id -u)" -ne 0 ]; then
-	echo "Error: Este script debe ejecutarse como root." >&2
-	exit 1
-fi
-
-# Obtener el nombre de usuario con UID 1000 (generalmente el primer usuario no root)
-RUSER="$(getent passwd 1000 | cut -d: -f1)"
-if [ -z "$RUSER" ]; then
-	echo "Error: No se pudo encontrar un usuario con UID 1000." >&2
+if [ "$(id -u)" -eq 0 ]; then
+	echo "Error: Este script no debe ejecutarse como root." >&2
 	exit 1
 fi
 
 # Añadimos el usuario a los grupos desados
-usermod -aG realtime,audio,video,optical,uucp "$RUSER"
+sudo usermod -aG realtime,audio,video,optical,uucp "$USER"
 
 # Permite al usuario (en el grupo "audio") utilizar dispositivos de audio con
 # prioridad elevada y acceso a recursos extendidos.
-cat <<-EOF | tee -a /etc/security/limits.conf
+cat <<-EOF | sudo tee -a /etc/security/limits.conf
 	    @audio - rtprio 95
 	    @audio - memlock unlimited
 	    $RUSER hard nofile 524288

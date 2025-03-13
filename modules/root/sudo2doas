@@ -42,6 +42,9 @@ fi
 echo "Instalando doas-sudo-shim..."
 if command -v yay &>/dev/null; then
 	su "$RUSER" -c "yay -Sy --noconfirm --disable-download-timeout --needed doas-sudo-shim"
+else
+	echo "Error: yay no está instalado." >&2
+	exit 1
 fi
 
 # Mensaje final

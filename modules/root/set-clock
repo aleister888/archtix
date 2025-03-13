@@ -15,14 +15,10 @@ fi
 
 # Obtener la zona horaria actual
 TIMEZONE="$(readlink -f /etc/localtime | sed 's|.*/zoneinfo/||')"
-if [ -z "$TIMEZONE" ]; then
-	echo "Error: No se pudo determinar la zona horaria del sistema." >&2
-	exit 1
-fi
 
 # Verificar dependencias
 if ! command -v jq &>/dev/null; then
-	echo "Error: El comando 'jq' no está instalado. Por favor, instálelo antes de ejecutar este script." >&2
+	echo "Error: jq no está instalado." >&2
 	exit 1
 fi
 
@@ -32,21 +28,9 @@ CURRENT_TIME=""
 
 # Función para obtener la hora desde una API
 get_current_time() {
-	local api="$1"
-	case "$api" in
-	worldtimeapi)
-		curl "http://worldtimeapi.org/api/timezone/$TIMEZONE" |
-			jq -r '.datetime' | cut -d. -f1 | sed 's/T/ /'
-		;;
-	timeapi)
-		curl -s \
-			"https://timeapi.io/api/Time/current/zone?timeZone=$TIMEZONE" |
-			grep -oP '"dateTime":"\K[^"]+' | cut -d. -f1 | sed 's/T/ /'
-		;;
-	*)
-		return 1
-		;;
-	esac
+	curl -s \
+		"https://timeapi.io/api/Time/current/zone?timeZone=$TIMEZONE" |
+		grep -oP '"dateTime":"\K[^"]+' | cut -d. -f1 | sed 's/T/ /'
 }
 
 # Intentar obtener la hora hasta que se defina o se alcance el límite de intentos
@@ -54,11 +38,7 @@ while [ -z "$CURRENT_TIME" ] && [ "$COUNTER" -le 5 ]; do
 	echo "Intento $COUNTER: Obteniendo la hora..."
 
 	# Primero intentar con worldtimeapi
-	CURRENT_TIME=$(get_current_time "worldtimeapi")
-	if [ -z "$CURRENT_TIME" ]; then
-		# Si falla, intentar con timeapi
-		CURRENT_TIME=$(get_current_time "timeapi")
-	fi
+	CURRENT_TIME=$(get_current_time)
 
 	# Incrementar el contador y esperar antes del siguiente intento
 	if [ -z "$CURRENT_TIME" ]; then

@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC1091
 
 # Script Iniciador del entorno de escritorio
 # por aleister888 <pacoe1000@gmail.com>
@@ -23,11 +24,11 @@ for _ in $(seq $((instancias - 1))); do
 	pkill -o "$(basename "$0")"
 done
 
-for id in $(grep -v "^$my_id$" "$processlist"); do
+grep -v "^$my_id$" "$processlist" | while read -r id; do
 	kill -9 "$id" 2>/dev/null
 done
 
-# Permite al usuario root conectarse al servidor X (p.e. Para compartir el porta-papeles)
+# Permite al usuario root conectarse al servidor X (Para usar el porta-papeles)
 xhost +SI:localuser:root
 
 #############
@@ -55,9 +56,6 @@ virtualmic() {
 ##########
 # Script #
 ##########
-
-# Desactivar el atenuado de la pantalla
-xset -dpms && xset s off &
 
 # Leer la configuración Xresources
 if [ -f "$XDG_CONFIG_HOME/Xresources" ]; then
@@ -94,7 +92,7 @@ if [ -e /sys/class/power_supply/BAT0 ]; then
 	mic=$(pactl list short sources |
 		grep -E "alsa_input.pci-[0-9]*_[0-9]*_[0-9].\.[0-9].analog-stereo" |
 		awk '{print $1}')
-	pactl set-source-volume "$mic" 25%
+	pactl set-source-volume "$mic" 50%
 fi
 
 # Servicio de notificaciones
@@ -103,45 +101,6 @@ pgrep dunst || dunst &
 # Esperar a que se incie wireplumber para activar el micrófono virtual
 # (Para compartir el audio de las aplicaciones através del micrófono)
 virtualmic &
-
-# Salvapantallas
-xautolock -time 5 -locker screensaver &
-
-while true; do
-	resultado=0 # Reinicamos la variable antes de hacer las comprobaciones
-
-	# Si alguno de estos procesos esta activo, no mostrar el salvapantallas
-	processes=("i3lock")
-	for process in "${processes[@]}"; do
-		! pgrep "$process" >/dev/null
-		resultado=$((resultado + $?))
-	done
-
-	activewindow="$(xdotool getwindowclassname "$(xdotool getactivewindow)")"
-
-	# Si alguna de estas aplicaciones esta enfocada y reproduciendo
-	# vídeo/audio, no mostrar el salvapantallas
-	players=("vlc" "firefox" "mpv")
-	for player in "${players[@]}"; do
-		if [ "$(playerctl --player "$player" status)" == "Playing" ] &&
-			[ "$activewindow" = "$player" ]; then
-			resultado=1
-			break
-		fi
-	done
-
-	# Si alguna de estas apps esta enfocada, no mostrar el salvapantallas
-	apps="looking-glass\|TuxGuitar"
-	echo "$activewindow" | grep "$apps" && resultado=1
-
-	# Reinciar xautolock en función de los resultados
-	if [ "$resultado" -ne 0 ]; then
-		xautolock -enable
-		pkill dvdbounce
-	fi
-
-	sleep 0.5 # Esperar 0.5s antes de hacer la siguiente comprobación
-done &
 
 # Servidor VNC Local (Solo para equipos que no lleven batería)
 if [ ! -e /sys/class/power_supply/BAT0 ]; then

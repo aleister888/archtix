@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Script que crea enlaces simbólicos en /usr/local/bin para ciertos scripts
+# - Invocado por /update.sh
+
+if [ "$(id -u)" -eq 0 ]; then
+	echo "Error: Este script no debe ejecutarse como root." >&2
+	exit 1
+fi
+
+files=(
+	"wakeat"
+	"wakeme"
+	"pipewire-start"
+	"tray-toggle"
+	"rdp-connect"
+)
+for file in "${files[@]}"; do
+	sudo ln -sf "$HOME/.dotfiles/assets/bin/$file" "/usr/local/bin/$file"
+done

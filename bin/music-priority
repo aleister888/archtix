@@ -5,30 +5,29 @@
 
 # Aquí se establece la prioridad de los reproductores:
 priority=(
+	"$BROWSER"
 	"tauon"
-	"firefox"
 )
 
-# Lista de dominios permitidos para firefox
+# Lista de dominios permitidos para el navegador
 allowed_domains=(
-	"youtube.com"
+	"music.youtube.com"
 	"open.spotify.com"
-	"mega.nz"
 )
 
 # Establecemos el reproductor y salimos del loop
 for app in "${priority[@]}"; do
 
 	case "$app" in
-	# Si es firefox, comprobamos que se está reproduciendo
+	# Si es el navegador, comprobamos que se está reproduciendo
 	# contenido en uno de los dominios permitidos
-	firefox)
+	$BROWSER)
 		# Convierte el array en una expresión regular
 		domains_pattern=$(
 			IFS=\|
 			echo "${allowed_domains[*]}"
 		)
-		if playerctl -p firefox metadata xesam:url 2>/dev/null |
+		if playerctl -p "$BROWSER" metadata xesam:url 2>/dev/null |
 			grep -qE "$domains_pattern"; then
 			PLAYER=$app
 			break
