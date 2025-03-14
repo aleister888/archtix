@@ -12,7 +12,7 @@ EXENAME="minecraft-server-start"
 # Crear directorio con el servidor
 sudo mkdir -p $SERVERDIR
 sudo chown "$USER:$USER" $SERVERDIR
-cd $SERVERDIR || return
+cd $SERVERDIR || exit
 
 # Descargar instalador
 curl -OJ https://meta.fabricmc.net/v2/versions/loader/1.21.4/0.16.10/1.0.1/server/jar

@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 # Hacer que npm user la especificación de directorios XDG
 npm_xdg() {

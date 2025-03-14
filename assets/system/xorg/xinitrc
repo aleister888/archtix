@@ -9,8 +9,4 @@ if [ -d /etc/X11/xinit/xinitrc.d ]; then
 	done
 fi
 
-dbus-update-activation-environment --all
-
-while true; do
-	dwm >/dev/null 2>&1
-done
+exec dbus-launch --sh-syntax --exit-with-session sh -c 'while true; do dwm; done'

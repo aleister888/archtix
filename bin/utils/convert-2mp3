@@ -75,7 +75,7 @@ find "$BK_DIR" -type f -printf '%P\n' | sed 's/\.[^.]*$//' >"$BK_TMP"
 
 # Crear un script para borrar los archivos que han sido eliminados en el directorio original
 grep -vFxf "$OG_TMP" "$BK_TMP" | uniq >"$SYNC_DIFF"
-sed -i -e "s|^|rm -rf \"$BK_DIR/|" -e 's|$|.m4a"|' -e '1i #!/bin/sh' "$SYNC_DIFF" >/dev/null 2>&1
+sed -i -e "s|^|rm -rf \"$BK_DIR/|" -e 's|$|.mp3"|' -e '1i #!/bin/sh' "$SYNC_DIFF" >/dev/null 2>&1
 
 # Función para comparar y añadir archivos obsoletos al archivo SYNC_DIFF
 compare_and_append() {

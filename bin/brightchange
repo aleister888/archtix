@@ -3,7 +3,7 @@
 # Script para cambiar el brillo
 
 # Sonido
-SOUND="/usr/share/SOUNDs/freedesktop/stereo/audio-volume-change.oga"
+SOUND="/usr/share/sounds/freedesktop/stereo/audio-volume-change.oga"
 # Número de niveles de brillo (ajustar según preferencia)
 LEVELS=8
 
