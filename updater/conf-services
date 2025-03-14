@@ -1,21 +1,37 @@
-#!/bin/sh
+#!/bin/bash
 
-service_add() { # Activar servicio
+# Activar servicio
+service_add() {
 	sudo rc-update add "$1" default
 }
-user_service_add() { # Activar servicio
+# Activar servicio para el usuario
+user_service_add() {
 	rc-update add "$1" default -U
 }
 
 [ "$(id -u)" -eq 0 ] && exit 1
 
-# Activar servicios
-service_add elogind
-service_add earlyoom
-service_add tlp
-service_add xdm
-service_add syslog-ng
+SERVICES=(
+	"elogind"
+	"earlyoom"
+	"tlp"
+	"xdm"
+	"syslog-ng"
+)
 
-user_service_add pipewire
-user_service_add pipewire-pulse
-user_service_add wireplumber
+USER_SERVICES=(
+	"dbus"
+	"pipewire"
+	"pipewire-pulse"
+	"wireplumber"
+)
+
+# Activar los servicios del sistema
+for SERVICE in "${SERVICES[@]}"; do
+	service_add "$SERVICE"
+done
+
+# Activar los servicios del usuario
+for USER_SERVICE in "${USER_SERVICES[@]}"; do
+	user_service_add "$USER_SERVICE"
+done
