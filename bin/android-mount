@@ -2,7 +2,7 @@
 
 # Script para montar dispositivos android
 
-# Función para escapar el nombre de teléfonos móviles.
+# Función para escapar el nombre del dispositivo.
 escape() {
 	echo "$@" |
 		iconv -cf UTF-8 -t ASCII//TRANSLIT |

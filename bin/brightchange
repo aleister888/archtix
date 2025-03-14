@@ -5,7 +5,7 @@
 # Sonido
 sound="/usr/share/sounds/freedesktop/stereo/audio-volume-change.oga"
 # Número de niveles de brillo (ajustar según preferencia)
-levels=5
+levels=8
 
 # Prevenir que el script se ejecute varias veces simultáneamente
 [ $(pgrep -c "$(basename "$0")") -ge 2 ] && exit 1

@@ -2,7 +2,6 @@
 
 # Script para configurar el reloj de hardware y sincronizalo con la hora
 # del sistema.
-# - Invocado en /installer/stage3.sh
 
 # Se termina la ejecución de toda la tubería despúes del primer fallo
 set -o pipefail
@@ -24,7 +23,7 @@ CURRENT_TIME=""
 
 # Función para obtener la hora desde una API
 get_current_time() {
-	curl -s \
+	timeout -k 1s 10s curl -s \
 		"https://timeapi.io/api/Time/current/zone?timeZone=$TIMEZONE" |
 		grep -oP '"dateTime":"\K[^"]+' | cut -d. -f1 | sed 's/T/ /'
 }

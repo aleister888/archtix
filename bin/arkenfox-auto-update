@@ -3,21 +3,17 @@
 # Script de Luke Smith:
 # https://github.com/LukeSmithxyz/voidrice/blob/master/.local/bin/arkenfox-auto-update
 
-# A wrapper for the arkenfox-updater that runs it on all pre-existing Arkenfox
-# user.js files on the machine.
+# Envoltorio que se copia en /usr/local/lib para que arkenfox-updater se ejecute
+# a través de un hook de pacman, actualizando todos los user.js de Arkenfox.
 
-# On installation of LARBS, this file is copied to /usr/local/lib/ where it is
-# run by a pacman hook set up. The user should not have to run this manually.
-
-# Search for all Firefox and Librewolf profiles using Arkenfox.
+# Buscar todos los perfiles de Firefox y Librewolf que usan Arkenfox.
 profiles="$(grep -sH "arkenfox user.js" \
 	/home/*/.librewolf/*.default-release/user.js \
 	/home/*/.mozilla/firefox/*.default-release/user.js)"
 
 IFS='
 '
-
-# Update each found profile.
+# Actualiza cada uno de los perfiles encontrados.
 for profile in $profiles; do
 	userjs=${profile%%/user.js*}
 	user=$(stat -c '%U' "$userjs") || continue

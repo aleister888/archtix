@@ -3,6 +3,8 @@
 # Script para auto-configurar TauonMusicBox
 # https://github.com/Taiko2k/TauonMusicBox
 
+[ "$(id -u)" -eq 0 ] && exit 1
+
 mkdir -p "$HOME"/.local/share
 rm "$HOME"/.local/share/TauonMusicBox/tauon.conf
 

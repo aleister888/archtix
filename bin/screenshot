@@ -27,6 +27,7 @@ capture() {
 	if [ "$destination" = "$TMP" ]; then
 		xclip -selection clipboard -t image/png -i "$TMP"
 		notify-send -i "$TMP" 'Captura copiada al Portapapeles'
+		rm "$TMP"
 	else
 		notify-send -i "$FILE" "$NAME"
 	fi

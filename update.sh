@@ -48,13 +48,13 @@ fi
 ###########
 
 # Instalar/actualizar archivos de configuración
-"$HOME"/.dotfiles/modules/update/install-conf >/dev/null 2>&1
+"$HOME"/.dotfiles/updater/install-conf >/dev/null 2>&1
 # Crear enlaces simbólicos en /usr/local/bin para ciertos scripts
-"$HOME"/.dotfiles/modules/update/install-bin >/dev/null 2>&1
+"$HOME"/.dotfiles/updater/install-bin >/dev/null 2>&1
 # Compilar aplicaciones suckless
-"$HOME"/.dotfiles/modules/update/suckless-compile >/dev/null 2>&1
+"$HOME"/.dotfiles/updater/suckless-compile >/dev/null 2>&1
 # Activar los servicios necesarios
-"$HOME"/.dotfiles/modules/update/conf-services >/dev/null 2>&1
+"$HOME"/.dotfiles/updater/conf-services >/dev/null 2>&1
 
 #######################################
 # Archivos de configuración y scripts #

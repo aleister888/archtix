@@ -1,7 +1,6 @@
 #!/bin/sh
 
-# Script para construir e instalar yay
-# - Invocado por /installer/stage3.sh
+# Script para compilar e instalar yay
 
 [ "$(id -u)" -eq 0 ] && exit 1
 

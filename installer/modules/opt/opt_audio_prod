@@ -2,12 +2,11 @@
 
 [ "$(id -u)" -eq 0 ] && exit 1
 
-yay -S --noconfirm --disable-download-timeout --needed \
-	$(cat "$HOME"/.dotfiles/assets/packages/opt/audioProd | xargs)
+xargs yay -S --noconfirm --disable-download-timeout --needed \
+	<"$HOME/.dotfiles/assets/packages/opt/audio_prod"
 
-# El paquete tuxguitar-bin guarda el archivo .desktop de la aplicación
-# en un directorio no estándar. Con esto enlazamos los archivos
-# necesarios en /usr/share para que el sistema los reconozca.
+# El paquete tuxguitar-bin guarda el archivo .desktop en un directorio no estándar.
+# Con esto enlazamos los archivos necesarios en /usr/share para que el sistema los reconozca.
 sudo ln -sf /opt/tuxguitar/share/applications/tuxguitar.desktop \
 	/usr/share/applications/
 [ ! -d /usr/share/icons/hicolor/96x96/apps ] &&

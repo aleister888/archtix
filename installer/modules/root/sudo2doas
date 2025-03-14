@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # Script para sustituir sudo por OpenDoas durante la instalación del SO
-# - Invocado en /installer/stage3.sh
 
 [ "$(id -u)" -ne 0 ] && exit 1
 

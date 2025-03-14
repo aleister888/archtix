@@ -39,7 +39,7 @@
     "python-pypresence",
     "tauon-music-box"
   ],
-  "not-foss": [
+  "no-foss": [
     "discord",
     "telegram-desktop"
   ],

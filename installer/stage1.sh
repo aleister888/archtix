@@ -6,18 +6,18 @@
 # Licencia: GNU GPLv3
 
 # - Pasa como variables los siguientes parámetros al siguiente script:
-#   - Nombre del usuario regular ($username)
-#   - DPI de la pantalla ($final_dpi)
-#   - Zona horaria del sistema ($systemTimezone)
+#   - Nombre del usuario regular ($USERNAME)
+#   - DPI de la pantalla ($FINAL_DPI)
+#   - Zona horaria del sistema ($SYSTEM_TIMEZONE)
 #   - Nombre del disco utilizado ($ROOT_DISK)
-#   - Si se usa encriptación ($crypt_root)
+#   - Si se usa encriptación ($CRYPT_ROOT)
 #   - El tipo de partición de la instalación ($ROOT_FILESYSTEM)
-#   - Nombre de la partición principal ($rootPartName)
-#   - Nombre de la partición desencriptada abierta ($cryptName)
-#   - Nombre del host ($hostName)
-#   - Driver de vídeo a usar ($graphic_driver)
+#   - Nombre de la partición principal ($ROOT_PART_NAME)
+#   - Nombre de la partición desencriptada abierta ($CRYPT_NAME)
+#   - Nombre del host ($HOSTNAME)
+#   - Driver de vídeo a usar ($GRAPHIC_DRIVER)
 #   - Variables con el software opcional elegido
-#     - $virt, $music, $noprivacy, $office, $latex, $audioProd
+#     - $CHOSEN_AUDIO_PROD, $CHOSEN_LATEX, $CHOSEN_MUSIC, $CHOSEN_VIRT
 
 REPO_URL="https://github.com/aleister888/artix-installer"
 
@@ -52,70 +52,70 @@ echo_msg() {
 }
 
 # Muestra como quedarían las particiones de nuestra instalación para # confirmar
-# los cambios. También prepara las variables para formatear los discos
-scheme_show() {
-	local scheme   # Variable con el esquema de particiones completo
-	local rootType # Tipo de partición/ (LUKS o normal)
-	bootPart=      # Partición de arranque
-	rootPart=      # Partición con el sistema
+# los cambios. También prepara las VARIABLES para formatear los discos
+SCHEME_show() {
+	local SCHEME    # Variable con el esquema de particiones completo
+	local ROOT_TYPE # Tipo de partición/ (LUKS o normal)
+	BOOT_PART=      # Partición de arranque
+	ROOT_PART=      # Partición con el sistema
 
 	# Definimos el nombre de las particiones de nuestro disco principal
 	# (Los NVME tienen un sistema de nombrado distinto)
 	case "$ROOT_DISK" in
 	*"nvme"* | *"mmcblk"*)
-		bootPart="$ROOT_DISK"p1
-		rootPart="$ROOT_DISK"p2
+		BOOT_PART="$ROOT_DISK"p1
+		ROOT_PART="$ROOT_DISK"p2
 		;;
 	*)
-		bootPart="$ROOT_DISK"1
-		rootPart="$ROOT_DISK"2
+		BOOT_PART="$ROOT_DISK"1
+		ROOT_PART="$ROOT_DISK"2
 		;;
 	esac
 
 	# Mostrar si la partición esta encriptada
-	if [ "$crypt_root" == "true" ]; then
-		rootType="LUKS"
+	if [ "$CRYPT_ROOT" == "true" ]; then
+		ROOT_TYPE="LUKS"
 	else
-		rootType="/"
+		ROOT_TYPE="/"
 	fi
 
 	# Creamos el esquema que whiptail nos mostrará
-	scheme="/dev/$ROOT_DISK    $(lsblk -dn -o size /dev/"$ROOT_DISK")
-	/dev/$bootPart  /boot
-	/dev/$rootPart  $rootType
+	SCHEME="/dev/$ROOT_DISK    $(lsblk -dn -o SIZE /dev/"$ROOT_DISK")
+	/dev/$BOOT_PART  /boot
+	/dev/$ROOT_PART  $ROOT_TYPE
 	"
-	if [ "$crypt_root" == "true" ]; then
-		scheme+="/dev/mapper/root  /"
+	if [ "$CRYPT_ROOT" == "true" ]; then
+		SCHEME+="/dev/mapper/root  /"
 	fi
 
 	# Mostramos el esquema para confirmar los cambios
 	if ! whiptail --backtitle "$REPO_URL" \
 		--title "Confirmar particionado" \
-		--yesno "$scheme" 15 60; then
+		--yesno "$SCHEME" 15 60; then
 		whip_yes "Salir" "¿Desea cancelar la instalación? En caso contrario, volverá a elegir su esquema de particiones" &&
 			exit 1
 	fi
 }
 
 # Función para elegir como se formatearán nuestros discos
-scheme_setup() {
+SCHEME_setup() {
 	while true; do
 		while true; do
 			ROOT_DISK=$(
 				whip_menu "Discos disponibles" \
 					"Selecciona un disco para la instalación:" \
-					"$(lsblk -dn -o name,size | tr '\n' ' ')"
+					"$(lsblk -dn -o name,SIZE | tr '\n' ' ')"
 			) && break
 		done
 
 		if whip_yes "LUKS" "¿Desea encriptar el disco duro?"; then
-			crypt_root=true
+			CRYPT_ROOT=true
 		else
-			crypt_root=false
+			CRYPT_ROOT=false
 		fi
 
 		# Confirmamos los cambios
-		if scheme_show; then
+		if SCHEME_show; then
 			break # Salir del bucle si se confirman los cambios
 		else
 			whip_msg "ERROR" "Hubo un error al comprobar el esquema de particiones elegido, o el usuario cancelo la operación."
@@ -125,18 +125,18 @@ scheme_setup() {
 
 # Encriptar el disco duro
 part_encrypt() {
-	local cryptPassword
+	local LUKS_PASSWORD
 	while true; do
-		cryptPassword=$(
+		LUKS_PASSWORD=$(
 			get_password "Entrada de Contraseña" "Confirmación de contraseña" \
 				"Introduce la contraseña de encriptación del disco $1:" \
 				"Re-introduce la contraseña de encriptación del disco $1:"
 		)
-		yes "$cryptPassword" | cryptsetup luksFormat -q --verify-passphrase "/dev/$2" && break
+		yes "$LUKS_PASSWORD" | cryptsetup luksFormat -q --verify-passphrase "/dev/$2" && break
 		whip_msg "LUKS" "Hubo un error, deberá introducir la contraseña otra vez"
 	done
 
-	yes "$cryptPassword" | cryptsetup open "/dev/$2" "$3" && return
+	yes "$LUKS_PASSWORD" | cryptsetup open "/dev/$2" "$3" && return
 }
 
 disk_setup() {
@@ -147,10 +147,10 @@ disk_setup() {
 			"ext4" "Ext4" "btrfs" "Btrfs"
 	)
 
-	rootPartName=
+	ROOT_PART_NAME=
 
 	# Nombre aleatorio de la partición encriptada abierta
-	cryptName=$(tr -dc 'a-zA-Z' </dev/urandom | fold -w 5 | head -n 1)
+	CRYPT_NAME=$(tr -dc 'a-zA-Z' </dev/urandom | fold -w 5 | head -n 1)
 
 	# Borramos la firma del disco
 	wipefs --all "/dev/$ROOT_DISK"
@@ -159,23 +159,23 @@ disk_setup() {
 	printf "label: gpt\n,550M,U\n,,\n" | sfdisk "/dev/$ROOT_DISK"
 
 	# Formateamos la primera partición como EFI
-	mkfs.fat -F32 "/dev/$bootPart"
+	mkfs.fat -F32 "/dev/$BOOT_PART"
 
 	# Si se eligió usar LUKS, es el momento de encriptar la partición
-	if [ "$crypt_root" == "true" ]; then
-		part_encrypt "/" "$rootPart" "$cryptName" &&
+	if [ "$CRYPT_ROOT" == "true" ]; then
+		part_encrypt "/" "$ROOT_PART" "$CRYPT_NAME" &&
 			# Cambiamos el indicador del disco a la partición encriptada
-			rootPartName="$rootPart"
-		rootPart="mapper/$cryptName"
+			ROOT_PART_NAME="$ROOT_PART"
+		ROOT_PART="mapper/$CRYPT_NAME"
 	fi
 
 	# Formateamos y montamosnuestras particiones
 	if [ "$ROOT_FILESYSTEM" == "ext4" ]; then
 
-		mkfs.ext4 "/dev/$rootPart"
+		mkfs.ext4 "/dev/$ROOT_PART"
 
 		# Creamos el archivo swap
-		mount "/dev/$rootPart" /mnt
+		mount "/dev/$ROOT_PART" /mnt
 		mkdir /mnt/swap
 		fallocate -l 8G /mnt/swap/swapfile
 		chmod 0600 /mnt/swap/swapfile
@@ -183,39 +183,39 @@ disk_setup() {
 
 	elif [ "$ROOT_FILESYSTEM" == "btrfs" ]; then
 
-		mkfs.btrfs -f "/dev/$rootPart"
+		mkfs.btrfs -f "/dev/$ROOT_PART"
 
-		mount "/dev/$rootPart" /mnt
+		mount "/dev/$ROOT_PART" /mnt
 		btrfs subvolume create /mnt/@
 		# Creamos el subvolumen home
 		btrfs subvolume create /mnt/@home
 		# Creamos el subvolumen swap
 		btrfs subvolume create /mnt/@swap
 		# Creamos un subvolumen para las imágenes de las máquinas
-		# virtuales, así, en caso de que el usuario instale libvirt,
+		# CHOSEN_VIRTuales, así, en caso de que el usuario instale libCHOSEN_VIRT,
 		# estas no se incluirán en las snapshots
 		btrfs subvolume create /mnt/@images
 		umount -R /mnt
 
 		mount -t btrfs \
 			-o noatime,compress=zstd:1,autodefrag,subvol=@ \
-			"/dev/$rootPart" /mnt
+			"/dev/$ROOT_PART" /mnt
 
 		mkdir /mnt/home
 		mkdir /mnt/swap
-		mkdir -p /mnt/var/lib/libvirt/images
+		mkdir -p /mnt/var/lib/libCHOSEN_VIRT/images
 
 		mount -t btrfs \
 			-o noatime,compress=zstd:1,autodefrag,subvol=@home \
-			"/dev/$rootPart" /mnt/home
+			"/dev/$ROOT_PART" /mnt/home
 
 		mount -t btrfs \
 			-o noatime,autodefrag,subvol=@images \
-			"/dev/$rootPart" /mnt/var/lib/libvirt/images
+			"/dev/$ROOT_PART" /mnt/var/lib/libCHOSEN_VIRT/images
 
 		mount -t btrfs \
 			-o noatime,nodatacow,subvol=@swap \
-			"/dev/$rootPart" /mnt/swap
+			"/dev/$ROOT_PART" /mnt/swap
 
 		btrfs filesystem mkswapfile -s 8G /mnt/swap/swapfile
 
@@ -224,7 +224,7 @@ disk_setup() {
 	swapon /mnt/swap/swapfile
 
 	mkdir /mnt/boot
-	mount "/dev/$bootPart" /mnt/boot
+	mount "/dev/$BOOT_PART" /mnt/boot
 }
 
 # Instalar paquetes con basestrap
@@ -232,47 +232,47 @@ disk_setup() {
 # porque el comando no tiene la opción --disable-download-timeout.
 # Lo que podría hacer que la operación falle con conexiones muy lentas.
 basestrap_install() {
-	local basestrap_packages
+	local BASESTRAP_PACKAGES
 
-	basestrap_packages="base elogind-openrc openrc linux linux-firmware"
-	basestrap_packages+=" opendoas mkinitcpio wget libnewt btrfs-progs"
-	basestrap_packages+=" neovim"
+	BASESTRAP_PACKAGES="base elogind-openrc openrc linux linux-firmware"
+	BASESTRAP_PACKAGES+=" opendoas mkinitcpio wget libnewt btrfs-progs"
+	BASESTRAP_PACKAGES+=" neovim"
 
 	# Instalamos los paquetes del grupo base-devel manualmente para luego
 	# poder borrar sudo facilmente. (Si en su lugar instalamos el grupo,
 	# luego será más complicado desinstalarlo)
-	basestrap_packages+=" autoconf automake bison debugedit fakeroot flex"
-	basestrap_packages+=" gc gcc groff guile libisl libmpc libtool m4 make"
-	basestrap_packages+=" patch pkgconf texinfo which"
+	BASESTRAP_PACKAGES+=" autoconf automake bison debugedit fakeroot flex"
+	BASESTRAP_PACKAGES+=" gc gcc groff guile libisl libmpc libtool m4 make"
+	BASESTRAP_PACKAGES+=" patch pkgconf texinfo which"
 
-	basestrap_packages+=" linux-headers linux-lts linux-lts-headers"
-	basestrap_packages+=" networkmanager networkmanager-openrc dosfstools"
-	basestrap_packages+=" cronie cronie-openrc cups cups-openrc freetype2"
-	basestrap_packages+=" libjpeg-turbo grub git wpa_supplicant usbutils"
-	basestrap_packages+=" pciutils cryptsetup device-mapper-openrc dialog"
-	basestrap_packages+=" cryptsetup-openrc acpid-openrc efibootmgr"
+	BASESTRAP_PACKAGES+=" linux-headers linux-lts linux-lts-headers"
+	BASESTRAP_PACKAGES+=" networkmanager networkmanager-openrc dosfstools"
+	BASESTRAP_PACKAGES+=" cronie cronie-openrc cups cups-openrc freetype2"
+	BASESTRAP_PACKAGES+=" libjpeg-turbo grub git wpa_supplicant usbutils"
+	BASESTRAP_PACKAGES+=" pciutils cryptsetup device-mapper-openrc dialog"
+	BASESTRAP_PACKAGES+=" cryptsetup-openrc acpid-openrc efibootmgr"
 
 	# Instalamos pipewire para evitar conflictos (p.e. se isntala jack2 y no
 	# pipewire-jack). Los paquetes para 32 bits se instalarán una vez
 	# activados el repo multilib de Arch Linux (s3)
-	basestrap_packages+=" pipewire-pulse wireplumber pipewire pipewire-alsa"
-	basestrap_packages+=" pipewire-audio pipewire-jack"
+	BASESTRAP_PACKAGES+=" pipewire-pulse wireplumber pipewire pipewire-alsa"
+	BASESTRAP_PACKAGES+=" pipewire-audio pipewire-jack"
 
 	# Instalamos go y sudo para poder compilar yay más adelante (s3)
-	basestrap_packages+=" go sudo"
+	BASESTRAP_PACKAGES+=" go sudo"
 
 	# Para procesar los .json con los paquetes a instalar
-	basestrap_packages+=" jq"
+	BASESTRAP_PACKAGES+=" jq"
 
 	# Añadimos el paquete con el microcódigo de CPU correspodiente
-	local manufacturer
-	manufacturer=$(
+	local MANUFACTURER
+	MANUFACTURER=$(
 		grep vendor_id /proc/cpuinfo | awk '{print $3}' | head -1
 	)
-	if [ "$manufacturer" == "GenuineIntel" ]; then
-		basestrap_packages+=" intel-ucode"
-	elif [ "$manufacturer" == "AuthenticAMD" ]; then
-		basestrap_packages+=" amd-ucode"
+	if [ "$MANUFACTURER" == "GenuineIntel" ]; then
+		BASESTRAP_PACKAGES+=" intel-ucode"
+	elif [ "$MANUFACTURER" == "AuthenticAMD" ]; then
+		BASESTRAP_PACKAGES+=" amd-ucode"
 	fi
 
 	# Si el dispositivo tiene bluetooth, instalaremos blueman
@@ -280,33 +280,33 @@ basestrap_install() {
 		lspci
 		lsusb
 	)" | grep -i bluetooth; then
-		basestrap_packages+=" blueman"
+		BASESTRAP_PACKAGES+=" blueman"
 	fi
 
 	# shellcheck disable=SC2086
 	while true; do
-		basestrap /mnt $basestrap_packages && break
+		basestrap /mnt $BASESTRAP_PACKAGES && break
 	done
 }
 
 # Elegimos distribución de teclado
 kb_layout_select() {
-	key_layouts=$(
+	KEY_LAYOUTS=$(
 		find /usr/share/X11/xkb/symbols/ -mindepth 1 -type f \
 			-printf "%f\n" | sort -u | grep -v '...'
 	)
 
 	# Array con las diferentes distribuciones de teclado posibles
-	keyboard_array=()
-	for key_layout in $key_layouts; do
-		keyboard_array+=("$key_layout" "$key_layout")
+	KEYBOARD_ARRAY=()
+	for KEY_LAYOUT in $KEY_LAYOUTS; do
+		KEYBOARD_ARRAY+=("$KEY_LAYOUT" "$KEY_LAYOUT")
 	done
 
 	# Elegimos nuestro layout
-	final_layout=$(
+	FINAL_LAYOUT=$(
 		whip_menu "Teclado" \
 			"Por favor, elige una distribucion de teclado:" \
-			${keyboard_array[@]}
+			${KEYBOARD_ARRAY[@]}
 	)
 }
 
@@ -316,29 +316,29 @@ kb_layout_conf() {
 		Section "InputClass"
 		    Identifier "system-keyboard"
 		    MatchIsKeyboard "on"
-		    Option "XkbLayout" "$final_layout"
+		    Option "XkbLayout" "$FINAL_LAYOUT"
 		    Option "XkbModel" "pc105"
 		    Option "XkbOptions" "terminate:ctrl_alt_bksp"
 		EndSection
 	EOF
 	# Si elegimos español, configurar el layout de la tty en español también
-	[ "$final_layout" == "es" ] &&
+	[ "$FINAL_LAYOUT" == "es" ] &&
 		sudo sed -i 's|keymap="us"|keymap="es"|' /etc/conf.d/keymaps
 }
 
 # Calcular el DPI
 calculate_dpi() {
-	local resolution size width height fact displayDPI
+	local RESOLUTION SIZE WIDTH HEIGHT FACT DISPLAY_DPI
 
 	# Selección de resolución del monitor
-	resolution=$(
+	RESOLUTION=$(
 		whip_menu "Resolucion del Monitor" \
 			"Seleccione la resolucion de su monitor:" \
 			"720p" "HD" "1080p" "Full-HD" "1440p" "QHD" "2160p" "4K"
 	)
 
 	# Selección del tamaño del monitor en pulgadas (diagonal)
-	size=$(
+	SIZE=$(
 		whip_menu "Tamaño del Monitor" \
 			"Seleccione el tamaño de su monitor (en pulgadas):" \
 			"14" "Portatil" \
@@ -349,66 +349,66 @@ calculate_dpi() {
 	)
 
 	# Definimos la resolución elegida
-	case $resolution in
+	case $RESOLUTION in
 	"720p")
-		width=1280
-		height=720
-		fact="0.6"
+		WIDTH=1280
+		HEIGHT=720
+		FACT="0.6"
 		;;
 	"1080p")
-		width=1920
-		height=1080
-		fact="0.6"
+		WIDTH=1920
+		HEIGHT=1080
+		FACT="0.6"
 		;;
 	"1440p")
-		width=2560
-		height=1440
-		fact="0.6"
+		WIDTH=2560
+		HEIGHT=1440
+		FACT="0.6"
 		;;
 	"2160p")
-		width=3840
-		height=2160
-		fact="1.2"
+		WIDTH=3840
+		HEIGHT=2160
+		FACT="1.2"
 		;;
 	esac
 
 	# Calculamos el DPI
-	displayDPI=$(
-		echo "scale=6; sqrt($width^2 + $height^2) / $size * $fact" | bc
+	DISPLAY_DPI=$(
+		echo "scale=6; sqrt($WIDTH^2 + $HEIGHT^2) / $SIZE * $FACT" | bc
 	)
 
 	# Redondeamos el DPI calculado al entero más cercano
-	final_dpi=$(printf "%.0f" "$displayDPI")
+	FINAL_DPI=$(printf "%.0f" "$DISPLAY_DPI")
 }
 
 get_password() {
-	local password1 password2
-	local title1=$1
-	local title2=$2
-	local box1=$3
-	local box2=$4
+	local PASSWORD_1 PASSWORD_2
+	local TITLE_1=$1
+	local TITLE_2=$2
+	local BOX_1=$3
+	local BOX_2=$4
 
 	while true; do
 
 		# Pedir la contraseña la primera vez
-		password1=$(
+		PASSWORD_1=$(
 			whiptail --backtitle "$REPO_URL" \
-				--title "$title1" \
-				--passwordbox "$box1" \
+				--title "$TITLE_1" \
+				--passwordbox "$BOX_1" \
 				10 60 3>&1 1>&2 2>&3
 		)
 
 		# Pedir la contraseña una segunda vez
-		password2=$(
+		PASSWORD_2=$(
 			whiptail --backtitle "$REPO_URL" \
-				--title "$title2" \
-				--passwordbox "$box2" \
+				--title "$TITLE_2" \
+				--passwordbox "$BOX_2" \
 				10 60 3>&1 1>&2 2>&3
 		)
 
 		# Si ambas contraseñas coinciden devolver el resultado
-		if [ "$password1" == "$password2" ] && [ -n "$password1" ]; then
-			echo "$password1" && break
+		if [ "$PASSWORD_1" == "$PASSWORD_2" ] && [ -n "$PASSWORD_1" ]; then
+			echo "$PASSWORD_1" && break
 		else
 			# Mostrar un mensaje de error si las contraseñas no coinciden
 			whiptail --backtitle "$REPO_URL" \
@@ -424,47 +424,47 @@ get_password() {
 timezone_set() {
 
 	while true; do
-		# Obtener la lista de regiones disponibles
-		regions=$(
+		# Obtener la lista de REGIONes disponibles
+		REGIONS=$(
 			find /usr/share/zoneinfo -mindepth 1 -type d \
 				-printf "%f\n" | sort -u
 		)
 
-		# Crear un array con las regiones
-		regions_array=()
-		for region in $regions; do
-			regions_array+=("$region" "$region")
+		# Crear un array con las REGIONes
+		REGIONS_ARRAY=()
+		for REGION in $REGIONS; do
+			REGIONS_ARRAY+=("$REGION" "$REGION")
 		done
 
 		# Elegir la región
-		region=$(
+		REGION=$(
 			whip_menu "Selecciona una región" \
 				"Por favor, elige una región" \
-				${regions_array[@]}
+				${REGIONS_ARRAY[@]}
 		)
 
 		# Obtener la lista de zonas horarias de la región seleccionada
-		timezones=$(
-			find "/usr/share/zoneinfo/$region" -mindepth 1 -type f \
+		TIMEZONES=$(
+			find "/usr/share/zoneinfo/$REGION" -mindepth 1 -type f \
 				-printf "%f\n" | sort -u
 		)
 
 		# Crear un array con las distintas zonas horarias
-		timezones_array=()
-		for timezone in $timezones; do
-			timezones_array+=("$timezone" "$timezone")
+		TIMEZONES_ARRAY=()
+		for TIMEZONE in $TIMEZONES; do
+			TIMEZONES_ARRAY+=("$TIMEZONE" "$TIMEZONE")
 		done
 
 		# Elegir la zona horaria dentro de la región seleccionada
-		timezone=$(
-			whip_menu "Selecciona una zona horaria en $region" \
-				"Por favor, elige una zona horaria en $region:" \
-				${timezones_array[@]}
+		TIMEZONE=$(
+			whip_menu "Selecciona una zona horaria en $REGION" \
+				"Por favor, elige una zona horaria en $REGION:" \
+				${TIMEZONES_ARRAY[@]}
 		)
 
 		# Verificar si la zona horaria seleccionada es válida
-		if [ -f "/usr/share/zoneinfo/$region/$timezone" ] &&
-			[ -n "$region" ] && [ -n "$timezone" ]; then
+		if [ -f "/usr/share/zoneinfo/$REGION/$TIMEZONE" ] &&
+			[ -n "$REGION" ] && [ -n "$TIMEZONE" ]; then
 			break
 		else
 			whip_msg "Zona horaria no valida" \
@@ -472,53 +472,53 @@ timezone_set() {
 		fi
 	done
 
-	echo "/usr/share/zoneinfo/$region/$timezone"
+	echo "/usr/share/zoneinfo/$REGION/$TIMEZONE"
 }
 
 # Elegimos el driver de vídeo
 driver_choose() {
-	local driver_options
+	local DRIVER_OPTIONS
 
 	# Opciones posibles
-	driver_options=(
-		"amd" "AMD" "nvidia" "NVIDIA" "intel" "Intel" "virtual" "VM"
+	DRIVER_OPTIONS=(
+		"amd" "AMD" "nvidia" "NVIDIA" "intel" "INTEL" "vm" "VM"
 	)
 
 	# Elegimos nuestra tarjeta gráfica
-	graphic_driver=$(
+	GRAPHIC_DRIVER=$(
 		whip_menu "Selecciona tu tarjeta grafica" "Elige una opcion:" \
-			${driver_options[@]}
+			${DRIVER_OPTIONS[@]}
 	)
 }
 
 packages_choose() {
 	while true; do
 
-		variables=(
-			"audioProd"
-			"latex"
-			"music"
-			"virt"
+		VARIABLES=(
+			"CHOSEN_AUDIO_PROD"
+			"CHOSEN_LATEX"
+			"CHOSEN_MUSIC"
+			"CHOSEN_VIRT"
 		)
 
 		# Reiniciamos las variables si no confirmamos la selección
-		for var in "${variables[@]}"; do eval "$var=false"; done
+		for VAR in "${VARIABLES[@]}"; do eval "$VAR=false"; done
 
-		whip_yes "Virtualizacion" \
-			"¿Quieres instalar libvirt para ejecutar máquinas virtuales?" &&
-			virt="true"
+		whip_yes "CHOSEN_VIRTualizacion" \
+			"¿Quieres instalar libCHOSEN_VIRT para ejecutar máquinas CHOSEN_VIRTuales?" &&
+			CHOSEN_VIRT="true"
 
-		whip_yes "Musica" \
-			"¿Deseas instalar software para manejar tu coleccion de musica?" &&
-			music="true"
+		whip_yes "CHOSEN_MUSICa" \
+			"¿Deseas instalar software para manejar tu coleccion de CHOSEN_MUSICa?" &&
+			CHOSEN_MUSIC="true"
 
-		whip_yes "laTeX" \
-			"¿Deseas instalar laTeX?" &&
-			latex="true"
+		whip_yes "CHOSEN_LATEX" \
+			"¿Deseas instalar CHOSEN_LATEX?" &&
+			CHOSEN_LATEX="true"
 
 		whip_yes "DAW" \
 			"¿Deseas instalar software de produccion de audio?" &&
-			audioProd="true"
+			CHOSEN_AUDIO_PROD="true"
 
 		# Confirmamos la selección de paquetes a instalar (o no)
 		if packages_show; then
@@ -532,16 +532,16 @@ packages_choose() {
 
 # Elegimos que paquetes instalar
 packages_show() {
-	local scheme # Variable con la lista de paquetes a instalar
-	scheme="Se instalaran:\n"
-	[ "$virt" == "true" ] && scheme+="libvirt\n"
-	[ "$music" == "true" ] && scheme+="Softw. Gestión de Música\n"
-	[ "$latex" == "true" ] && scheme+="laTeX\n"
-	[ "$audioProd" == "true" ] && scheme+="Softw. Prod. Musical\n"
+	local SCHEME # Variable con la lista de paquetes a instalar
+	SCHEME="Se instalaran:\n"
+	[ "$CHOSEN_VIRT" == "true" ] && SCHEME+="libCHOSEN_VIRT\n"
+	[ "$CHOSEN_MUSIC" == "true" ] && SCHEME+="Softw. Gestión de Música\n"
+	[ "$CHOSEN_LATEX" == "true" ] && SCHEME+="CHOSEN_LATEX\n"
+	[ "$CHOSEN_AUDIO_PROD" == "true" ] && SCHEME+="Softw. Prod. CHOSEN_MUSICal\n"
 
 	whiptail --backtitle "$REPO_URL" \
 		--title "Confirmar paquetes" \
-		--yesno "$scheme" 15 60
+		--yesno "$SCHEME" 15 60
 }
 
 ##########
@@ -549,7 +549,7 @@ packages_show() {
 ##########
 
 # Elegimos como se formatearán nuestros discos
-scheme_setup
+SCHEME_setup
 
 # Formateamos, creamos la swap y montamos los discos
 disk_setup
@@ -561,32 +561,32 @@ kb_layout_conf
 # Calculamos el DPI
 calculate_dpi
 
-rootPassword=$(
+ROOT_PASSWORD=$(
 	get_password "Entrada de Contraseña" "Confirmación de contraseña" \
 		"Introduce la contraseña del superusuario:" \
 		"Re-introduce la contraseña del superusuario:"
 )
 
-username="$(
+USERNAME="$(
 	whiptail --backtitle "$REPO_URL" \
 		--inputbox "Por favor, ingresa el nombre del usuario:" \
 		10 60 3>&1 1>&2 2>&3
 )"
 
-userPassword=$(
+USER_PASSWORD=$(
 	get_password "Entrada de Contraseña" "Confirmación de contraseña" \
-		"Introduce la contraseña del usuario $username:" \
-		"Re-introduce la contraseña del usuario $username:"
+		"Introduce la contraseña del usuario $USERNAME:" \
+		"Re-introduce la contraseña del usuario $USERNAME:"
 )
 
-systemTimezone=$(timezone_set)
+SYSTEM_TIMEZONE=$(timezone_set)
 
-hostName=$(
-	whip_input "Configuracion de Hostname" \
+HOSTNAME=$(
+	whip_input "Configuracion de HOSTNAME" \
 		"Por favor, introduce el nombre que deseas darle a tu ordenador:"
 )
 
-# Elegimos el driver de video y lo guardamos en la variable $graphic_driver
+# Elegimos el driver de video y lo guardamos en la variable $GRAPHIC_DRIVER
 driver_choose
 
 # Elegimos que software opcional instalar
@@ -603,42 +603,42 @@ basestrap_install
 fstabgen -U /mnt >/mnt/etc/fstab
 
 # Montamos los directorios necesarios para el chroot
-for dir in dev proc sys run; do
-	mount --rbind /$dir /mnt/$dir
-	mount --make-rslave /mnt/$dir
+for DIR in dev proc sys run; do
+	mount --rbind /$DIR /mnt/$DIR
+	mount --make-rslave /mnt/$DIR
 done
 
 artix-chroot /mnt sh -c "
-	useradd -m -G wheel,lp $username
-	yes $rootPassword | passwd
-	yes $userPassword | passwd $username
+	useradd -m -G wheel,lp $USERNAME
+	yes $ROOT_PASSWORD | passwd
+	yes $USER_PASSWORD | passwd $USERNAME
 "
 
 # Copiamos el repositorio a la nueva instalación
-cp -r "$(dirname "$0")/.." "/mnt/home/$username/.dotfiles"
+cp -r "$(dirname "$0")/.." "/mnt/home/$USERNAME/.dotfiles"
 
 # Corregimos el propietario del repositorio copiado y ejecutamos la siguiente
 # parte del script pasandole las variables correspondientes.
 artix-chroot /mnt sh -c "
 	export \
-	username=$username \
-	final_dpi=$final_dpi \
-	systemTimezone=$systemTimezone \
+	USERNAME=$USERNAME \
+	FINAL_DPI=$FINAL_DPI \
+	SYSTEM_TIMEZONE=$SYSTEM_TIMEZONE \
 	ROOT_DISK=$ROOT_DISK \
-	crypt_root=$crypt_root \
+	CRYPT_ROOT=$CRYPT_ROOT \
 	ROOT_FILESYSTEM=$ROOT_FILESYSTEM \
-	rootPartName=$rootPartName \
-	cryptName=$cryptName \
-	hostName=$hostName \
-	graphic_driver=$graphic_driver \
-	virt=$virt \
-	music=$music \
-	latex=$latex \
-	audioProd=$audioProd
+	ROOT_PART_NAME=$ROOT_PART_NAME \
+	CRYPT_NAME=$CRYPT_NAME \
+	HOSTNAME=$HOSTNAME \
+	GRAPHIC_DRIVER=$GRAPHIC_DRIVER \
+	CHOSEN_VIRT=$CHOSEN_VIRT \
+	CHOSEN_MUSIC=$CHOSEN_MUSIC \
+	CHOSEN_LATEX=$CHOSEN_LATEX \
+	CHOSEN_AUDIO_PROD=$CHOSEN_AUDIO_PROD
 
-	chown $username:$username -R \
-	   /home/$username/.dotfiles
-	cd /home/$username/.dotfiles/installer
+	chown $USERNAME:$USERNAME -R \
+	   /home/$USERNAME/.dotfiles
+	cd /home/$USERNAME/.dotfiles/installer
 
 	./stage2.sh
 "

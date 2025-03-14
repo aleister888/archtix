@@ -8,11 +8,11 @@
 # Esta parte del script se ejecuta ya dentro de la instalación (chroot).
 
 # - Pasa como variables los siguientes parámetros al siguiente script:
-#   - DPI de la pantalla ($final_dpi)
-#   - Driver de video a usar ($graphic_driver)
+#   - DPI de la pantalla ($FINAL_DPI)
+#   - Driver de video a usar ($GRAPHIC_DRIVER)
 #   - El tipo de partición de la instalación ($ROOT_FILESYSTEM)
 #   - Variables con el software opcional elegido
-#     - $virt, $music, $latex, $audioProd
+#     - $CHOSEN_AUDIO_PROD, $CHOSEN_LATEX, $CHOSEN_MUSIC, $CHOSEN_VIRT
 
 pacinstall() {
 	pacman -Sy --noconfirm --disable-download-timeout --needed "$@"
@@ -24,32 +24,32 @@ service_add() {
 
 # Instalamos GRUB
 install_grub() {
-	local cryptid decryptid
-	cryptid=$(lsblk -nd -o UUID /dev/"$rootPartName")
-	decryptid=$(lsblk -n -o UUID /dev/mapper/"$cryptName")
+	local CRYPT_ID DECRYPT_ID
+	CRYPT_ID=$(lsblk -nd -o UUID /dev/"$ROOT_PART_NAME")
+	DECRYPT_ID=$(lsblk -n -o UUID /dev/mapper/"$CRYPT_NAME")
 
 	# Obtenemos el nombre del dispositivo donde se aloja la partición boot
 	case "$ROOT_DISK" in
 	*"nvme"*)
-		bootDrive="${ROOT_DISK%p[0-9]}"
+		BOOT_DRIVE="${ROOT_DISK%p[0-9]}"
 		;;
 	*)
-		bootDrive="${ROOT_DISK%[0-9]}"
+		BOOT_DRIVE="${ROOT_DISK%[0-9]}"
 		;;
 	esac
 
 	# Instalar GRUB
 	grub-install --target=x86_64-efi --efi-directory=/boot \
-		--recheck "$bootDrive"
+		--recheck "$BOOT_DRIVE"
 
 	grub-install --target=x86_64-efi --efi-directory=/boot \
-		--removable --recheck "$bootDrive"
+		--removable --recheck "$BOOT_DRIVE"
 
 	# Si se usa encriptación, le decimos a GRUB el UUID de la partición
 	# encriptada y desencriptada.
-	if [ "$crypt_root" = "true" ]; then
+	if [ "$CRYPT_ROOT" = "true" ]; then
 		echo GRUB_ENABLE_CRYPTODISK=y >>/etc/default/grub
-		sed -i "s/\(^GRUB_CMDLINE_LINUX_DEFAULT=\".*\)\"/\1 cryptdevice=UUID=$cryptid:cryptroot root=UUID=$decryptid\"/" /etc/default/grub
+		sed -i "s/\(^GRUB_CMDLINE_LINUX_DEFAULT=\".*\)\"/\1 cryptdevice=UUID=$CRYPT_ID:cryptroot root=UUID=$DECRYPT_ID\"/" /etc/default/grub
 	fi
 
 	# Crear el archivo de configuración
@@ -58,7 +58,7 @@ install_grub() {
 
 # Definimos el nombre de nuestra máquina y creamos el archivo hosts
 hostname_config() {
-	echo "$hostName" >/etc/hostname
+	echo "$HOSTNAME" >/etc/HOSTNAME
 
 	# Este archivo hosts bloquea el acceso a sitios maliciosos
 	curl -o /etc/hosts \
@@ -66,7 +66,7 @@ hostname_config() {
 
 	cat <<-EOF | tee -a /etc/hosts
 		127.0.0.1 localhost
-		127.0.0.1 $hostName.localdomain $hostName
+		127.0.0.1 $HOSTNAME.localdomain $HOSTNAME
 		127.0.0.1 localhost.localdomain
 		127.0.0.1 local
 	EOF
@@ -126,7 +126,7 @@ genlocale() {
 ##########
 
 # Establecer la zona horaria
-ln -sf "$systemTimezone" /etc/localtime
+ln -sf "$SYSTEM_TIMEZONE" /etc/localtime
 # Sincronizar reloj del hardware con la zona horaria
 hwclock --systohc
 
@@ -142,7 +142,7 @@ sed -i 's/^#Color/Color\nILoveCandy/' /etc/pacman.conf
 sed -i 's/^#ParallelDownloads = 5/ParallelDownloads = 5/' /etc/pacman.conf
 
 # Si se utiliza encriptación, añadir el módulo encrypt a la imagen del kernel
-if [ "$crypt_root" = "true" ]; then
+if [ "$CRYPT_ROOT" = "true" ]; then
 	sed -i -e '/^HOOKS=/ s/block/& encrypt/' /etc/mkinitcpio.conf
 fi
 
@@ -193,15 +193,15 @@ echo "root ALL=(ALL:ALL) ALL
 
 # Ejecutamos la siguiente parte del script pasandole las variables
 # correspondientes
-su "$username" -c "
+su "$USERNAME" -c "
 	export \
-	final_dpi=$final_dpi \
-	graphic_driver=$graphic_driver \
+	FINAL_DPI=$FINAL_DPI \
+	GRAPHIC_DRIVER=$GRAPHIC_DRIVER \
 	ROOT_FILESYSTEM=$ROOT_FILESYSTEM \
-	virt=$virt \
-	music=$music \
-	latex=$latex \
-	audioProd=$audioProd
+	CHOSEN_AUDIO_PROD=$CHOSEN_AUDIO_PROD
+	CHOSEN_LATEX=$CHOSEN_LATEX \
+	CHOSEN_MUSIC=$CHOSEN_MUSIC \
+	CHOSEN_VIRT=$CHOSEN_VIRT \
 
-	cd /home/$username/.dotfiles/installer && ./stage3.sh
+	cd /home/$USERNAME/.dotfiles/installer && ./stage3.sh
 "

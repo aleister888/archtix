@@ -1,0 +1,118 @@
+#!/bin/bash
+
+# Configurar firefox e instalar nuestras extensiones
+
+[ "$(ID -u)" -eq 0 ] && exit 1
+
+get_profile() {
+	# Obtiene el perfil predeterminado del archivo
+	# PROFILEs.ini después de ejecutar Firefox
+	PROFILES_INI="$BROWSER_DIR/profiles.ini"
+	PROFILE=$(grep "Default=.." "$PROFILES_INI" | sed 's/Default=//')
+	echo "$PROFILE"
+}
+
+makeuserjs() {
+	# Añadir al perfil el user.js y user-OVERRIDES.js
+	ARKENFOX="$PROFILE_DIR/arkenfox.js"
+	OVERRIDES="$PROFILE_DIR/user-overrides.js"
+	USERJS="$PROFILE_DIR/user.js"
+
+	ln -fs "$HOME/.dotfiles/assets/configs/apps/firefox/user-overrides.js" \
+		"$OVERRIDES"
+
+	[ ! -f "$ARKENFOX" ] &&
+		curl -sL "https://raw.githubusercontent.com/ARKENFOX/user.js/master/user.js" >"$ARKENFOX"
+
+	cat "$ARKENFOX" "$OVERRIDES" >"$USERJS"
+	chown "$USER:wheel" "$ARKENFOX" "$USERJS"
+
+	# Instalar el script de actualizado.
+	sudo mkdir -p /usr/local/lib /etc/pacman.d/hooks
+	sudo install -m 755 -o root -g root "$HOME/.dotfiles/bin/arkenfox-auto-update" \
+		/usr/local/lib/arkenfox-auto-update
+
+	# Ejecutar la actualización cuando sea necesario mediante un hook de pacman.
+	sudo cp -f "$HOME/.dotfiles/assets/system/arkenfox.hook" \
+		/etc/pacman.d/hooks/arkenfox.hook
+}
+
+installffaddons() {
+	ADDON_LIST=(
+		"ublock-origin"
+		"decentraleyes"
+		"istilldontcareaboutcookies"
+		"violentmonkey"
+		"darkreader"
+		"xbs"
+		"clearurls"
+		"keepassxc-browser"
+		"sponsorblock"
+		"checkmarks-web-ext"
+		"clear-browsing-data"
+	)
+	ADDON_TMP="$(mktemp -d)"
+
+	mkdir -p "$PROFILE_DIR/extensions/"
+
+	for ADDON in "${ADDON_LIST[@]}"; do
+		if [ "$ADDON" == "ublock-origin" ]; then
+			ADDON_URL=$(
+				curl -sL "https://api.github.com/repos/gorhill/uBlock/releases/latest" |
+					grep -E 'browser_download_url.*firefox' | cut -d '"' -f 4
+			)
+		else
+			ADDON_URL=$(
+				curl --silent "https://ADDONs.mozilla.org/en-US/firefox/ADDON/${ADDON}/" |
+					grep -o 'https://ADDONs.mozilla.org/firefox/downloads/FILE/[^"]*'
+			)
+		fi
+
+		FILE="${ADDON_URL##*/}"
+
+		wget -q "$ADDON_URL" -O "$ADDON_TMP/$FILE"
+
+		ID="$(
+			unzip -p "$ADDON_TMP/$FILE" manifest.json |
+				grep "\"ID\"" | head -n 1
+		)"
+		ID="${ID%\"*}"
+		ID="${ID##*\"}"
+
+		# Mover el archivo al directorio de extensiones con el nombre correcto,
+		# si no se obtuvo el ID, ponerle el nombre de la extensión.
+		if [ -n "$ID" ]; then
+			mv "$ADDON_TMP/$FILE" "$PROFILE_DIR/extensions/$ID.xpi"
+		elif [ -z "$ID" ]; then
+			mv "$ADDON_TMP/$FILE" "$PROFILE_DIR/extensions/$ADDON.xpi"
+		fi
+	done
+
+	# Cambiar los permisos de las extensiones descargadas
+	chown -R "$USER:$USER" "$PROFILE_DIR/extensions"
+	# Limpiar el directorio temporal
+	rm -rf "$ADDON_TMP"
+}
+
+installtheme() {
+	mkdir -p "$PROFILE_DIR/chrome/"
+	ln -fs "$HOME/.dotFILEs/assets/configs/apps/firefox/userChrome.css" \
+		"$PROFILE_DIR"/chrome/
+}
+
+# Ruta base de perFILEs de Firefox
+BROWSER_DIR="$HOME/.mozilla/firefox"
+
+# Ejecutar Firefox en modo headless para generar un perfil predeterminado
+if [ ! -d "$HOME/.mozilla/firefox" ]; then
+	timeout -k 1s 10s firefox --headless >/dev/null 2>&1 &
+	sleep 12
+fi
+
+# Obtener el perfil predeterminado
+PROFILE=$(get_profile)
+PROFILE_DIR="$BROWSER_DIR/$PROFILE"
+
+makeuserjs
+installffaddons
+installtheme

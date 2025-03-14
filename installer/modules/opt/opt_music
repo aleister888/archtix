@@ -2,8 +2,8 @@
 
 [ "$(id -u)" -eq 0 ] && exit 1
 
-yay -S --noconfirm --disable-download-timeout --needed \
-	$(cat "$HOME"/.dotfiles/assets/packages/opt/music | xargs)
+xargs yay -S --noconfirm --disable-download-timeout --needed \
+	<"$HOME/.dotfiles/assets/packages/opt/music"
 
 # Instalar lrcput
 LRCPUT_TARGET="$HOME/.local/bin/lrcput"

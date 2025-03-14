@@ -26,7 +26,7 @@
     "pacman-contrib",
     "rebuild-detector"
   ],
-  "mesa_vid": [
+  "mesa_video": [
     "lib32-mesa",
     "mesa",
     "mesa-utils"

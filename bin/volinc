@@ -1,9 +1,9 @@
 #!/bin/sh
 
-# Script para establecer el volumen (Nunca por encima del 100%)
-
+# Script para cambiar el volumen, controlando que no supere el límite establecido
+limit=150
 vol=$(($(pamixer --get-volume) + $1))
-[ $vol -gt 150 ] && vol=150
+[ $vol -gt $limit ] && vol=$limit
 
 # Establecer el nuevo volumen
 pactl set-sink-volume @DEFAULT_SINK@ "${vol}%"

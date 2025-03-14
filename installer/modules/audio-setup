@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# Script para darle acceso al usuario al audio de baja latencia.
+
+[ "$(id -u)" -eq 0 ] && exit 1
+
+# Añadimos el usuario a los grupos necesarios
+sudo usermod -aG realtime,audio "$USER"
+
+# Permite a los usuarios en el grupo "audio" utilizar dispositivos de audio con
+# prioridad elevada y acceso a recursos extendidos.
+cat <<-EOF | sudo tee -a /etc/security/limits.conf
+	    @audio - rtprio 95
+	    @audio - memlock unlimited
+	    $USER hard nofile 524288
+EOF

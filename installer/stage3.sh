@@ -6,29 +6,23 @@
 # por aleister888 <pacoe1000@gmail.com>
 # Licencia: GNU GPLv3
 
-# Esta parte del script se ejecuta como nuestro usuario creado, no como root.
-# Una vez instalado yay, desinstalamos sudo y lo reemplazamos por opendoas.
-
 # Importamos todos los componentes en los que se separa el script
-PATH="$PATH:$(find ~/.dotfiles/modules -type d | paste -sd ':' -)"
+PATH="$PATH:$(find ~/.dotfiles/installer/modules -type d | paste -sd ':' -)"
 
 yayinstall() { # Instalar paquetes con yay
 	yay -Sy --noconfirm --needed "$@"
 }
 
-# Paquetes
-
-# Guardamos nuestros paquetes en un array con mapfile desde los
-# diferentes archivos
-mapfile -t packages < <(
+# Guardamos nuestros paquetes a instalar en un array
+mapfile -t PACKAGES < <(
 	jq -r '.[] | .[]' "$HOME"/.dotfiles/assets/packages/*.json
 )
 
 driver_add() {
-	case $graphic_driver in
+	case $GRAPHIC_DRIVER in
 
 	amd)
-		packages+=(
+		PACKAGES+=(
 			"xf86-video-amdgpu"
 			"mesa" "lib32-mesa"
 			"vulkan-radeon" "lib32-vulkan-radeon"
@@ -36,7 +30,7 @@ driver_add() {
 		;;
 
 	nvidia)
-		packages+=(
+		PACKAGES+=(
 			"dkms" "nvidia-dkms" "nvidia-utils"
 			"libva-vdpau-driver" "libva-mesa-driver"
 			"nvidia-prime" "lib32-nvidia-utils"
@@ -45,15 +39,15 @@ driver_add() {
 		;;
 
 	intel)
-		packages+=(
+		PACKAGES+=(
 			"xf86-video-intel"
 			"libva-intel-driver" "lib32-libva-intel-driver"
 			"vulkan-intel" "lib32-vulkan-intel"
 		)
 		;;
 
-	virtual)
-		packages+=(
+	vm)
+		PACKAGES+=(
 			"xf86-video-vmware" "xf86-input-vmmouse"
 			"vulkan-virtio" "lib32-vulkan-virtio"
 		)
@@ -68,7 +62,7 @@ xresources_make() {
 	XRES_FILE="$HOME/.config/Xresources"
 	cp "$HOME/.dotfiles/assets/configs/Xresources" "$XRES_FILE"
 	# Añadimos nuestro DPI a el arcivo Xresources
-	echo "Xft.dpi:$final_dpi" | tee -a "$XRES_FILE"
+	echo "Xft.dpi:$FINAL_DPI" | tee -a "$XRES_FILE"
 }
 
 # Descargar los archivos de diccionario
@@ -98,8 +92,8 @@ yay-install
 sudo sudo2doas
 
 # Crear directorios
-for dir in Documentos Música Imágenes Público Vídeos; do
-	mkdir -p "$HOME/$dir"
+for DIR in Documentos Música Imágenes Público Vídeos; do
+	mkdir -p "$HOME/$DIR"
 done
 ln -s /tmp/ "$HOME/Descargas"
 
@@ -115,12 +109,12 @@ sudo sed -i "s/-j2/-j$(nproc)/;/^#MAKEFLAGS/s/^#//" /etc/makepkg.conf
 
 # Instalar grub-btrfs solo si / es una partición btrfs
 if [ "$ROOT_FILESYSTEM" == "btrfs" ]; then
-	packages+=("grub-btrfs")
+	PACKAGES+=("grub-btrfs")
 fi
 
 # Instalamos todos los paquetes a la vez
 while true; do
-	yayinstall "${packages[@]}" &&
+	yayinstall "${PACKAGES[@]}" &&
 		break
 done
 
@@ -128,8 +122,10 @@ done
 sudo mkdir /mnt/ANDROID
 sudo chown "$USER" /mnt/ANDROID
 
-# Configuramos Tauon Music Box (Nuestro reproductor de música)
-"$HOME/.dotfiles/bin/tauon-config"
+# Configuramos Tauon CHOSEN_MUSIC Box (Nuestro reproductor de música)
+tauon-config
+# Configuramos firefox
+firefox-config
 
 # Establecemos la versión de java por defecto
 sudo archlinux-java set java-21-openjdk
@@ -149,8 +145,8 @@ cat <<-EOF | sudo tee -a /etc/crontab >/dev/null
 	@reboot root sleep 5 && swapon /swap/swapfile
 EOF
 
-# Si estamos usando una máquina virtual, configuramos X11 para funcionar a 1080p
-[ "$graphic_driver" == "virtual" ] &&
+# Si estamos usando una máquina CHOSEN_VIRTual, configuramos X11 para funcionar a 1080p
+[ "$GRAPHIC_DRIVER" == "vm" ] &&
 	sudo cp "$HOME/.dotfiles/assets/system/xorg/xorg.conf" /etc/X11/xorg.conf
 
 # Activar WiFi y Bluetooth
@@ -158,14 +154,14 @@ sudo rfkill unblock wifi
 { lspci | grep -i bluetooth || lsusb | grep -i bluetooth; } >/dev/null &&
 	sudo rfkill unblock bluetooth
 
-# /etc/polkit-1/rules.d/99-artix.rules
-sudo usermod -aG storage,input,users "$USER"
+# Añadimos al usuario a los grupos correspondientes
+sudo usermod -aG storage,input,users,video,optical,uucp "$USER"
 
 # Configurar el software de instalación opcional
-[ "$virt" == "true" ] && opt_virt
-[ "$latex" == "true" ] && opt_latex
-[ "$audioProd" == "true" ] && opt_audioProd
-[ "$music" == "true" ] && opt_music
+[ "$CHOSEN_AUDIO_PROD" == "true" ] && opt_audio_prod
+[ "$CHOSEN_LATEX" == "true" ] && opt_latex
+[ "$CHOSEN_MUSIC" == "true" ] && opt_music
+[ "$CHOSEN_VIRT" == "true" ] && opt_virt
 
 # Configurar el audio de baja latencia
 audio-setup

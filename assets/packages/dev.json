@@ -11,7 +11,7 @@
     "npm",
     "yarn"
   ],
-  "formatters": [
+  "formateadores": [
     "astyle",
     "prettier",
     "sassc",

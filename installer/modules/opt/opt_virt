@@ -7,8 +7,8 @@
 
 # Instalar y configurar libvirt
 virt_install() {
-	yay -S --noconfirm --disable-download-timeout --needed \
-		$(cat "$HOME"/.dotfiles/assets/packages/opt/virt | xargs)
+	xargs yay -S --noconfirm --disable-download-timeout --needed \
+		<"$HOME/.dotfiles/assets/packages/opt/virt"
 
 	# Configurar QEMU para usar el usuario actual
 	sudo sed -i "s/^#user = .*/user = \"$USER\"/" /etc/libvirt/qemu.conf
@@ -29,7 +29,7 @@ virt_install() {
 }
 
 # Desinstalar libvirt por completo
-virt_remove() {
+virt_uninstall() {
 	# Detener servicios
 	sudo rc-service libvirtd stop
 	sudo rc-service virtlogd stop
@@ -39,13 +39,13 @@ virt_remove() {
 	sudo rc-update del virtlogd default
 
 	# Borrar al usuario de los grupos
-	for group in libvirt libvirt-qemu kvm; do
-		sudo gpasswd -d "$USER" $group
+	for GROUP in libvirt libvirt-qemu kvm; do
+		sudo gpasswd -d "$USER" $GROUP
 	done
 
 	# Desinstalar los paquetes
-	yay -Rcns --noconfirm \
-		$(cat "$HOME"/.dotfiles/assets/packages/opt/virt | xargs)
+	xargs yay -Rcns --noconfirm \
+		<"$HOME/.dotfiles/assets/packages/opt/virt"
 
 	# Borrar archivos restantes
 	sudo rm -rf /var/lib/libvirt
@@ -54,8 +54,8 @@ virt_remove() {
 	sync
 }
 
-if [ "$1" = "del" ]; then
-	virt_remove >/dev/null 2>&1
+if [ "$1" = "uninstall" ]; then
+	virt_uninstall >/dev/null 2>&1
 else
 	virt_install
 fi
