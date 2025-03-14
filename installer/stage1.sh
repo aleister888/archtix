@@ -51,9 +51,9 @@ echo_msg() {
 	sleep 1
 }
 
-# Muestra como quedarían las particiones de nuestra instalación para # confirmar
-# los cambios. También prepara las VARIABLES para formatear los discos
-SCHEME_show() {
+# Muestra como quedarían las particiones de nuestra instalación para confirmar
+# los cambios. También prepara las variables para formatear los discos
+scheme_show() {
 	local SCHEME    # Variable con el esquema de particiones completo
 	local ROOT_TYPE # Tipo de partición/ (LUKS o normal)
 	BOOT_PART=      # Partición de arranque
@@ -80,7 +80,7 @@ SCHEME_show() {
 	fi
 
 	# Creamos el esquema que whiptail nos mostrará
-	SCHEME="/dev/$ROOT_DISK    $(lsblk -dn -o SIZE /dev/"$ROOT_DISK")
+	SCHEME="/dev/$ROOT_DISK    $(lsblk -dn -o size /dev/"$ROOT_DISK")
 	/dev/$BOOT_PART  /boot
 	/dev/$ROOT_PART  $ROOT_TYPE
 	"
@@ -98,13 +98,13 @@ SCHEME_show() {
 }
 
 # Función para elegir como se formatearán nuestros discos
-SCHEME_setup() {
+scheme_setup() {
 	while true; do
 		while true; do
 			ROOT_DISK=$(
 				whip_menu "Discos disponibles" \
 					"Selecciona un disco para la instalación:" \
-					"$(lsblk -dn -o name,SIZE | tr '\n' ' ')"
+					"$(lsblk -dn -o name,size | tr '\n' ' ')"
 			) && break
 		done
 
@@ -115,7 +115,7 @@ SCHEME_setup() {
 		fi
 
 		# Confirmamos los cambios
-		if SCHEME_show; then
+		if scheme_show; then
 			break # Salir del bucle si se confirman los cambios
 		else
 			whip_msg "ERROR" "Hubo un error al comprobar el esquema de particiones elegido, o el usuario cancelo la operación."
@@ -191,9 +191,9 @@ disk_setup() {
 		btrfs subvolume create /mnt/@home
 		# Creamos el subvolumen swap
 		btrfs subvolume create /mnt/@swap
-		# Creamos un subvolumen para las imágenes de las máquinas
-		# CHOSEN_VIRTuales, así, en caso de que el usuario instale libCHOSEN_VIRT,
-		# estas no se incluirán en las snapshots
+		# Creamos un subvolumen para las imágenes de las máquinas virtuales,
+		# así, en caso de que el usuario instale libvirt, estas no se incluirán
+		# en las instantáneas
 		btrfs subvolume create /mnt/@images
 		umount -R /mnt
 
@@ -203,7 +203,7 @@ disk_setup() {
 
 		mkdir /mnt/home
 		mkdir /mnt/swap
-		mkdir -p /mnt/var/lib/libCHOSEN_VIRT/images
+		mkdir -p /mnt/var/lib/libvirt/images
 
 		mount -t btrfs \
 			-o noatime,compress=zstd:1,autodefrag,subvol=@home \
@@ -211,7 +211,7 @@ disk_setup() {
 
 		mount -t btrfs \
 			-o noatime,autodefrag,subvol=@images \
-			"/dev/$ROOT_PART" /mnt/var/lib/libCHOSEN_VIRT/images
+			"/dev/$ROOT_PART" /mnt/var/lib/libvirt/images
 
 		mount -t btrfs \
 			-o noatime,nodatacow,subvol=@swap \
@@ -424,13 +424,13 @@ get_password() {
 timezone_set() {
 
 	while true; do
-		# Obtener la lista de REGIONes disponibles
+		# Obtener la lista de regiones disponibles
 		REGIONS=$(
 			find /usr/share/zoneinfo -mindepth 1 -type d \
 				-printf "%f\n" | sort -u
 		)
 
-		# Crear un array con las REGIONes
+		# Crear un array con las regiones
 		REGIONS_ARRAY=()
 		for REGION in $REGIONS; do
 			REGIONS_ARRAY+=("$REGION" "$REGION")
@@ -504,16 +504,16 @@ packages_choose() {
 		# Reiniciamos las variables si no confirmamos la selección
 		for VAR in "${VARIABLES[@]}"; do eval "$VAR=false"; done
 
-		whip_yes "CHOSEN_VIRTualizacion" \
-			"¿Quieres instalar libCHOSEN_VIRT para ejecutar máquinas CHOSEN_VIRTuales?" &&
+		whip_yes "Virtualización" \
+			"¿Quieres instalar libvirt para ejecutar máquinas virtuales?" &&
 			CHOSEN_VIRT="true"
 
-		whip_yes "CHOSEN_MUSICa" \
-			"¿Deseas instalar software para manejar tu coleccion de CHOSEN_MUSICa?" &&
+		whip_yes "Música" \
+			"¿Deseas instalar software para manejar tu coleccion de música?" &&
 			CHOSEN_MUSIC="true"
 
-		whip_yes "CHOSEN_LATEX" \
-			"¿Deseas instalar CHOSEN_LATEX?" &&
+		whip_yes "laTeX" \
+			"¿Deseas instalar laTeX?" &&
 			CHOSEN_LATEX="true"
 
 		whip_yes "DAW" \
@@ -524,8 +524,8 @@ packages_choose() {
 		if packages_show; then
 			break
 		else
-			whip_msg "Operacion cancelada" \
-				"Se te volvera a preguntar que software desea instalar"
+			whip_msg "Operación cancelada" \
+				"Se te volverá a preguntar que software desea instalar"
 		fi
 	done
 }
@@ -534,10 +534,10 @@ packages_choose() {
 packages_show() {
 	local SCHEME # Variable con la lista de paquetes a instalar
 	SCHEME="Se instalaran:\n"
-	[ "$CHOSEN_VIRT" == "true" ] && SCHEME+="libCHOSEN_VIRT\n"
+	[ "$CHOSEN_AUDIO_PROD" == "true" ] && SCHEME+="Softw. Prod. Musical\n"
 	[ "$CHOSEN_MUSIC" == "true" ] && SCHEME+="Softw. Gestión de Música\n"
-	[ "$CHOSEN_LATEX" == "true" ] && SCHEME+="CHOSEN_LATEX\n"
-	[ "$CHOSEN_AUDIO_PROD" == "true" ] && SCHEME+="Softw. Prod. CHOSEN_MUSICal\n"
+	[ "$CHOSEN_LATEX" == "true" ] && SCHEME+="laTeX\n"
+	[ "$CHOSEN_VIRT" == "true" ] && SCHEME+="libvirt\n"
 
 	whiptail --backtitle "$REPO_URL" \
 		--title "Confirmar paquetes" \
@@ -549,7 +549,7 @@ packages_show() {
 ##########
 
 # Elegimos como se formatearán nuestros discos
-SCHEME_setup
+scheme_setup
 
 # Formateamos, creamos la swap y montamos los discos
 disk_setup
@@ -582,8 +582,8 @@ USER_PASSWORD=$(
 SYSTEM_TIMEZONE=$(timezone_set)
 
 HOSTNAME=$(
-	whip_input "Configuracion de HOSTNAME" \
-		"Por favor, introduce el nombre que deseas darle a tu ordenador:"
+	whip_input "Configuracion de hostname" \
+		"Por favor, introduce el nombre que deseas darle al equipo:"
 )
 
 # Elegimos el driver de video y lo guardamos en la variable $GRAPHIC_DRIVER

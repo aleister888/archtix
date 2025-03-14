@@ -122,7 +122,7 @@ done
 sudo mkdir /mnt/ANDROID
 sudo chown "$USER" /mnt/ANDROID
 
-# Configuramos Tauon CHOSEN_MUSIC Box (Nuestro reproductor de música)
+# Configuramos Tauon Music Box (Nuestro reproductor de música)
 tauon-config
 # Configuramos firefox
 firefox-config
@@ -157,7 +157,7 @@ sudo rfkill unblock wifi
 # Añadimos al usuario a los grupos correspondientes
 sudo usermod -aG storage,input,users,video,optical,uucp "$USER"
 
-# Configurar el software de instalación opcional
+# Configurar el software opcional
 [ "$CHOSEN_AUDIO_PROD" == "true" ] && opt_audio_prod
 [ "$CHOSEN_LATEX" == "true" ] && opt_latex
 [ "$CHOSEN_MUSIC" == "true" ] && opt_music
