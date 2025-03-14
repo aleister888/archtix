@@ -8,80 +8,80 @@ help_msg() {
 
 # Comporobar que el archivo es del tipo correcto
 filetype_test() {
-	local mimeType fileToCheck
-	fileToCheck="$1"
-	mimeType="$2"
-	file --dereference --brief --mime-type -- "$fileToCheck" | grep "$mimeType" >/dev/null 2>&1
+	local MIMETYPE FILE_2_CHECK
+	FILE_2_CHECK="$1"
+	MIMETYPE="$2"
+	file --dereference --brief --mime-type -- "$FILE_2_CHECK" | grep "$MIMETYPE" >/dev/null 2>&1
 	return $?
 }
 
 # Función para renombrar archivos
 renombrar_archivo() {
-	local archivo nombre_archivo extension nuevo_nombre nuevo_archivo tipo
-	archivo="$1"
-	nombre_archivo="$(basename "$archivo")"
-	extension="${archivo##*.}" # Extraer la extensión del archivo
+	local ARCHIVO NOMBRE_ARCHIVO EXTENSION NUEVO_NOMBRE NUEVO_ARCHIVO TIPO
+	ARCHIVO="$1"
+	NOMBRE_ARCHIVO="$(basename "$ARCHIVO")"
+	EXTENSION="${ARCHIVO##*.}" # Extraer la extensión del archivo
 
 	# Fotos (Android)
-	if [[ $nombre_archivo =~ IMG_(20[0-9]{2})([0-1][0-9])([0-3][0-9])_([0-2][0-9])([0-6][0-9])([0-6][0-9])_.* ]]; then
-		local year="${BASH_REMATCH[1]}"
-		local month="${BASH_REMATCH[2]}"
-		local day="${BASH_REMATCH[3]}"
-		local hour="${BASH_REMATCH[4]}"
-		local minute="${BASH_REMATCH[5]}"
-		local second="${BASH_REMATCH[6]}"
-		tipo="image"
+	if [[ $NOMBRE_ARCHIVO =~ IMG_(20[0-9]{2})([0-1][0-9])([0-3][0-9])_([0-2][0-9])([0-6][0-9])([0-6][0-9])_.* ]]; then
+		local YEAR="${BASH_REMATCH[1]}"
+		local MONTH="${BASH_REMATCH[2]}"
+		local DAY="${BASH_REMATCH[3]}"
+		local HOUR="${BASH_REMATCH[4]}"
+		local MINUTE="${BASH_REMATCH[5]}"
+		local SECOND="${BASH_REMATCH[6]}"
+		TIPO="image"
 	# Capturas de pantalla (Android)
-	elif [[ $nombre_archivo =~ Screenshot_(20[0-9]{2})([0-1][0-9])([0-3][0-9])-([0-2][0-9])([0-6][0-9])([0-6][0-9])_.* ]]; then
-		local year="${BASH_REMATCH[1]}"
-		local month="${BASH_REMATCH[2]}"
-		local day="${BASH_REMATCH[3]}"
-		local hour="${BASH_REMATCH[4]}"
-		local minute="${BASH_REMATCH[5]}"
-		local second="${BASH_REMATCH[6]}"
-		tipo="image"
+	elif [[ $NOMBRE_ARCHIVO =~ Screenshot_(20[0-9]{2})([0-1][0-9])([0-3][0-9])-([0-2][0-9])([0-6][0-9])([0-6][0-9])_.* ]]; then
+		local YEAR="${BASH_REMATCH[1]}"
+		local MONTH="${BASH_REMATCH[2]}"
+		local DAY="${BASH_REMATCH[3]}"
+		local HOUR="${BASH_REMATCH[4]}"
+		local MINUTE="${BASH_REMATCH[5]}"
+		local SECOND="${BASH_REMATCH[6]}"
+		TIPO="image"
 	# Videos grabados (Android)
-	elif [[ $nombre_archivo =~ VID_(20[0-9]{2})([0-1][0-9])([0-3][0-9])_([0-2][0-9])([0-6][0-9])([0-6][0-9])_.* ]]; then
-		local year="${BASH_REMATCH[1]}"
-		local month="${BASH_REMATCH[2]}"
-		local day="${BASH_REMATCH[3]}"
-		local hour="${BASH_REMATCH[4]}"
-		local minute="${BASH_REMATCH[5]}"
-		local second="${BASH_REMATCH[6]}"
-		tipo="video"
+	elif [[ $NOMBRE_ARCHIVO =~ VID_(20[0-9]{2})([0-1][0-9])([0-3][0-9])_([0-2][0-9])([0-6][0-9])([0-6][0-9])_.* ]]; then
+		local YEAR="${BASH_REMATCH[1]}"
+		local MONTH="${BASH_REMATCH[2]}"
+		local DAY="${BASH_REMATCH[3]}"
+		local HOUR="${BASH_REMATCH[4]}"
+		local MINUTE="${BASH_REMATCH[5]}"
+		local SECOND="${BASH_REMATCH[6]}"
+		TIPO="video"
 	# Fotos (Cámara de Samsung)
-	elif [[ $nombre_archivo =~ (20[0-9]{2})([0-1][0-9])([0-3][0-9])_([0-2][0-9])([0-6][0-9])([0-6][0-9]).* ]]; then
-		local year="${BASH_REMATCH[1]}"
-		local month="${BASH_REMATCH[2]}"
-		local day="${BASH_REMATCH[3]}"
-		local hour="${BASH_REMATCH[4]}"
-		local minute="${BASH_REMATCH[5]}"
-		local second="${BASH_REMATCH[6]}"
-		tipo="image"
+	elif [[ $NOMBRE_ARCHIVO =~ (20[0-9]{2})([0-1][0-9])([0-3][0-9])_([0-2][0-9])([0-6][0-9])([0-6][0-9]).* ]]; then
+		local YEAR="${BASH_REMATCH[1]}"
+		local MONTH="${BASH_REMATCH[2]}"
+		local DAY="${BASH_REMATCH[3]}"
+		local HOUR="${BASH_REMATCH[4]}"
+		local MINUTE="${BASH_REMATCH[5]}"
+		local SECOND="${BASH_REMATCH[6]}"
+		TIPO="image"
 	# Fotos de Telegram (App PC)
-	elif [[ $nombre_archivo =~ photo_(20[0-9]{2})-([0-3][0-9])-([0-1][0-9])_([0-2][0-9])-([0-6][0-9])-([0-6][0-9]).* ]]; then
-		local year="${BASH_REMATCH[1]}"
-		local day="${BASH_REMATCH[2]}"
-		local month="${BASH_REMATCH[3]}"
-		local hour="${BASH_REMATCH[4]}"
-		local minute="${BASH_REMATCH[5]}"
-		local second="${BASH_REMATCH[6]}"
-		tipo="image"
+	elif [[ $NOMBRE_ARCHIVO =~ photo_(20[0-9]{2})-([0-3][0-9])-([0-1][0-9])_([0-2][0-9])-([0-6][0-9])-([0-6][0-9]).* ]]; then
+		local YEAR="${BASH_REMATCH[1]}"
+		local DAY="${BASH_REMATCH[2]}"
+		local MONTH="${BASH_REMATCH[3]}"
+		local HOUR="${BASH_REMATCH[4]}"
+		local MINUTE="${BASH_REMATCH[5]}"
+		local SECOND="${BASH_REMATCH[6]}"
+		TIPO="image"
 	else
 		return
 	fi
 
-	if [ "$test_for_type" == "true" ]; then
-		filetype_test "$archivo" "$tipo" || return
+	if [ "$TEST_FOR_TYPE" == "true" ]; then
+		filetype_test "$ARCHIVO" "$TIPO" || return
 	fi
 
 	# Crear el nuevo nombre preservando la extensión
-	nuevo_nombre="${year}-${month}-${day}_${hour}-${minute}-${second}.${extension}"
-	nuevo_archivo="$(dirname "$archivo")/$nuevo_nombre"
+	NUEVO_NOMBRE="${YEAR}-${MONTH}-${DAY}_${HOUR}-${MINUTE}-${SECOND}.${EXTENSION}"
+	NUEVO_ARCHIVO="$(dirname "$ARCHIVO")/$NUEVO_NOMBRE"
 
 	# Renombrar el archivo
-	mv "$archivo" "$nuevo_archivo"
-	echo "Renombrado: $archivo -> $nuevo_archivo"
+	mv "$ARCHIVO" "$NUEVO_ARCHIVO"
+	echo "Renombrado: $ARCHIVO -> $NUEVO_ARCHIVO"
 }
 
 DIRECTORIO="$1"
@@ -90,13 +90,13 @@ DIRECTORIO="$1"
 
 while [ "$#" -gt 0 ]; do
 	case "$1" in
-	-t) test_for_type="true" ;;
+	-t) TEST_FOR_TYPE="true" ;;
 	-h) help_msg ;;
 	esac
 	shift
 done
 
 # Buscar y procesar archivos
-find "$DIRECTORIO" -type f | while read -r archivo; do
-	renombrar_archivo "$archivo"
+find "$DIRECTORIO" -type f | while read -r ARCHIVO; do
+	renombrar_archivo "$ARCHIVO"
 done

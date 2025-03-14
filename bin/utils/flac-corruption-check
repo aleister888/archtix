@@ -1,0 +1,141 @@
+#!/bin/bash
+# shellcheck disable=SC2155
+
+# Script para comprobar y corregir la corrupción de los archivos flac de un directorio
+
+# por aleister888 <pacoe1000@gmail.com>
+# Licencia: GNU GPLv3
+
+# Directorio a verificar
+OG_DIR="$1"
+# Guarda los archivos con posibles errores
+TMP_LOG="/tmp/$(basename "$0")_tmp.log"
+# Guarda los archivos con corrupción una vez hechas las comprobaciones
+FINAL_LOG="/tmp/$(basename "$0")_corrupted.log"
+# Falsos positivos que solo necesitan recodificación
+RECODE_LOG="/tmp/$(basename "$0")_recoded.log"
+# Carpeta de salida para los archivos recodificados (temporales)
+TMP_DIR="/tmp/$(basename "$0")_try"
+# Carpeta de salida para los archivos recodificados
+OUT_DIR="/tmp/$(basename "$0")_recoded"
+# Flag para sobrescribir archivos originales
+OVERWRITE=false
+
+# Función para mostrar ayuda
+show_help() {
+	echo "Uso: $(basename "$0") [opciones] <directorio>"
+	echo
+	echo "OPCIONES:"
+	echo "  -o, --overwrite     Sobrescribe los archivos originales si son recodificados"
+	echo "  -h, --help          Muestra este mensaje de ayuda"
+}
+
+# Parsear opciones
+while [[ $# -gt 0 ]]; do
+	case "$1" in
+	-h | --help)
+		show_help
+		exit
+		;;
+	-o | --overwrite)
+		OVERWRITE=true
+		shift
+		;;
+	*)
+		OG_DIR="$1"
+		shift
+		;;
+	esac
+done
+
+# Verificar si el directorio proporcionado existe
+if [ ! -d "$OG_DIR" ]; then
+	echo "ERROR: El directorio $OG_DIR no existe." >&2
+	exit 1
+fi
+
+[ ! -d $OUT_DIR ] && mkdir $OUT_DIR
+
+# Limpiar los archivos de guardado
+true >"$TMP_LOG"
+true >"$FINAL_LOG"
+find "$OUT_DIR" -type f -delete
+
+# Función para verificar la integridad de los archivos
+flac_check() {
+	local FILE="$1"
+	local ANY_ERRORS=false
+
+	# Output de la comprobación inicial
+	local FLAC_OUTPUT=$(flac -t "$FILE" 2>&1)
+	# Patrones de error
+	ERROR_PATTERNS=(
+		"FLAC__STREAM_DECODER_ERROR"
+		"ERROR.*STREAMINFO"
+		"ERROR.*metadata"
+	)
+
+	# Iterar sobre los patrones y comprobar si están en el output
+	for PATTERN in "${ERROR_PATTERNS[@]}"; do
+		if [ -n "$(ffmpeg -v error -i "$FILE" -f null - 2>&1)" ] &&
+			echo "$FLAC_OUTPUT" | grep -q "$PATTERN"; then
+			# Si el archivo esta corrupto, salir del bucle
+			ANY_ERRORS=true && break
+		fi
+	done
+
+	# Si hubo errores añade el archivo a un archivo .log
+	[ "$ANY_ERRORS" = "true" ] && echo "$1" >>"$TMP_LOG"
+}
+
+# Para asegurarnos que el archivo esta corrupto comprobamos si se puede recodificar.
+# En caso de que si, comprobamos si el archivo recodificado tiene la misma duración
+# que el original. En caso de que no, esta claro que el archivo tiene corrupción.
+process_flac() {
+	local FILE="$1"
+	local RECODED_TRY="$TMP_DIR/$(basename "$FILE")"
+	local RECODED_FINAL="$OUT_DIR/$(basename "$FILE")"
+
+	# Recodificamos el archivo FLAC
+	if ! ffmpeg -y -i "$FILE" "$RECODED_TRY" >/dev/null 2>&1; then
+		# Si no se puede recodificar, el archivo tiene corrupción
+		echo "$FILE" >>"$FINAL_LOG"
+		return
+	fi
+
+	# Leemos la duración del archivo original y el recodificado
+	local OG_DURATION=$(ffprobe -i "$FILE" -show_entries format=duration -v quiet -of csv="p=0" | sed 's/\..*//')
+	local RECODE_DURATION=$(ffprobe -i "$RECODED_TRY" -show_entries format=duration -v quiet -of csv="p=0" | sed 's/\..*//')
+
+	# Si la duración no coincide, el archivo tiene corrupción.
+	if [ "$OG_DURATION" -ne "$RECODE_DURATION" ]; then
+		echo "$FILE" >>"$FINAL_LOG"
+	else # Si coincide guardamos/sobrescribimos el archivo
+		if [ "$OVERWRITE" = "true" ]; then
+			mv "$RECODED_TRY" "$FILE"
+		else
+			mv "$RECODED_TRY" "$RECODED_FINAL"
+		fi
+	fi
+}
+
+# Buscar archivos FLAC y comprobar si es posible que esten corruptos
+find "$OG_DIR" -type f -name "*.flac" | while read -r FILE; do
+	flac_check "$FILE" "$TMP_LOG"
+done
+
+[ ! -d "$TMP_DIR" ] && mkdir -p "$TMP_DIR"
+[ ! -d "$OUT_DIR" ] && mkdir -p "$OUT_DIR"
+
+# Comprobamos si hay algún falso positivo recodificando los archivos
+while IFS= read -r FILE_PATH; do
+	# Si el script se ejecuta con el flag adecuado, esto sobrescribirá el archivo
+	# que dio un falso positivo por su versión recodificada.
+	process_flac "$FILE_PATH"
+done <"$TMP_LOG"
+
+# Creamos un log con los falsos positivos que fueron recodificados
+grep -v -f "$FINAL_LOG" "$TMP_LOG" >"$RECODE_LOG"
+
+rm -rf "$TMP_DIR" # Borramos la carpeta temporal
+rm "$TMP_LOG"     # Borramos el log temporal

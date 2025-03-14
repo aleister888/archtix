@@ -1,40 +1,40 @@
 #!/bin/bash
 
-pomodorofile=/tmp/pomodoro_timer
-[ ! -f $pomodorofile ] && exit
+POMODOROFILE=/tmp/pomodoro_timer
+[ ! -f $POMODOROFILE ] && exit
 
 # Comprobar si el temporizador está activo
-processlist=/tmp/pomodoro_processes
-counting="false"
-[ "$(cat $processlist | wc -l)" -ge 1 ] && counting="true"
+PROCESSLIST=/tmp/pomodoro_processes
+COUNTING="false"
+[ "$(cat $PROCESSLIST | wc -l)" -ge 1 ] && COUNTING="true"
 
-content="$(cat $pomodorofile)"
+CONTENT="$(cat $POMODOROFILE)"
 
-workicon="^c#928273^"
-breakicon="^c#d79921^"
-pauseicon="^f6^"
+WORKICON="^c#928273^"
+BREAKICON="^c#d79921^"
+PAUSEICON="^f6^"
 
 get_status() {
 	# El tiempo de trabajo y de pausa se guarda en un archivo como lineas
-	worktime="$(echo "$content" | grep -oP "^W \K[0-9]*")"
-	breaktime="$(echo "$content" | grep -oP "^B \K[0-9]*")"
+	WORKTIME="$(echo "$CONTENT" | grep -oP "^W \K[0-9]*")"
+	BREAKTIME="$(echo "$CONTENT" | grep -oP "^B \K[0-9]*")"
 }
 
 print_time() {
-	local total_seconds="$1"
-	local icon="$2"
-	local minutes=$(((total_seconds % 3600) / 60))
-	local seconds=$((total_seconds - (minutes * 60)))
-	[ "$seconds" -lt "10" ] && seconds=0"$seconds"
-	echo "$icon $minutes:$seconds "
+	local TOTAL_SECONDS="$1"
+	local ICON="$2"
+	local MINUTES=$(((TOTAL_SECONDS % 3600) / 60))
+	local SECONDS=$((TOTAL_SECONDS - (MINUTES * 60)))
+	[ "$SECONDS" -lt "10" ] && SECONDS=0"$SECONDS"
+	echo "$ICON $MINUTES:$SECONDS "
 }
 
 get_status
 
-if [ "$worktime" -gt 0 ]; then
-	[ "$counting" = "false" ] && workicon="$workicon$pauseicon"
-	print_time "$worktime" "$workicon"
+if [ "$WORKTIME" -gt 0 ]; then
+	[ "$COUNTING" = "false" ] && WORKICON="$WORKICON$PAUSEICON"
+	print_time "$WORKTIME" "$WORKICON"
 else
-	[ "$counting" = "false" ] && breakicon="$breakicon$pauseicon"
-	print_time "$breaktime" "$breakicon"
+	[ "$COUNTING" = "false" ] && BREAKICON="$BREAKICON$PAUSEICON"
+	print_time "$BREAKTIME" "$BREAKICON"
 fi

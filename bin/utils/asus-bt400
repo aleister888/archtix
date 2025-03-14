@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -x
 
 # Script para instalar los drivers de:
 # https://www.asus.com/networking-iot-servers/adapters/all-series/usbbt400/

@@ -2,24 +2,24 @@
 
 info-print() {
 	# Contar el número de baterías disponibles
-	num_baterias=$(
+	NUM_BATERIAS=$(
 		find /sys/class/power_supply/ -maxdepth 1 -name 'BAT[0-9]*' |
 			wc -l
 	)
-	out=$(acpi -b | grep -v "Unknown\|unavailable")
+	OUT=$(acpi -b | grep -v "Unknown\|unavailable")
 
 	# Extraer e imprimir la información para cada batería
-	for ((i = 1; i <= num_baterias; i++)); do
-		estado=""
-		if echo "$out" | sed "${i}q;d" | grep Charging >/dev/null; then
-			estado="C "
+	for ((i = 1; i <= NUM_BATERIAS; i++)); do
+		ESTADO=""
+		if echo "$OUT" | sed "${i}q;d" | grep Charging >/dev/null; then
+			ESTADO="C "
 		fi
-		porcentaje="$(echo "$out" | sed "${i}q;d" | grep -oP '\d+%')"
-		tiempo="$(
-			echo "$out" | sed "${i}q;d" |
+		PORCENTAJE="$(echo "$OUT" | sed "${i}q;d" | grep -oP '\d+%')"
+		TIEMPO="$(
+			echo "$OUT" | sed "${i}q;d" |
 				grep -oP ' [0-9]{2}:[0-9]{2}:[0-9]{2}'
 		)"
-		echo "${estado}${porcentaje}${tiempo}"
+		echo "${ESTADO}${PORCENTAJE}${TIEMPO}"
 	done
 }
 

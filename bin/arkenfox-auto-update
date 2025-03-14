@@ -7,16 +7,16 @@
 # a través de un hook de pacman, actualizando todos los user.js de Arkenfox.
 
 # Buscar todos los perfiles de Firefox y Librewolf que usan Arkenfox.
-profiles="$(grep -sH "arkenfox user.js" \
+PROFILES="$(grep -sH "arkenfox user.js" \
 	/home/*/.librewolf/*.default-release/user.js \
 	/home/*/.mozilla/firefox/*.default-release/user.js)"
 
 IFS='
 '
 # Actualiza cada uno de los perfiles encontrados.
-for profile in $profiles; do
-	userjs=${profile%%/user.js*}
-	user=$(stat -c '%U' "$userjs") || continue
+for PROFILE in $PROFILES; do
+	USERJS=${PROFILE%%/user.js*}
+	USER=$(stat -c '%U' "$USERJS") || continue
 
-	su -l "$user" -c "arkenfox-updater -c -p $userjs -s"
+	su -l "$USER" -c "arkenfox-updater -c -p $USERJS -s"
 done

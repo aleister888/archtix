@@ -1,10 +1,10 @@
-#!/bin/bash
+#!/bin/bash -x
 
 # Hacer que npm user la especificación de directorios XDG
 npm_xdg() {
-	local configdir
-	configdir="$(dirname "$NPM_CONFIG_USERCONFIG")"
-	mkdir -p "$configdir"
+	local CONFIG_DIR
+	CONFIG_DIR="$(dirname "$NPM_CONFIG_USERCONFIG")"
+	mkdir -p "$CONFIG_DIR"
 	cat <<-'EOF' | tee "$NPM_CONFIG_USERCONFIG"
 		prefix=${XDG_DATA_HOME}/npm
 		cache=${XDG_CACHE_HOME}/npm
@@ -19,32 +19,32 @@ npm_xdg() {
 }
 
 merge_delete() {
-	local og xdg
-	og="$1"
-	xdg="$2"
-	if [ -d "$og" ]; then
-		cp -r "$og" "$xdg"
-		rm -rf "$og"
+	local OG XDG
+	OG="$1"
+	XDG="$2"
+	if [ -d "$OG" ]; then
+		cp -r "$OG" "$XDG"
+		rm -rf "$OG"
 	fi
 }
 
 moveto_xdg() {
-	local og xdg
-	og="$1"
-	xdg="$2"
-	if [ -f "$og" ]; then
-		mkdir "$(dirname "$xdg")"
-		mv -f "$og" "$xdg"
+	local OG XDG
+	OG="$1"
+	XDG="$2"
+	if [ -f "$OG" ]; then
+		mkdir "$(dirname "$XDG")"
+		mv -f "$OG" "$XDG"
 	fi
 }
 
 move_hardcoded_dir() {
-	local og xdg
-	og="$1"
-	xdg="$2"
-	if [ ! -L "$og" ] && [ -d "$og" ]; then
-		merge_delete "$og" "$xdg"
-		ln -s "$xdg" "$og"
+	local OG XDG
+	OG="$1"
+	XDG="$2"
+	if [ ! -L "$OG" ] && [ -d "$OG" ]; then
+		merge_delete "$OG" "$XDG"
+		ln -s "$XDG" "$OG"
 	fi
 }
 
@@ -65,8 +65,6 @@ move_hardcoded_dir "$HOME/.eclipse" "$XDG_CONFIG_HOME/eclipse"
 move_hardcoded_dir "$HOME/eclipse-workspace" "$XDG_DATA_HOME/eclipse-workspace"
 move_hardcoded_dir "$HOME/.codetogether" "$HOME/.config/codetogether"
 move_hardcoded_dir "$HOME/.webclipse" "$HOME/.config/webclipse"
-
-sleep 10
 
 # Borrar archivos
 rm -f "$HOME/.wget-hsts"

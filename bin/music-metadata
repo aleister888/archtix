@@ -9,8 +9,8 @@ PLAYER="$(music-priority)"
 
 makesafe() {
 	if [ "${#1}" -gt "$FACT" ]; then
-		local cropped="${1:0:$((FACT - 3))}"
-		echo "${cropped% }..."
+		local CROPPED="${1:0:$((FACT - 3))}"
+		echo "${CROPPED% }..."
 	else
 		[ -z "$1" ] || echo "$1"
 	fi
@@ -20,53 +20,53 @@ statusbar() {
 	[ -z "$PLAYER" ] && exit
 
 	# Obtener el título de la canción y estado de la reproducción
-	local title
-	title="$(playerctl metadata --player="$PLAYER" title)"
-	local status
-	status="$(playerctl status --player="$PLAYER")"
-	local icon
+	local TITLE
+	TITLE="$(playerctl metadata --player="$PLAYER" title)"
+	local STATUS
+	STATUS="$(playerctl status --player="$PLAYER")"
+	local ICON
 
-	[ -z "$title" ] && exit
+	[ -z "$TITLE" ] && exit
 
-	if [ "$status" == "Playing" ]; then
-		icon="  "
-	elif [ -n "$status" ]; then
-		icon="  "
+	if [ "$STATUS" == "Playing" ]; then
+		ICON="  "
+	elif [ -n "$STATUS" ]; then
+		ICON="  "
 	fi
 
-	echo "$icon$(makesafe "$title")"
+	echo "$ICON$(makesafe "$TITLE")"
 }
 
 metaprint() {
-	local out
+	local OUT
 
 	case "$1" in
 	title)
 		if [ -z "$PLAYER" ]; then
-			out="Cannot detect artist"
+			OUT="Cannot detect artist"
 		else
-			out="$(playerctl metadata --player="$PLAYER" title)"
+			OUT="$(playerctl metadata --player="$PLAYER" title)"
 		fi
 		;;
 	artist)
 		if [ -z "$PLAYER" ]; then
-			out="Player Stopped"
+			OUT="Player Stopped"
 		else
-			out="$(playerctl metadata --player="$PLAYER" artist)"
+			OUT="$(playerctl metadata --player="$PLAYER" artist)"
 		fi
 		;;
 	esac
 
-	if [ "$withsafe" == "true" ]; then
-		makesafe "$out"
+	if [ "$WITHSAFE" == "true" ]; then
+		makesafe "$OUT"
 	else
-		echo "$out"
+		echo "$OUT"
 	fi
 }
 
 help_msg() {
 	echo "Uso:
-  music-metadata [-Sdtacsh]
+  $(basename $0) [-Sdtacsh]
 
 OPCIONES:
   -S	Habilitar máximo de caracteres ($FACT para -d, $ALTFACT para -t/-a)
@@ -81,14 +81,14 @@ NOTA:
   Puedes cambiar el máximo de caracteres para -d con la variable \$FACT y el máximo para -t/-a con la variable \$ALTFACT" >&2
 }
 
-if echo "$@" | grep "\-h" >/dev/null; then
+if echo "$@" | grep "\-h\|--help" >/dev/null; then
 	help_msg
 	exit
 fi
 
 while [[ "$#" -gt 0 ]]; do
 	case "$1" in
-	-S) withsafe=true ;;
+	-S) WITHSAFE=true ;;
 	-d)
 		statusbar
 		exit

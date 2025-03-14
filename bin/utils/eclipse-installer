@@ -7,24 +7,24 @@ RUN_SCRIPT="/usr/bin/eclipse"
 
 install() {
 	# Obtener el año y el mes actual
-	local year month
-	year=$(date +'%Y')
-	month=$(date +'%m')
+	local YEAR MONTH
+	YEAR=$(date +'%Y')
+	MONTH=$(date +'%m')
 
 	# Ajustar la versión de Eclipse según el mes actual
-	if [ "$month" -ge 6 ]; then
+	if [ "$MONTH" -ge 6 ]; then
 		# Si el mes es junio o posterior, usar la versión de junio de este año
-		release_month="06"
+		RELEASE_MONTH="06"
 	else
 		# Si el mes es anterior a junio, usar la versión de diciembre del año anterior
-		release_month="12"
-		year=$((year - 1)) # Restar 1 al año para obtener el año anterior
+		RELEASE_MONTH="12"
+		YEAR=$((YEAR - 1)) # Restar 1 al año para obtener el año anterior
 	fi
 
 	# Definir URL y nombre del archivo
 	local URL="https://www.eclipse.org/downloads/download.php"
-	local FILENAME="eclipse-java-$year-$release_month-R-linux-gtk-x86_64.tar.gz"
-	local DOWNLOAD_URL="$URL?file=/technology/epp/downloads/release/$year-$release_month/R/$FILENAME&r=1"
+	local FILENAME="eclipse-java-$YEAR-$RELEASE_MONTH-R-linux-gtk-x86_64.tar.gz"
+	local DOWNLOAD_URL="$URL?file=/technology/epp/downloads/release/$YEAR-$RELEASE_MONTH/R/$FILENAME&r=1"
 	local TAR_LOCATION="/tmp/$FILENAME"
 
 	# Descargar y descomprimir el archivo

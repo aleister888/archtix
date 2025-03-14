@@ -13,22 +13,22 @@ escape() {
 }
 
 # Directorio donde montar el dispositivo
-mp="/mnt/ANDROID"
+MP="/mnt/ANDROID"
 
 # Obtener una lista de dispositivos Android conectados
-anddrives=$(simple-mtpfs -l 2>/dev/null)
+ANDDRIVES=$(simple-mtpfs -l 2>/dev/null)
 
 # Salir si no se detecta ningún dispositivo Android
-[ -z "$anddrives" ] && exit 1
+[ -z "$ANDDRIVES" ] && exit 1
 
 # Seleccionar un dispositivo Android para montar
-chosen="$(echo "$anddrives" | dmenu -p "Que dispositivo montar?")"
+CHOSEN="$(echo "$ANDDRIVES" | dmenu -p "Que dispositivo montar?")"
 
-number="${chosen%%:*}"
+NUMBER="${CHOSEN%%:*}"
 
 # Intentar montar el dispositivo Android
-if doas simple-mtpfs -o allow_other -o fsname="simple-mtpfs-$(escape "$chosen")" --device "$number" "$mp"; then
-	notify-send "🤖 Android montado en $mp."
+if doas simple-mtpfs -o allow_other -o fsname="simple-mtpfs-$(escape "$CHOSEN")" --device "$NUMBER" "$MP"; then
+	notify-send "🤖 Android montado en $MP."
 else
-	notify-send "🤖 Hubo un error al montar $chosen"
+	notify-send "🤖 Hubo un error al montar $CHOSEN"
 fi

@@ -3,64 +3,64 @@
 # Script para cambiar el brillo
 
 # Sonido
-sound="/usr/share/sounds/freedesktop/stereo/audio-volume-change.oga"
+SOUND="/usr/share/SOUNDs/freedesktop/stereo/audio-volume-change.oga"
 # Número de niveles de brillo (ajustar según preferencia)
-levels=8
+LEVELS=8
 
 # Prevenir que el script se ejecute varias veces simultáneamente
 [ $(pgrep -c "$(basename "$0")") -ge 2 ] && exit 1
 
 # Establecer el dispositivo en función de si nuestro procesador es AMD
 if grep "GenuineIntel" /proc/cpuinfo >/dev/null; then
-	brightdev=/sys/class/backlight/intel_backlight
+	BRIGHT_DEV=/sys/class/backlight/intel_backlight
 else
-	brightdev=/sys/class/backlight/amdgpu_bl1
+	BRIGHT_DEV=/sys/class/backlight/amdgpu_bl1
 fi
 
 # Verificar si el archivo existe antes de continuar
-[ ! -e "$brightdev/brightness" ] && exit 1
+[ ! -e "$BRIGHT_DEV/brightness" ] && exit 1
 
-maxBrightness=$(cat "$brightdev/max_brightness" 2>/dev/null)
-currentBrightness=$(cat "$brightdev/brightness" 2>/dev/null)
-steps=$((maxBrightness / levels))
+MAX_BRIGHTNESS=$(cat "$BRIGHT_DEV/max_brightness" 2>/dev/null)
+CURRENT_BRIGHTNESS=$(cat "$BRIGHT_DEV/brightness" 2>/dev/null)
+STEPS=$((MAX_BRIGHTNESS / LEVELS))
 
 # Crear un array con todos los niveles de brillo posibles
-levelsArray=()
-for ((i = 1; i <= levels; i++)); do
-	value=$((steps * i))
-	if [[ value -le maxBrightness ]]; then
-		result=$value
+LEVELS_ARRAY=()
+for ((i = 1; i <= LEVELS; i++)); do
+	VALUE=$((STEPS * i))
+	if [[ VALUE -le MAX_BRIGHTNESS ]]; then
+		RESULT=$VALUE
 	else
-		result=$maxBrightness
+		RESULT=$MAX_BRIGHTNESS
 	fi
-	levelsArray+=("$result")
+	LEVELS_ARRAY+=("$RESULT")
 done
 
 # Encontramos el intervalo en el que nos encontramos
-for ((i = 0; i < levels; i++)); do
-	[ "${levelsArray[$i]}" -ge "$currentBrightness" ] && break
+for ((i = 0; i < LEVELS; i++)); do
+	[ "${LEVELS_ARRAY[$i]}" -ge "$CURRENT_BRIGHTNESS" ] && break
 done
 
 case "$1" in
 dec)
-	index=$((i - 1))
-	[ $index -lt 0 ] && exit
+	INDEX=$((i - 1))
+	[ $INDEX -lt 0 ] && exit
 	;;
 inc)
-	index=$((i + 1))
-	[ $index -gt $((levels - 1)) ] && exit
+	INDEX=$((i + 1))
+	[ $INDEX -gt $((LEVELS - 1)) ] && exit
 	;;
 *)
 	exit
 	;;
 esac
 
-next=${levelsArray[$index]}
+NEXT=${LEVELS_ARRAY[$INDEX]}
 
-[ -z "$next" ] && exit
+[ -z "$NEXT" ] && exit
 
-echo "$next" | doas tee $brightdev/brightness
+echo "$NEXT" | doas tee $BRIGHT_DEV/brightness
 
-pw-play $sound
+pw-play $SOUND
 
-notify-send -i brightness "Brillo: $(((index + 1) * 100 / levels))%" -t 500
+notify-send -i brightness "Brillo: $(((INDEX + 1) * 100 / LEVELS))%" -t 500

@@ -2,18 +2,18 @@
 
 # Función para obtener y validar la hora
 obtener_hora() {
-	local hora
-	hora=$(printf "07:00\n12:00\n17:00\n22:00" | dmenu -p "Ingrese una hora (HH:MM):")
+	local HORA
+	HORA=$(printf "07:00\n12:00\n17:00\n22:00" | dmenu -p "Ingrese una hora (HH:MM):")
 
-	if [[ $hora =~ ^([01][0-9]|2[0-3]):[0-5][0-9]$ ]]; then
-		echo "$hora"
+	if [[ $HORA =~ ^([01][0-9]|2[0-3]):[0-5][0-9]$ ]]; then
+		echo "$HORA"
 	else
 		return 1
 	fi
 }
 
 # Define las opciones con iconos
-options=(
+OPTIONS=(
 	" Bloquear"
 	" Suspender"
 	" Suspender hasta las..."
@@ -25,24 +25,24 @@ options=(
 )
 
 # Presenta las opciones usando dmenu
-chosen=$(printf "%s\n" "${options[@]}" | dmenu -c -l ${#options[@]})
+CHOSEN=$(printf "%s\n" "${OPTIONS[@]}" | dmenu -c -l ${#OPTIONS[@]})
 
 # Maneja la opción elegida usando un caso
-case $chosen in
-"${options[0]}")
+case $CHOSEN in
+"${OPTIONS[0]}")
 	sleep 0.17
 	i3lock-fancy-rapid 4 4
 	;;
-"${options[1]}") loginctl suspend ;;
-"${options[2]}")
-	hora=$(obtener_hora)
+"${OPTIONS[1]}") loginctl suspend ;;
+"${OPTIONS[2]}")
+	HORA=$(obtener_hora)
 	if [ $? -eq 0 ]; then
-		sudo /usr/local/bin/wakeat "$hora" now
+		sudo /usr/local/bin/wakeat "$HORA" now
 	fi
 	;;
-"${options[3]}") $TERMINAL $TERMTITLE "scratchpad" $TERMEXEC doas pkill X ;;
-"${options[4]}") doas /usr/bin/openrc-shutdown -r now ;;
-"${options[5]}") doas /usr/bin/openrc-shutdown -p now ;;
-"${options[6]}") loginctl reboot --firmware-setup ;;
-"${options[7]}") pkill dwm ;;
+"${OPTIONS[3]}") $TERMINAL $TERMTITLE "scratchpad" $TERMEXEC doas pkill X ;;
+"${OPTIONS[4]}") doas /usr/bin/openrc-shutdown -r now ;;
+"${OPTIONS[5]}") doas /usr/bin/openrc-shutdown -p now ;;
+"${OPTIONS[6]}") loginctl reboot --firmware-setup ;;
+"${OPTIONS[7]}") pkill dwm ;;
 esac

@@ -2,8 +2,8 @@
 
 # Script para mostrar el uso de ram
 
-total=$(free -h | awk '/^Mem:/ {print $2}')
-usado=$(free -h | awk '/^Mem:/ {print $3}')
-libre=$(free -h | awk '/^Mem:/ {print $7}')
+TOTAL=$(free -h | awk '/^Mem:/ {print $2}')
+USADO=$(free -h | awk '/^Mem:/ {print $3}')
+LIBRE=$(free -h | awk '/^Mem:/ {print $7}')
 
-notify-send "$usado/$total ($libre)"
+notify-send "$USADO/$TOTAL ($LIBRE)"

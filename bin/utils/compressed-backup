@@ -5,43 +5,43 @@
 # Detener el script si cualquier comando falla
 set -e
 
-days=7
+DAYS=7
 
 help_msg() {
 	echo "Uso:
   $(basename "$0") [-hd] [<directorio_original> <directorio_destino>]
 
 OPCIONES:
-  -d	Borra las copias en el destino con mas de $days dias de antigüedad
+  -d	Borra las copias en el destino con mas de $DAYS dias de antigüedad
   -h	Muestra este mensaje" >&2
 	exit
 }
 
-delete_old=false
-og_dir="$1"
-bak_dir="$2"
+DELETE_OLD=false
+OG_DIR="$1"
+BAK_DIR="$2"
 
 while [ "$#" -gt 0 ]; do
 	case "$1" in
-	-d) delete_old="true" ;;
+	-d) DELETE_OLD="true" ;;
 	-h) help_msg ;;
 	esac
 	shift
 done
 
 # Verificar que los directorios proporcionados existan y sean válidos
-[ ! -d "$og_dir" ] || [ ! -d "$bak_dir" ] && help_msg
+[ ! -d "$OG_DIR" ] || [ ! -d "$BAK_DIR" ] && help_msg
 
-extension="tar.gz"
-bak_name="$(date +'%Y-%m-%d_%H:%M:%S').$extension"
+EXTENSION="tar.gz"
+BAK_NAME="$(date +'%Y-%m-%d_%H:%M:%S').$EXTENSION"
 
 # Crear el archivo tar.gz
-cd "$og_dir"
-tar -czf "${bak_dir}/${bak_name}" .
+cd "$OG_DIR"
+tar -czf "${BAK_DIR}/${BAK_NAME}" .
 
-echo "Copia de seguridad creada en ${bak_dir}/${bak_name}"
+echo "Copia de seguridad creada en ${BAK_DIR}/${BAK_NAME}"
 
 # Eliminar las copias de seguridad con mas de 1 mes de antigüedad
-if [ "$delete_old" = true ]; then
-	find "$bak_dir" -type f -name "*.$extension" -mtime +$days -exec rm {} \;
+if [ "$DELETE_OLD" = true ]; then
+	find "$BAK_DIR" -type f -name "*.$EXTENSION" -mtime +$DAYS -exec rm {} \;
 fi

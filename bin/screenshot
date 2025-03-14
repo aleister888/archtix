@@ -13,18 +13,18 @@ SOUND="/usr/share/sounds/freedesktop/stereo/camera-shutter.oga"
 mkdir -p "$SCRENDIR"
 
 capture() {
-	mode=$1
-	destination=$2
+	MODE=$1
+	DESTINATION=$2
 
 	# Captura de pantalla
-	if [ "$mode" = "all" ]; then
-		import -window root "$destination"
+	if [ "$MODE" = "all" ]; then
+		import -window root "$DESTINATION"
 	else
-		import "$destination"
+		import "$DESTINATION"
 	fi
 
 	# Si se copia al portapapeles
-	if [ "$destination" = "$TMP" ]; then
+	if [ "$DESTINATION" = "$TMP" ]; then
 		xclip -selection clipboard -t image/png -i "$TMP"
 		notify-send -i "$TMP" 'Captura copiada al Portapapeles'
 		rm "$TMP"

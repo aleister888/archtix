@@ -1,12 +1,12 @@
 #!/bin/sh
 
 # Define los iconos
-muted_icon="󰖁"
-unmuted_icon="󰕾"
+MUTED_ICON="󰖁"
+UNMUTED_ICON="󰕾"
 
 # Verifica si el volumen está silenciado
 if [ "$(pamixer --get-volume-human)" = "muted" ]; then
-	echo "$muted_icon"
+	echo "$MUTED_ICON"
 else
-	echo "$unmuted_icon"
+	echo "$UNMUTED_ICON"
 fi

@@ -6,7 +6,7 @@ REGULARUSER="$(getent passwd 1000 | cut -d: -f1)"
 export DISPLAY=:0
 export XDG_RUNTIME_DIR=/run/user/1000
 
-wait_mins=10
+WAIT_MINS=10
 
 # Comprobaciones:
 
@@ -28,19 +28,19 @@ notify() {
 }
 
 tosleep() {
-	target_time="$1"
-	current_time=$(date +%s)
-	wake_time_today=$(date -d "$(date +%Y-%m-%d) $target_time" +%s)
+	TARGET_TIME="$1"
+	CURRENT_TIME=$(date +%s)
+	WAKE_TIME_TODAY=$(date -d "$(date +%Y-%m-%d) $TARGET_TIME" +%s)
 
-	if [ "$wake_time_today" -le "$current_time" ]; then
+	if [ "$WAKE_TIME_TODAY" -le "$CURRENT_TIME" ]; then
 		# Si la hora de reactivación ya pasó, usa la de mañana
-		wake_time=$(date -d "tomorrow $target_time" +%s)
+		WAKE_TIME=$(date -d "tomorrow $TARGET_TIME" +%s)
 	else
 		# Si la hora de reactivación aún no ha pasado, usa la de hoy
-		wake_time="$wake_time_today"
+		WAKE_TIME="$WAKE_TIME_TODAY"
 	fi
 
-	if ! rtcwake -m mem -l -t "$wake_time"; then
+	if ! rtcwake -m mem -l -t "$WAKE_TIME"; then
 		notify "Error al programar la suspensión"
 		exit 1
 	fi
@@ -52,25 +52,25 @@ if [ -n "$1" ]; then
 		echo "Formato de hora incorrecto. Usa HH:MM (ej. 07:30)"
 		exit 1
 	fi
-	wake_time="$1"
+	WAKE_TIME="$1"
 else
-	wake_time="07:00"
+	WAKE_TIME="07:00"
 fi
 
 # Verifica si hay máquinas virtuales corriendo antes de suspender
 if command -v virsh >/dev/null 2>&1; then
-	VMs_activas="$(virsh list --state-running --id | grep -cv '^$')"
-	if [ "$VMs_activas" -ge 1 ]; then
+	VM_COUNT="$(virsh list --state-running --id | grep -cv '^$')"
+	if [ "$VM_COUNT" -ge 1 ]; then
 		notify "Suspensión cancelada (Máquina virtual activa)"
 		exit
 	fi
 fi
 
 # Si el usuario pasa "now", suspende inmediatamente, en el caso
-# contrario, se esperan $wait_mins antes de suspender el equipo.
+# contrario, se esperan $WAIT_MINS antes de suspender el equipo.
 if [ "$2" != "now" ]; then
-	notify "El sistema se suspenderá en $wait_mins minutos"
-	sleep $((wait_mins * 60))
+	notify "El sistema se suspenderá en $WAIT_MINS minutos"
+	sleep $((WAIT_MINS * 60))
 fi
 
-tosleep "$wake_time"
+tosleep "$WAKE_TIME"

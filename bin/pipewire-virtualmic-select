@@ -3,8 +3,8 @@
 # Script para vincular (dispositivos de entrada)|(aplicaciones) a un micrófono virtual para compartir audio
 
 # Sink del micrófono virtual
-sinkL=my-combined-sink:playback_FL
-sinkR=my-combined-sink:playback_FR
+SINK_L=my-combined-sink:playback_FL
+SINK_R=my-combined-sink:playback_FR
 
 # Icono para las notificaciones
 ICON="bridge-constructor"
@@ -32,50 +32,50 @@ for ADDED in $DEL_DEVICES; do
 done
 
 sink_match() {
-	local pwflag
-	local cselected
-	[ "$1" = "del" ] && pwflag="-d"
+	local PWFLAG
+	local CSELECTED
+	[ "$1" = "del" ] && PWFLAG="-d"
 
-	case "$selected" in
-	*FL) cselected="${selected%FL}FR" ;;
-	*FR) cselected="$selected" selected="${selected%FR}FL" ;;
-	*1) cselected="${selected%1}2" ;;
-	*2) cselected="$selected" selected="${selected%2}1" ;;
-	*) cselected="$selected" ;;
+	case "$SELECTED" in
+	*FL) CSELECTED="${SELECTED%FL}FR" ;;
+	*FR) CSELECTED="$SELECTED" SELECTED="${SELECTED%FR}FL" ;;
+	*1) CSELECTED="${SELECTED%1}2" ;;
+	*2) CSELECTED="$SELECTED" SELECTED="${SELECTED%2}1" ;;
+	*) CSELECTED="$SELECTED" ;;
 	esac
 
-	pw-link $pwflag "$selected" "$sinkL"
-	pw-link $pwflag "$cselected" "$sinkR"
+	pw-link $PWFLAG "$SELECTED" "$SINK_L"
+	pw-link $PWFLAG "$CSELECTED" "$SINK_R"
 }
 
 # Función para vincular/desvincular dispositivos/aplicaciones
 sink_edit() {
-	local dmenu_selected
+	local DMENU_SELECTED
 
 	# Lista con nuestros dispositivos/aplicaciones
 	if [ "$1" = "add" ]; then
-		sinks=$DEVICES
+		SINKS=$DEVICES
 	else
-		sinks=$DEL_DEVICES
+		SINKS=$DEL_DEVICES
 	fi
 
 	# Elegir el sink con dmenu mostrando solo la información esencial
-	dmenu_selected=$(echo "$sinks" | sed 's/:.*//g' | sort -u |
+	DMENU_SELECTED=$(echo "$SINKS" | sed 's/:.*//g' | sort -u |
 		dmenu -l 10)
-	if [ -z "$dmenu_selected" ]; then
+	if [ -z "$DMENU_SELECTED" ]; then
 		# Salir del script si no se eligió ninguna opción
 		exit
 	else
 		# Elegir la primera coincidencia de nuestra elección con el array
-		selected=$(echo "$sinks" | grep "$dmenu_selected" | sed '1q;d')
+		SELECTED=$(echo "$SINKS" | grep "$DMENU_SELECTED" | sed '1q;d')
 	fi
 
-	if [ -z "$selected" ]; then
+	if [ -z "$SELECTED" ]; then
 		exit
 	elif [ "$1" = "add" ]; then # Vincular dispositivos/aplicaciones
 		sink_match "$1"
 		# Comprobar que los dispositivos/aplicaciones se añadieron correctamente
-		if pw-link -l | grep "my-combined-sink" -A 1 | grep "$dmenu_selected" >/dev/null; then
+		if pw-link -l | grep "my-combined-sink" -A 1 | grep "$DMENU_SELECTED" >/dev/null; then
 			notify-send -i "$ICON" "Sink vinculado correctamente"
 		else
 			notify-send -i "$ICON" "Hubo un fallo al añadir el sink"
@@ -86,14 +86,14 @@ sink_edit() {
 }
 
 # Elegir si vincular o desvincular sinks
-add="Añadir sink al micrófono virtual"
-del="Quitar sink del micrófono virtual"
-chosen=$(echo -e "$add\n$del" | dmenu -l 10)
-if [ "$chosen" = "$add" ]; then
+ADD="Añadir sink al micrófono virtual"
+DEL="Quitar sink del micrófono virtual"
+CHOSEN=$(echo -e "$ADD\n$DEL" | dmenu -l 10)
+if [ "$CHOSEN" = "$ADD" ]; then
 	[ -z "$DEVICES" ] &&
 		notify-send -i $ICON "No hay sinks que añadir" && exit
 	sink_edit add
-elif [ "$chosen" = "$del" ]; then
+elif [ "$CHOSEN" = "$DEL" ]; then
 	[ -z "$DEL_DEVICES" ] &&
 		notify-send -i $ICON "No hay sinks que borrar" && exit
 	sink_edit del

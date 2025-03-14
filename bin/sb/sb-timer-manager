@@ -3,108 +3,108 @@
 # Script para empezar un contador pomodoro
 
 # Archivo donde se guardará el tiempo restante para que termine el contador
-pomodorofile=/tmp/pomodoro_timer
+POMODOROFILE=/tmp/pomodoro_timer
 # Archivo donde guardaremos los pid de los procesos
-processlist=/tmp/pomodoro_processes
-my_id=$BASHPID
+PROCESSLIST=/tmp/pomodoro_processes
+MY_ID=$BASHPID
 
 # Archivo donde guardaremos si ya se ha completado el tiempo de trabajo
-breakfile=/tmp/pomodoro_status
+BREAKFILE=/tmp/pomodoro_status
 
-sound="/usr/share/sounds/freedesktop/stereo/complete.oga"
+SOUND="/usr/share/sounds/freedesktop/stereo/complete.oga"
 
 # Crear nuevo temporizador
 create_timer() {
-	local timerwork
-	local timerbreak
+	local TIMERWORK
+	local TIMERBREAK
 
-	timerwork="$(dmenu -p "¿Minutos de trabajo? " </dev/null)"
-	[ -z "$timerwork" ] && exit
+	TIMERWORK="$(dmenu -p "¿Minutos de trabajo? " </dev/null)"
+	[ -z "$TIMERWORK" ] && exit
 
-	timerbreak="$(dmenu -p "¿Minutos de descanso? " </dev/null)"
-	[ -z "$timerbreak" ] && exit
+	TIMERBREAK="$(dmenu -p "¿Minutos de descanso? " </dev/null)"
+	[ -z "$TIMERBREAK" ] && exit
 
-	if [ "$timerwork" -ge 61 ] || [ "$timerbreak" -ge 61 ]; then
+	if [ "$TIMERWORK" -ge 61 ] || [ "$TIMERBREAK" -ge 61 ]; then
 		notify-send "El tiempo no puede exceder 1 hora"
 		exit 1
 	fi
 
 	# Guardamos los tiempos en el archivo
-	echo "W $((timerwork * 60))" | tee "$pomodorofile"
-	echo "B $((timerbreak * 60))" | tee -a "$pomodorofile"
+	echo "W $((TIMERWORK * 60))" | tee "$POMODOROFILE"
+	echo "B $((TIMERBREAK * 60))" | tee -a "$POMODOROFILE"
 }
 
 # Cerrar instancias previas del script
 close_old() {
-	while read -r id; do
-		if [[ "$id" != "$my_id" ]]; then
-			kill -9 "$id" 2>/dev/null
+	while read -r ID; do
+		if [[ "$ID" != "$MY_ID" ]]; then
+			kill -9 "$ID" 2>/dev/null
 		fi
-	done <"$processlist"
+	done <"$PROCESSLIST"
 }
 get_status() {
 	# El tiempo de trabajo y de pausa se guarda en un archivo como líneas
-	local content
-	content="$(cat "$pomodorofile")"
-	worktime="$(echo "$content" | grep -oP "^W \K[0-9]*")"
-	breaktime="$(echo "$content" | grep -oP "^B \K[0-9]*")"
+	local CONTENT
+	CONTENT="$(cat "$POMODOROFILE")"
+	WORKTIME="$(echo "$CONTENT" | grep -oP "^W \K[0-9]*")"
+	BREAKTIME="$(echo "$CONTENT" | grep -oP "^B \K[0-9]*")"
 }
 
 timer_count() {
 	get_status
-	local work_completed="false"
+	local WORK_COMPLETED="false"
 
-	echo $my_id | tee -a $processlist >/dev/null
+	echo $MY_ID | tee -a $PROCESSLIST >/dev/null
 
-	while [ "$worktime" -gt 0 ] || [ "$breaktime" -gt 0 ]; do
-		grep true $breakfile && work_completed="true"
-		if [ "$worktime" -gt 0 ]; then
-			sed -i "s/^W [0-9]*/W $((worktime - 1))/" \
-				"$pomodorofile"
+	while [ "$WORKTIME" -gt 0 ] || [ "$BREAKTIME" -gt 0 ]; do
+		grep true $BREAKFILE && WORK_COMPLETED="true"
+		if [ "$WORKTIME" -gt 0 ]; then
+			sed -i "s/^W [0-9]*/W $((WORKTIME - 1))/" \
+				"$POMODOROFILE"
 
-			worktime=$((worktime - 1))
+			WORKTIME=$((WORKTIME - 1))
 		else
-			if [ "$work_completed" = "false" ]; then
-				echo "true" >$breakfile
-				pw-play $sound
+			if [ "$WORK_COMPLETED" = "false" ]; then
+				echo "true" >$BREAKFILE
+				pw-play $SOUND
 				notify-send "Hora del descanso"
 			fi
-			sed -i "s/^B [0-9]*/B $((breaktime - 1))/" \
-				"$pomodorofile"
+			sed -i "s/^B [0-9]*/B $((BREAKTIME - 1))/" \
+				"$POMODOROFILE"
 
-			breaktime=$((breaktime - 1))
+			BREAKTIME=$((BREAKTIME - 1))
 		fi
 		sleep 1
 	done
 
-	rm "$pomodorofile"
-	pw-play $sound
+	rm "$POMODOROFILE"
+	pw-play $SOUND
 	notify-send "Temporizador completado"
 
-	rm "$processlist"
-	rm "$breakfile"
+	rm "$PROCESSLIST"
+	rm "$BREAKFILE"
 }
 
 # Si el archivo no existe, creamos un nuevo temporizador
-if [ ! -f "$pomodorofile" ]; then
+if [ ! -f "$POMODOROFILE" ]; then
 	create_timer
 	timer_count
 # Si existen instancias previas, preguntar al usuario
-elif [ "$(cat $processlist | wc -l)" -ge 1 ]; then
-	pauseopt="Pausar"
-	deleteopt="Eliminar"
-	eleccion="$(echo -e "$pauseopt\n$deleteopt" | dmenu)"
+elif [ "$(cat $PROCESSLIST | wc -l)" -ge 1 ]; then
+	PAUSEOPT="Pausar"
+	DELETEOPT="Eliminar"
+	ELECCION="$(echo -e "$PAUSEOPT\n$DELETEOPT" | dmenu)"
 
-	if [ "$eleccion" = "$pauseopt" ]; then
+	if [ "$ELECCION" = "$PAUSEOPT" ]; then
 		notify-send "Temporizador pausado"
 		close_old
-		rm "$processlist"
-	elif [ "$eleccion" = "$deleteopt" ]; then
-		rm "$pomodorofile"
+		rm "$PROCESSLIST"
+	elif [ "$ELECCION" = "$DELETEOPT" ]; then
+		rm "$POMODOROFILE"
 		notify-send "Temporizador eliminado"
 		close_old
-		rm "$processlist"
-		rm "$breakfile"
+		rm "$PROCESSLIST"
+		rm "$BREAKFILE"
 	fi
 else
 	notify-send "Temporizador reanudado"

@@ -2,16 +2,16 @@
 
 # Script para mover todos los conflictos de syncthing a un directorio común
 
-conflict_dir="$HOME/.local/share/syncthing-conflicts"
-[ ! -d "$conflict_dir" ] && mkdir -p "$conflict_dir"
+CONFLICT_DIR="$HOME/.local/share/syncthing-conflicts"
+[ ! -d "$CONFLICT_DIR" ] && mkdir -p "$CONFLICT_DIR"
 
 # Buscar y mover archivos de conflicto
-find "$HOME" -path "$conflict_dir" -prune -o \
+find "$HOME" -path "$CONFLICT_DIR" -prune -o \
 	-name "*.sync-conflict-[0-9]*-[0-9]*-*.*" -print0 |
 	while IFS= read -r -d '' file; do
 		# Obtener el nombre del archivo y reemplazar '/' por '_'
-		base_file=$(basename "$file")
-		new_name=$(echo "$base_file" | tr '/' '_')
+		BASE_FILE=$(basename "$FILE")
+		NEW_NAME=$(echo "$BASE_FILE" | tr '/' '_')
 		# Mover el archivo al directorio de conflictos
-		mv "$file" "$conflict_dir/$new_name"
+		mv "$FILE" "$CONFLICT_DIR/$NEW_NAME"
 	done

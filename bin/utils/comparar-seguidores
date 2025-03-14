@@ -21,19 +21,19 @@ OUT="/tmp/$$" # Directorio temporal para extraer el informe
 aunpack -fq "$IN" -X "$OUT"
 
 # Extraer seguidores y seguidos del informe
-seguidores=$(grep -oP 'href="https://www\.instagram\.com/\K[^"]+' \
+SEGUIDORES=$(grep -oP 'href="https://www\.instagram\.com/\K[^"]+' \
 	"$OUT/connections/followers_and_following/followers_1.html")
-seguidos=$(grep -oP 'href="https://www\.instagram\.com/\K[^"]+' \
+SEGUIDOS=$(grep -oP 'href="https://www\.instagram\.com/\K[^"]+' \
 	"$OUT/connections/followers_and_following/following.html")
 
 # Encontrar gente que no te sigue de vuelta
-no_seguidores=$(echo "$seguidos" | grep -Fxv -f <(echo "$seguidores"))
-echo "$no_seguidores" >./vuelta.txt
+NO_SEGUIDORES=$(echo "$SEGUIDOS" | grep -Fxv -f <(echo "$SEGUIDORES"))
+echo "$NO_SEGUIDORES" >./vuelta.txt
 
 # Extraer solicitudes de seguimiento pendientes
-pending_requests=$(grep -oP 'href="https://www\.instagram\.com/\K[^"]+' \
+PENDING_REQUESTS=$(grep -oP 'href="https://www\.instagram\.com/\K[^"]+' \
 	"$OUT/connections/followers_and_following/pending_follow_requests.html")
-echo "$pending_requests" >./peticiones.txt
+echo "$PENDING_REQUESTS" >./peticiones.txt
 
 # Limpieza de archivos temporales
 rm -rf "$OUT"

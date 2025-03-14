@@ -4,38 +4,38 @@
 # al usar music-control y music-priority
 
 # Aquí se establece la prioridad de los reproductores:
-priority=(
+PRIORITY=(
 	"$BROWSER"
 	"tauon"
 )
 
 # Lista de dominios permitidos para el navegador
-allowed_domains=(
+ALLOWED_DOMAINS=(
 	"music.youtube.com"
 	"open.spotify.com"
 )
 
 # Establecemos el reproductor y salimos del loop
-for app in "${priority[@]}"; do
+for APP in "${PRIORITY[@]}"; do
 
-	case "$app" in
+	case "$APP" in
 	# Si es el navegador, comprobamos que se está reproduciendo
 	# contenido en uno de los dominios permitidos
 	$BROWSER)
 		# Convierte el array en una expresión regular
-		domains_pattern=$(
+		DOMAINS_PATTERN=$(
 			IFS=\|
-			echo "${allowed_domains[*]}"
+			echo "${ALLOWED_DOMAINS[*]}"
 		)
 		if playerctl -p "$BROWSER" metadata xesam:url 2>/dev/null |
-			grep -qE "$domains_pattern"; then
-			PLAYER=$app
+			grep -qE "$DOMAINS_PATTERN"; then
+			PLAYER=$APP
 			break
 		fi
 		;;
 	*)
-		if playerctl -p "$app" status >/dev/null 2>&1; then
-			PLAYER=$app
+		if playerctl -p "$APP" status >/dev/null 2>&1; then
+			PLAYER=$APP
 			break
 		fi
 		;;
