@@ -1,19 +1,17 @@
-#!/bin/bash
+#!/bin/bash -x
 
 # Configurar firefox e instalar nuestras extensiones
 
-[ "$(ID -u)" -eq 0 ] && exit 1
-
 get_profile() {
 	# Obtiene el perfil predeterminado del archivo
-	# PROFILEs.ini después de ejecutar Firefox
+	# profiles.ini después de ejecutar Firefox
 	PROFILES_INI="$BROWSER_DIR/profiles.ini"
 	PROFILE=$(grep "Default=.." "$PROFILES_INI" | sed 's/Default=//')
 	echo "$PROFILE"
 }
 
 makeuserjs() {
-	# Añadir al perfil el user.js y user-OVERRIDES.js
+	# Añadir al perfil el user.js y user-overrides.js
 	ARKENFOX="$PROFILE_DIR/arkenfox.js"
 	OVERRIDES="$PROFILE_DIR/user-overrides.js"
 	USERJS="$PROFILE_DIR/user.js"
@@ -22,7 +20,7 @@ makeuserjs() {
 		"$OVERRIDES"
 
 	[ ! -f "$ARKENFOX" ] &&
-		curl -sL "https://raw.githubusercontent.com/ARKENFOX/user.js/master/user.js" >"$ARKENFOX"
+		curl -sL "https://raw.githubusercontent.com/arkenfox/user.js/master/user.js" >"$ARKENFOX"
 
 	cat "$ARKENFOX" "$OVERRIDES" >"$USERJS"
 	chown "$USER:wheel" "$ARKENFOX" "$USERJS"
@@ -63,8 +61,8 @@ installffaddons() {
 			)
 		else
 			ADDON_URL=$(
-				curl --silent "https://ADDONs.mozilla.org/en-US/firefox/ADDON/${ADDON}/" |
-					grep -o 'https://ADDONs.mozilla.org/firefox/downloads/FILE/[^"]*'
+				curl --silent "https://addons.mozilla.org/en-US/firefox/addon/${ADDON}/" |
+					grep -o 'https://addons.mozilla.org/firefox/downloads/file/[^"]*'
 			)
 		fi
 
@@ -74,17 +72,16 @@ installffaddons() {
 
 		ID="$(
 			unzip -p "$ADDON_TMP/$FILE" manifest.json |
-				grep "\"ID\"" | head -n 1
+				grep "\"id\"" | head -n 1
 		)"
 		ID="${ID%\"*}"
 		ID="${ID##*\"}"
 
-		# Mover el archivo al directorio de extensiones con el nombre correcto,
-		# si no se obtuvo el ID, ponerle el nombre de la extensión.
+		[ -z "$ID" ] && [ "$ADDON" = "checkmarks-web-ext" ] &&
+			ID="{bd97f89b-17ba-4539-9fec-06852d07f917}"
+
 		if [ -n "$ID" ]; then
 			mv "$ADDON_TMP/$FILE" "$PROFILE_DIR/extensions/$ID.xpi"
-		elif [ -z "$ID" ]; then
-			mv "$ADDON_TMP/$FILE" "$PROFILE_DIR/extensions/$ADDON.xpi"
 		fi
 	done
 
@@ -96,17 +93,16 @@ installffaddons() {
 
 installtheme() {
 	mkdir -p "$PROFILE_DIR/chrome/"
-	ln -fs "$HOME/.dotFILEs/assets/configs/apps/firefox/userChrome.css" \
-		"$PROFILE_DIR"/chrome/
+	ln -fs "$HOME/.dotfiles/assets/configs/apps/firefox/userChrome.css" "$PROFILE_DIR"/chrome/
 }
 
-# Ruta base de perFILEs de Firefox
+# Ruta base de perfiles de Firefox
 BROWSER_DIR="$HOME/.mozilla/firefox"
 
 # Ejecutar Firefox en modo headless para generar un perfil predeterminado
 if [ ! -d "$HOME/.mozilla/firefox" ]; then
-	timeout -k 1s 10s firefox --headless >/dev/null 2>&1 &
-	sleep 12
+	timeout -k 1s 5s firefox --headless >/dev/null 2>&1 &
+	sleep 7
 fi
 
 # Obtener el perfil predeterminado

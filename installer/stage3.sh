@@ -145,7 +145,7 @@ cat <<-EOF | sudo tee -a /etc/crontab >/dev/null
 	@reboot root sleep 5 && swapon /swap/swapfile
 EOF
 
-# Si estamos usando una máquina CHOSEN_VIRTual, configuramos X11 para funcionar a 1080p
+# Si estamos usando una máquina virtual, configuramos X11 para funcionar a 1080p
 [ "$GRAPHIC_DRIVER" == "vm" ] &&
 	sudo cp "$HOME/.dotfiles/assets/system/xorg/xorg.conf" /etc/X11/xorg.conf
 
