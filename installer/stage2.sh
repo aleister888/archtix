@@ -157,9 +157,6 @@ fi
 # Instalamos grub
 install_grub
 
-# Creamos el archivo swap
-swap_create
-
 # Regeneramos el initramfs
 mkinitcpio -P
 

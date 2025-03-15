@@ -6,7 +6,10 @@ service_add() {
 }
 # Activar servicio para el usuario
 user_service_add() {
-	rc-update add "$1" default -U
+	if [ -d /run/user/1000/ ]; then
+		rc-update add "$1" default -U
+		rc-service "$1" start -U
+	fi
 }
 
 [ "$(id -u)" -eq 0 ] && exit 1

@@ -189,3 +189,6 @@ mkdir -p "$HOME"/.local/share/gnupg
 pacman -Q poppler >/dev/null 2>&1 &&
 	sudo ln -s /usr/lib/libpoppler-cpp.so.2.0.0 \
 		/usr/lib/libpoppler-cpp.so.1 2>/dev/null
+
+# Creamos un archivo para indicar que es la primera vez que se inicia el sistema
+touch "$HOME"/.firstrun

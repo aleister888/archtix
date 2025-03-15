@@ -15,17 +15,17 @@ export XDG_RUNTIME_DIR
 nitrogen --restore
 
 # Cerrar instancias previas del script
-processlist=/tmp/startScript_processes
-my_id=$BASHPID
-instancias="$(pgrep -c -x "$(basename "$0")")"
-echo $my_id | tee -a $processlist >/dev/null
+PROCESSLIST=/tmp/startScript_processes
+MY_ID=$BASHPID
+INSTANCES="$(pgrep -c -x "$(basename "$0")")"
+echo $MY_ID | tee -a $PROCESSLIST >/dev/null
 
-for _ in $(seq $((instancias - 1))); do
+for _ in $(seq $((INSTANCES - 1))); do
 	pkill -o "$(basename "$0")"
 done
 
-grep -v "^$my_id$" "$processlist" | while read -r id; do
-	kill -9 "$id" 2>/dev/null
+grep -v "^$MY_ID$" "$PROCESSLIST" | while read -r ID; do
+	kill -9 "$ID" 2>/dev/null
 done
 
 # Permite al usuario root conectarse al servidor X (Para usar el porta-papeles)
@@ -37,17 +37,17 @@ xhost +SI:localuser:root
 
 virtualmic() {
 	# Contador para evitar bucles infinitos
-	local counter=0
+	local COUNTER=0
 	# Salir si se encuentra el sink
 	pactl list | grep '\(Name\|Monitor Source\): my-combined-sink' && exit
 
 	# En caso contrario, intentar crear el sink cada 5 segundos durante un
 	# máximo de 5 intentos
-	while [ $counter -lt 6 ]; do
+	while [ $COUNTER -lt 6 ]; do
 		# Verificar si Wireplumber está en ejecución
 		pgrep wireplumber && ~/.local/bin/pipewire-virtualmic &
 		# Esperar 5 segundos antes del siguiente intento
-		counter=$((counter + 1))
+		COUNTER=$((COUNTER + 1))
 		sleep 5
 	done
 	exit
@@ -86,10 +86,10 @@ fi
 
 # Corregir el nivel del micrófono en portátiles
 if [ -e /sys/class/power_supply/BAT0 ]; then
-	mic=$(pactl list short sources |
+	MIC=$(pactl list short sources |
 		grep -E "alsa_input.pci-[0-9]*_[0-9]*_[0-9].\.[0-9].analog-stereo" |
 		awk '{print $1}')
-	pactl set-source-volume "$mic" 50%
+	pactl set-source-volume "$MIC" 50%
 fi
 
 # Servicio de notificaciones

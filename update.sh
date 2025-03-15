@@ -114,11 +114,11 @@ fi
 #######################
 
 if [ ! -f "$CONF_DIR/gtk-3.0/bookmarks" ]; then
-	hadBookmarks="false"
+	HAD_BOOKMARKS="false"
 else
-	hadBookmarks="true"
-	tmpBookmarks="/tmp/bookmarks"
-	cp -f "$CONF_DIR/gtk-3.0/bookmarks" "$tmpBookmarks"
+	HAD_BOOKMARKS="true"
+	TMP_BOOKMARKS="/tmp/bookmarks"
+	cp -f "$CONF_DIR/gtk-3.0/bookmarks" "$TMP_BOOKMARKS"
 fi
 
 # Copiar la configuración de GTK
@@ -127,7 +127,7 @@ cp -rf "$ASSETDIR/gtk/gtk-2.0" ~/.config/gtk-2.0
 cp -rf "$ASSETDIR/gtk/gtk-3.0" ~/.config/gtk-3.0
 cp -rf "$ASSETDIR/gtk/gtk-4.0" ~/.config/gtk-4.0
 
-if [ "$hadBookmarks" = "false" ]; then
+if [ "$HAD_BOOKMARKS" = "false" ]; then
 	# Definimos nuestros directorios anclados
 	cat <<-EOF >"$CONF_DIR/gtk-3.0/bookmarks"
 		file://$HOME
@@ -137,8 +137,8 @@ if [ "$hadBookmarks" = "false" ]; then
 		file://$HOME/Vídeos
 		file://$HOME/Música
 	EOF
-elif [ "$hadBookmarks" = "true" ]; then
-	mv "$tmpBookmarks" "$CONF_DIR/gtk-3.0/bookmarks"
+elif [ "$HAD_BOOKMARKS" = "true" ]; then
+	mv "$TMP_BOOKMARKS" "$CONF_DIR/gtk-3.0/bookmarks"
 fi
 
 sudo sh -c "
@@ -215,11 +215,11 @@ echo "Exec=setsid -f ${VIEWER:-nsxiv} %F" | tee -a \
 
 # Función para establecer: visor de imagenes, video, audio y editor de texto
 set_default_mime_types() {
-	local pattern="$1"
-	local desktop_file="$2"
-	awk -v pattern="$pattern" '$0 ~ pattern {print $1}' /etc/mime.types |
-		while read -r line; do
-			xdg-mime default "$desktop_file" "$line"
+	local PATTERN="$1"
+	local DESKTOP_FILE="$2"
+	awk -v pattern="$PATTERN" '$0 ~ pattern {print $1}' /etc/mime.types |
+		while read -r LINE; do
+			xdg-mime default "$DESKTOP_FILE" "$LINE"
 		done
 }
 
@@ -245,42 +245,38 @@ update-desktop-database "$DATA_DIR/applications"
 # Establecer navegador predeterminado
 xdg-settings set default-web-browser firefox.desktop 2>/dev/null
 
-# Definir asociaciones para archivos de MS Excel
-excel_associations=(
+# Asociar los tipos de archivos de MS Office con Libreoffice
+EXCEL_ASSOCIATIONS=(
 	"application/vnd.ms-excel"
 	"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
-
-for association in "${excel_associations[@]}"; do
-	xdg-mime default libreoffice-calc.desktop "$association"
-done
-
-# Definir asociaciones para archivos de MS PowerPoint
-powerpoint_associations=(
+POWERPOINT_ASSOCIATIONS=(
 	"application/vnd.ms-powerpoint"
 	"application/vnd.openxmlformats-officedocument.presentationml.presentation"
 )
-
-for association in "${powerpoint_associations[@]}"; do
-	xdg-mime default libreoffice-impress.desktop "$association"
-done
-
-# Definir asociaciones para archivos de MS Word
-word_associations=(
+WORD_ASSOCIATIONS=(
 	"application/msword"
 	"application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 )
-
-for association in "${word_associations[@]}"; do
-	xdg-mime default libreoffice-writer.desktop "$association"
+for ASSOCIATION in "${EXCEL_ASSOCIATIONS[@]}"; do
+	xdg-mime default libreoffice-calc.desktop "$ASSOCIATION"
+done
+for ASSOCIATION in "${POWERPOINT_ASSOCIATIONS[@]}"; do
+	xdg-mime default libreoffice-impress.desktop "$ASSOCIATION"
+done
+for ASSOCIATION in "${WORD_ASSOCIATIONS[@]}"; do
+	xdg-mime default libreoffice-writer.desktop "$ASSOCIATION"
 done
 
 #####################
 # Archivos .desktop #
 #####################
 
+[ -d /usr/local/share/applications ] ||
+	sudo mkdir -p /usr/local/share/applications
+
 # Ocultar archivos .desktop innecesarios
-desktopent=(
+DESKTOPENT=(
 	"xdvi"
 	"envy24control"
 	"echomixer"
@@ -297,16 +293,13 @@ desktopent=(
 	"lstopo"
 )
 
-[ -d /usr/local/share/applications ] ||
-	sudo mkdir -p /usr/local/share/applications
-
 # Ocultamos estas entradas .desktop
-for entry in "${desktopent[@]}"; do
-	if [ -e "/usr/share/applications/$entry.desktop" ]; then
-		sudo cp -f "/usr/share/applications/$entry.desktop" \
-			"/usr/local/share/applications/$entry.desktop"
+for ENTRY in "${DESKTOPENT[@]}"; do
+	if [ -e "/usr/share/applications/$ENTRY.desktop" ]; then
+		sudo cp -f "/usr/share/applications/$ENTRY.desktop" \
+			"/usr/local/share/applications/$ENTRY.desktop"
 		echo 'NoDisplay=true' | sudo tee -a \
-			"/usr/local/share/applications/$entry.desktop"
+			"/usr/local/share/applications/$ENTRY.desktop"
 	fi
 done >/dev/null
 
@@ -329,9 +322,9 @@ done >/dev/null
 # Actualizar iconos y colores (lf) #
 ####################################
 
-lfUrl="https://raw.githubusercontent.com/gokcehan/lf/master/etc"
-curl $lfUrl/colors.example -o ~/.config/lf/colors 2>/dev/null
-curl $lfUrl/icons.example -o ~/.config/lf/icons 2>/dev/null
+LF_URL="https://raw.githubusercontent.com/gokcehan/lf/master/etc"
+curl $LF_URL/colors.example -o ~/.config/lf/colors 2>/dev/null
+curl $LF_URL/icons.example -o ~/.config/lf/icons 2>/dev/null
 
 # Recargar las configuraciones de fuentes
 fc-cache -fv >/dev/null

@@ -128,7 +128,7 @@ part_encrypt() {
 	local LUKS_PASSWORD
 	while true; do
 		LUKS_PASSWORD=$(
-			get_password "Entrada de Contraseña" "Confirmación de contraseña" \
+			get_password "Entrada de contraseña" "Confirmación de contraseña" \
 				"Introduce la contraseña de encriptación del disco $1:" \
 				"Re-introduce la contraseña de encriptación del disco $1:"
 		)
@@ -533,11 +533,11 @@ packages_choose() {
 # Elegimos que paquetes instalar
 packages_show() {
 	local SCHEME # Variable con la lista de paquetes a instalar
-	SCHEME="Se instalaran:\n"
-	[ "$CHOSEN_AUDIO_PROD" == "true" ] && SCHEME+="Softw. Prod. Musical\n"
-	[ "$CHOSEN_MUSIC" == "true" ] && SCHEME+="Softw. Gestión de Música\n"
-	[ "$CHOSEN_LATEX" == "true" ] && SCHEME+="laTeX\n"
-	[ "$CHOSEN_VIRT" == "true" ] && SCHEME+="libvirt\n"
+	SCHEME="Se instalará:\n"
+	[ "$CHOSEN_AUDIO_PROD" == "true" ] && SCHEME+="    Softw. Prod. Musical\n"
+	[ "$CHOSEN_MUSIC" == "true" ] && SCHEME+="    Softw. Gestión de Música\n"
+	[ "$CHOSEN_LATEX" == "true" ] && SCHEME+="    laTeX\n"
+	[ "$CHOSEN_VIRT" == "true" ] && SCHEME+="    libvirt\n"
 
 	whiptail --backtitle "$REPO_URL" \
 		--title "Confirmar paquetes" \
@@ -562,7 +562,7 @@ kb_layout_conf
 calculate_dpi
 
 ROOT_PASSWORD=$(
-	get_password "Entrada de Contraseña" "Confirmación de contraseña" \
+	get_password "Entrada de contraseña" "Confirmación de contraseña" \
 		"Introduce la contraseña del superusuario:" \
 		"Re-introduce la contraseña del superusuario:"
 )
@@ -574,7 +574,7 @@ USERNAME="$(
 )"
 
 USER_PASSWORD=$(
-	get_password "Entrada de Contraseña" "Confirmación de contraseña" \
+	get_password "Entrada de contraseña" "Confirmación de contraseña" \
 		"Introduce la contraseña del usuario $USERNAME:" \
 		"Re-introduce la contraseña del usuario $USERNAME:"
 )

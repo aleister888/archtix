@@ -9,4 +9,12 @@ if [ -d /etc/X11/xinit/xinitrc.d ]; then
 	done
 fi
 
+# Como no podemos activar los servicios de usuario en el chroot lo hacemos
+# antes de inciar el entorno gráfico por 1a vez.
+if [ -f "$HOME/.firstrun" ]; then
+	rm "$HOME/.firstrun"
+	"$HOME"/.dotfiles/updater/conf-services
+	sleep 5
+fi
+
 exec dbus-launch --sh-syntax --exit-with-session sh -c 'while true; do dwm; done'
