@@ -51,7 +51,8 @@
     "playerctl",
     "ripgrep",
     "shellcheck-bin",
-    "stow"
+    "stow",
+    "tree"
   ],
   "bandeja_sistema": [
     "network-manager-applet",
