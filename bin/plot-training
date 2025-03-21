@@ -1,6 +1,10 @@
 #!/bin/bash
 # shellcheck disable=SC2155
 
+# TODO: Tabular y graficar el volumen de entrenamiento y otros datos
+# TODO: Ajustar el rango inferior basandonos en el mínimo de entre los máximos.
+# No en el mínimo global, que puede estár determinado por el peso del calentamiento
+
 # Parámetros del script
 INPUT_DIR=${1:-$(pwd)}     # Diretorio que contiene los datos
 DATA_DIR="$INPUT_DIR/data" # Directorio del que extraeremos los datos
@@ -13,8 +17,11 @@ process_csv() {
 	local -r DIR_NAME=$(dirname "$FILE")                                 # Directorio que contiene el archivo
 	local -r MUSCLE_GROUP=$(basename "$DIR_NAME")                        # Grupo muscular del ejercicio
 	local -r MAX_FILE="$MAX_DIR/$MUSCLE_GROUP/$EXERCISE_NAME".csv        # Archivo donde se guardará el peso máximo levantado por sesión
-	local -r PLOT_FILE="$MAX_DIR/$MUSCLE_GROUP/plots/$EXERCISE_NAME".png # Archivo donde se guardará el peso máximo levantado por sesión
-	local -r PLOT_NAME="$(echo "$EXERCISE_NAME" | sed 's/_/ /g' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2))}1')"
+	local -r PLOT_FILE="$MAX_DIR/$MUSCLE_GROUP/plots/$EXERCISE_NAME".png # Gráfico con el progeso tabulado en $MAX_FILE
+	local -r PLOT_NAME="$(
+		echo "$EXERCISE_NAME" | sed 's/_/ /g' |
+			awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2))}1'
+	)"
 
 	mkdir -p "$(dirname "$MAX_FILE")"
 	mkdir -p "$(dirname "$PLOT_FILE")"
@@ -25,44 +32,42 @@ process_csv() {
 
 	# Función para obtener los máximos
 	get_maxs() {
-		declare -A MAX_DATA # Array para almacenar el máximo por fecha
+		declare -A MAX_DATA
+		MAX_GLOBAL=0   # Variable para almacenar el máximo absoluto
+		MIN_GLOBAL=999 # Variable para almacenar el mínimo absoluto
 
 		for ROW in "${ALL_ROWS[@]}"; do
 			IFS=',' read -r DATE W R S N <<<"$ROW"
 
-			# Comparar los valores con bc para manejar decimales
+			# Si no hay datos previos, guardar directamente
 			if [[ ! "${MAX_DATA[$DATE]}" ]]; then
-				# Si aún no hay un valor, guardamos este
 				[ -n "$R" ] && MAX_DATA[$DATE]="$W,$R,$S,$N"
 			else
-				# Si el valor actual es mayor que el anterior, lo actualizamos
-				# Usamos bc para manejar decimales en la comparación
 				MAX_WEIGHT=$(echo "${MAX_DATA[$DATE]}" | cut -d',' -f1)
-				MAX_REPS=$(echo "${MAX_DATA[$DATE]}" | cut -d',' -f2)
-
-				# Comparar el peso
 				MAX_DIFF=$(echo "$W > $MAX_WEIGHT" | bc)
 				if [[ "$MAX_DIFF" -eq 1 ]]; then
 					MAX_DATA[$DATE]="$W,$R,$S,$N"
-				elif [[ "$W" == "$MAX_WEIGHT" ]]; then
-					# Si los pesos son iguales, comparamos las repeticiones
-					REPS_DIFF=$(echo "$R > $MAX_REPS" | bc)
-					if [[ "$REPS_DIFF" -eq 1 ]]; then
-						MAX_DATA[$DATE]="$W,$R,$S,$N"
-					fi
 				fi
 			fi
+
+			# Actualizamos el máximo global
+			MAX_GLOBAL=$(echo "$W $MAX_GLOBAL" | awk '{print ($1 > $2) ? $1 : $2}')
+			# Actualizamos el mínimo global
+			MIN_GLOBAL=$(echo "$W $MIN_GLOBAL" | awk '{print ($1 < $2) ? $1 : $2}')
 		done
 
-		# Guardar los máximos en el archivo correspondiente
+		# Guardamos los máximos en el archivo correspondiente
 		echo "fecha_Y-m-d,peso_maximo_kg,reps_maximas,status,notes" >"$MAX_FILE"
 		for DATE in $(echo "${!MAX_DATA[@]}" | tr ' ' '\n' | sort); do
 			echo "$DATE,${MAX_DATA[$DATE]}" >>"$MAX_FILE"
 		done
 	}
-	# Graficar el progreso del peso máximo, junto con el producto
-	# peso*repeticiones y el RM estimado con Brzycki
+	# Graficamos el progreso del peso máximo, junto con el producto
+	# peso*repeticiones y el RM estimado con Brzycki y Epley
 	plot_maxs() {
+		Y1_MAX=$(echo "$MAX_GLOBAL * 1.5" | bc) # Ajuste del rango superior
+		Y1_MIN=$(echo "$MIN_GLOBAL * 0.5" | bc) # Ajuste del rango inferior
+
 		cat <<-EOF | gnuplot
 			set datafile separator ","
 			set terminal pngcairo size 1600,1200 enhanced font 'Verdana,16'
@@ -78,23 +83,26 @@ process_csv() {
 			set y2tics
 			set logscale y2
 			set xtics rotate by -20
+			set key at graph 0.2, 0.95
+			set key opaque box
+			set yrange [$Y1_MIN:$Y1_MAX]
 
-			plot '$MAX_FILE' using 1:2 with linespoints lw 2 title "Peso Máximo" axes x1y1, \
+			plot '$MAX_FILE' using 1:2 with linespoints lw 3 title "Peso Máximo" axes x1y1, \
 			     '' using 1:(\$2 * \$3) with linespoints title "Peso * Reps" axes x1y2, \
-			     '' using 1:(\$2 / (1.0278 - (0.0278 * \$3))) with lines dt 2 lw 2 title "RM Estimado (Brzycki)" axes x1y1, \
-			     '' using 1:(\$2 * (1 + \$3 / 30)) with lines dt 2 lw 2 title "RM Estimado (Epley)" axes x1y1, \
+			     '' using 1:(\$2 / (1.0278 - (0.0278 * \$3))) with lines dt 2 lw 2 title "RM (Brzycki)" axes x1y1, \
+			     '' using 1:(\$2 * (1 + \$3 / 30)) with lines dt 2 lw 2 title "RM (Epley)" axes x1y1, \
 			     '' using 1:2:3 with labels offset 0,1 notitle axes x1y1
 		EOF
 	}
 
 	# Llamar a las subfunciones
 	get_maxs
-	plot_maxs
+	plot_maxs 2>/dev/null
 }
 
 # Verificar si el directorio objetivo existe
 if [[ ! -d "$DATA_DIR" ]]; then
-	echo "Error: El directorio '$DATA_DIR' no existe."
+	echo "Error: El directorio '$DATA_DIR' no existe." >&2
 	exit 1
 fi
 
