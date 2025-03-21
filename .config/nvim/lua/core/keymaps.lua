@@ -24,6 +24,7 @@ vim.keymap.set("v", "=", "$h", { noremap = true, silent = true })
 -- Encapsular texto seleccionado
 vim.keymap.set("v", '"', 's"<C-r>""', { noremap = true, silent = true })
 vim.keymap.set("v", "'", "s'<C-r>\"'", { noremap = true, silent = true })
+vim.keymap.set("v", "`", 's`<C-r>"`', { noremap = true, silent = true })
 vim.keymap.set("v", "$", 's$<C-r>"$', { noremap = true, silent = true })
 vim.keymap.set("v", "(", 's(<C-r>")', { noremap = true, silent = true })
 vim.keymap.set("v", ")", 's(<C-r>")', { noremap = true, silent = true })

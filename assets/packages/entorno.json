@@ -41,10 +41,13 @@
   ],
   "utilidades_cli": [
     "bat",
+    "bc",
     "cdrtools",
+    "csvkit",
     "eza",
     "ffmpegthumbnailer",
     "fzf",
+    "gnuplot",
     "odt2txt",
     "pamixer",
     "parallel",
