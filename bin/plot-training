@@ -2,7 +2,7 @@
 # shellcheck disable=SC2155
 
 # Parámetros del script
-TARGET_DIR=${4:-$(pwd)} # Directorio del que extraeremos los datos
+TARGET_DIR=${1:-$(pwd)} # Directorio del que extraeremos los datos
 MAX_DIR="$TARGET_DIR/max"
 
 # Función para procesar cada archivo CSV
