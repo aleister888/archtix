@@ -2,22 +2,21 @@
 # shellcheck disable=SC2155
 
 # TODO: Tabular y graficar el volumen de entrenamiento y otros datos
-# TODO: Ajustar el rango inferior basandonos en el mínimo de entre los máximos.
-# No en el mínimo global, que puede estár determinado por el peso del calentamiento
 
 # Parámetros del script
 INPUT_DIR=${1:-$(pwd)}     # Diretorio que contiene los datos
 DATA_DIR="$INPUT_DIR/data" # Directorio del que extraeremos los datos
 MAX_DIR="$INPUT_DIR/max"
+PLOT_DIR="$INPUT_DIR/max_plots"
 
 # Función para procesar cada archivo CSV
 process_csv() {
-	local -r FILE="$1"                                                   # Archivo a procesar
-	local -r EXERCISE_NAME=$(basename "$FILE" .csv)                      # Extraemos el nombre del ejercicio
-	local -r DIR_NAME=$(dirname "$FILE")                                 # Directorio que contiene el archivo
-	local -r MUSCLE_GROUP=$(basename "$DIR_NAME")                        # Grupo muscular del ejercicio
-	local -r MAX_FILE="$MAX_DIR/$MUSCLE_GROUP/$EXERCISE_NAME".csv        # Archivo donde se guardará el peso máximo levantado por sesión
-	local -r PLOT_FILE="$MAX_DIR/$MUSCLE_GROUP/plots/$EXERCISE_NAME".png # Gráfico con el progeso tabulado en $MAX_FILE
+	local -r FILE="$1"                                              # Archivo a procesar
+	local -r EXERCISE_NAME=$(basename "$FILE" .csv)                 # Extraemos el nombre del ejercicio
+	local -r DIR_NAME=$(dirname "$FILE")                            # Directorio que contiene el archivo
+	local -r MUSCLE_GROUP=$(basename "$DIR_NAME")                   # Grupo muscular del ejercicio
+	local -r MAX_FILE="$MAX_DIR/$MUSCLE_GROUP/$EXERCISE_NAME".csv   # Archivo donde se guardará el peso máximo levantado por sesión
+	local -r PLOT_FILE="$PLOT_DIR/$MUSCLE_GROUP/$EXERCISE_NAME".png # Gráfico con el progeso tabulado en $MAX_FILE
 	local -r PLOT_NAME="$(
 		echo "$EXERCISE_NAME" | sed 's/_/ /g' |
 			awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2))}1'
@@ -33,8 +32,8 @@ process_csv() {
 	# Función para obtener los máximos
 	get_maxs() {
 		declare -A MAX_DATA
-		MAX_GLOBAL=0   # Variable para almacenar el máximo absoluto
-		MIN_GLOBAL=999 # Variable para almacenar el mínimo absoluto
+		MAX_GLOBAL=0 # Variable para almacenar el máximo absoluto
+		MIN_MAX=""   # Variable para el mínimo de entre los máximos
 
 		for ROW in "${ALL_ROWS[@]}"; do
 			IFS=',' read -r DATE W R S N <<<"$ROW"
@@ -51,22 +50,25 @@ process_csv() {
 			fi
 
 			# Actualizamos el máximo global
-			MAX_GLOBAL=$(echo "$W $MAX_GLOBAL" | awk '{print ($1 > $2) ? $1 : $2}')
-			# Actualizamos el mínimo global
-			MIN_GLOBAL=$(echo "$W $MIN_GLOBAL" | awk '{print ($1 < $2) ? $1 : $2}')
+			MAX_GLOBAL=$(awk -v a="$MAX_GLOBAL" -v b="$W" 'BEGIN {print (b > a) ? b : a}')
 		done
 
 		# Guardamos los máximos en el archivo correspondiente
 		echo "fecha_Y-m-d,peso_maximo_kg,reps_maximas,status,notes" >"$MAX_FILE"
 		for DATE in $(echo "${!MAX_DATA[@]}" | tr ' ' '\n' | sort); do
 			echo "$DATE,${MAX_DATA[$DATE]}" >>"$MAX_FILE"
+			# Extraemos el peso y actualizamos (si es preciso) el mínimo de entre los máximos
+			CURRENT_MAX=$(echo "${MAX_DATA[$DATE]}" | cut -d',' -f1)
+			if [[ -z "$MIN_MAX" || "$(echo "$CURRENT_MAX < $MIN_MAX" | bc)" -eq 1 ]]; then
+				MIN_MAX="$CURRENT_MAX"
+			fi
 		done
 	}
 	# Graficamos el progreso del peso máximo, junto con el producto
-	# peso*repeticiones y el RM estimado con Brzycki y Epley
+	# peso*repeticiones y el RM estimado con Brzycki, O'Conner y Lombardi
 	plot_maxs() {
-		Y1_MAX=$(echo "$MAX_GLOBAL * 1.5" | bc) # Ajuste del rango superior
-		Y1_MIN=$(echo "$MIN_GLOBAL * 0.5" | bc) # Ajuste del rango inferior
+		Y1_MAX=$(echo "scale=2; $MAX_GLOBAL * 1.5" | bc) # Ajuste del rango superior
+		Y1_MIN=$(echo "scale=2; $MIN_MAX / 1.5" | bc)    # Ajuste del rango superior
 
 		cat <<-EOF | gnuplot
 			set datafile separator ","
@@ -75,29 +77,32 @@ process_csv() {
 			set title "$PLOT_NAME"
 			set xlabel "Fecha"
 			set ylabel "Peso (kg)"
-			set y2label "Producto (Peso * Reps)"
+			set y2label "Volumen (Peso * Reps)"
 			set xdata time
 			set timefmt "%Y-%m-%d"
 			set format x "%Y-%m-%d"
 			set grid
+			set ytics
 			set y2tics
 			set logscale y2
 			set xtics rotate by -20
+			set yrange [$Y1_MIN:$Y1_MAX]
 			set key at graph 0.2, 0.95
 			set key opaque box
-			set yrange [$Y1_MIN:$Y1_MAX]
 
-			plot '$MAX_FILE' using 1:2 with linespoints lw 3 title "Peso Máximo" axes x1y1, \
-			     '' using 1:(\$2 * \$3) with linespoints title "Peso * Reps" axes x1y2, \
-			     '' using 1:(\$2 / (1.0278 - (0.0278 * \$3))) with lines dt 2 lw 2 title "RM (Brzycki)" axes x1y1, \
-			     '' using 1:(\$2 * (1 + \$3 / 30)) with lines dt 2 lw 2 title "RM (Epley)" axes x1y1, \
-			     '' using 1:2:3 with labels offset 0,1 notitle axes x1y1
+			plot \
+				'$MAX_FILE' using 1:2 with lines lw 6 title "Peso Máximo" axes x1y1, \
+				'' using 1:(\$2 * \$3) with lines dt 3 lw 3 title "Peso * Reps" axes x1y2, \
+				'' using 1:(\$2 * (36 / (37 - \$3))) with lines title "RM (Brzycki)"  axes x1y1, \
+				'' using 1:(\$2 * (1 + 0.025 * \$3)) with lines title "RM (O'Conner)" axes x1y1, \
+				'' using 1:(\$2 * (\$3 ** 0.1))      with lines title "RM (Lombardi)" axes x1y1, \
+				'' using 1:2:3 with labels offset 0,1 notitle axes x1y1
 		EOF
 	}
 
-	# Llamar a las subfunciones
-	get_maxs
-	plot_maxs 2>/dev/null
+	get_maxs # Tabular los pesos máximos
+	# Graficar ejericicos que tienen un número aceptable de sesiones
+	[ "$(wc -l <"$MAX_FILE")" -gt 2 ] && plot_maxs
 }
 
 # Verificar si el directorio objetivo existe
@@ -110,5 +115,3 @@ fi
 find "$DATA_DIR" -type d -path "$MAX_DIR" -prune -o -type f -name "*.csv" -print | while read -r FILE; do
 	process_csv "$FILE"
 done
-
-echo "Procesamiento completado."
