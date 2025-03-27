@@ -65,7 +65,7 @@ user_pref("signon.rememberSignons", false);
 user_pref("browser.search.separatePrivateDefault", false);
 
 // Implementar medidas anti-trazado
-user_pref("privacy.resistFingerprinting", true)
+user_pref("privacy.resistFingerprinting", true);
 
 // Desactivar LBing
 user_pref("browser.urlbar.suggest.searches", false);
