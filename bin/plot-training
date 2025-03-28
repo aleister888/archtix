@@ -105,7 +105,7 @@ process_csv() {
 		local -r Y_MAX="$4"
 		local -r TITLE="$5"
 
-		cat <<-EOF | gnuplot >/dev/null 2>&1
+		cat <<-EOF | gnuplot >/dev/null
 			set datafile separator ","
 			set terminal pngcairo size 1600,1200 enhanced font 'Verdana,16'
 			set output '$OUTPUT_FILE'
@@ -116,7 +116,7 @@ process_csv() {
 			set xdata time
 			set timefmt "%Y-%m-%d"
 			set format x "%Y-%m-%d"
-			set grid
+			set grid lw 1.5
 			set ytics
 			set y2tics
 			set logscale y2
@@ -130,9 +130,9 @@ process_csv() {
 				'$INPUT_FILE' using 1:2 with lines lw 6 lc rgb "#9400d3" title "Peso Máximo" axes x1y1, \
 				'' using 1:2:3 with points pt 7 ps 2 lc rgb "#9400d3" title "Repeticiones", \
 				'' using 1:(\$2 * \$3) with lines dt 3 lw 3 title "Peso * Reps" axes x1y2, \
-				'' using 1:(\$2 * (36 / (37 - \$3))) with lines title "RM (Brzycki)" axes x1y1, \
-				'' using 1:(\$2 * (1 + 0.025 * \$3)) with lines title "RM (O'Conner)" axes x1y1, \
-				'' using 1:(\$2 * (\$3 ** 0.1)) with lines title "RM (Lombardi)" axes x1y1, \
+				'' using 1:(\$2 * (36 / (37 - \$3))) with lines lw 0.7 title "RM (Brzycki)" axes x1y1, \
+				'' using 1:(\$2 * (1 + 0.025 * \$3)) with lines lw 0.7 title "RM (O'Conner)" axes x1y1, \
+				'' using 1:(\$2 * (\$3 ** 0.1)) with lines lw 0.7 title "RM (Lombardi)" axes x1y1, \
 				'' using 1:2:3 with labels offset 0,1 notitle axes x1y1, \
 				'' using 1:2:(sprintf("RPE: %s", strcol(4))) with labels boxed offset 0,-1.5 font ",10" notitle axes x1y1
 		EOF
