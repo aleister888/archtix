@@ -1,13 +1,16 @@
 #!/bin/bash
 # shellcheck disable=SC2155
 
+# TODO: Buscar una mejor forma de mostrar el RPE
+
 # Parámetros del script
 INPUT_DIR=${1:-$(pwd)}
 DATA_DIR="$INPUT_DIR/data"
-WEIGHT_DIR="$INPUT_DIR/max"
-VOLUME_DIR="$INPUT_DIR/volume"
-WEIGHT_PLOT_DIR="$INPUT_DIR/max_plots"
-VOLUME_PLOT_DIR="$INPUT_DIR/volume_plots"
+PROCESSED_DATA_DIR="$INPUT_DIR/processed_data"
+WEIGHT_DIR="$PROCESSED_DATA_DIR/max"
+VOLUME_DIR="$PROCESSED_DATA_DIR/volume"
+WEIGHT_PLOT_DIR="$PROCESSED_DATA_DIR/max_plots"
+VOLUME_PLOT_DIR="$PROCESSED_DATA_DIR/volume_plots"
 
 # Función para procesar cada archivo CSV
 process_csv() {
@@ -139,7 +142,7 @@ process_csv() {
 	if [[ "$(wc -l <"$WEIGHT_FILE")" -gt 2 ]]; then
 		Y1_MAX=$(echo "scale=2; $MAX_WEIGHT_GLOBAL * 1.5" | bc)
 		Y1_MIN=$(echo "scale=2; $MIN_WEIGHT_MAX / 1.5" | bc)
-		generate_plot "$WEIGHT_FILE" "$WEIGHT_PLOT_FILE" "$Y1_MIN" "$Y1_MAX" "$PLOT_NAME"
+		generate_plot "$WEIGHT_FILE" "$WEIGHT_PLOT_FILE" "$Y1_MIN" "$Y1_MAX" "$PLOT_NAME (Peso máximo)"
 	fi
 
 	# Gráfica de Volumen Máximo
