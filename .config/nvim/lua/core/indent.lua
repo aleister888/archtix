@@ -116,5 +116,6 @@ vim.api.nvim_create_autocmd("FileType", {
 		opt.preserveindent = true
 		opt.tabstop = 2
 		opt.shiftwidth = 2
+		opt.conceallevel = 2
 	end,
 })

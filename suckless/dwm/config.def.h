@@ -211,7 +211,7 @@ static const Key keys[] = {
 	// Abrir dmenu
 	{ MODKEY|ControlMask,           XK_h,      spawn,            SHCMD("zathura ~/.dotfiles/assets/pdf/help.pdf") },
 	{ MODKEY,                       XK_p,      spawn,            {.v = dmenucmd } },
-	{ MODKEY|ShiftMask,             XK_p,      spawn,            SHCMD("j4-dmenu-desktop --dmenu 'dmenu -c -l 12'") },
+	{ MODKEY|ShiftMask,             XK_p,      spawn,            SHCMD("j4-dmenu-desktop --no-generic --dmenu 'dmenu -c -l 12'") },
 	{ MODKEY|ControlMask,           XK_p,      spawn,            SHCMD("dmenu -C -l 1 | tr -d '\n' | xclip -selection clipboard") },
 	{ 0,               XF86XK_Calculator,      spawn,            SHCMD("dmenu -C -l 1 | tr -d '\n' | xclip -selection clipboard") },
 	{ MODKEY,                       XK_t,      spawn,            SHCMD("tray-toggle") },
@@ -229,6 +229,7 @@ static const Key keys[] = {
 	// Abrir aplicaciones más usadas
 	{ MODKEY,                       XK_F2,     spawn,            {.v = (const char*[]){ BROWSER, NULL } } },
 	{ MODKEY,                       XK_F3,     spawn,            {.v = (const char*[]){ TERM, TERME, "lf", NULL } } },
+	{ MODKEY|ShiftMask,             XK_F3,     spawn,            {.v = (const char*[]){ TERM, TERME, "lf", "/run/media/aleister/", NULL } } },
 	{ MODKEY,                       XK_F4,     spawn,            SHCMD("tauon") },
 
 	// Montar/Desmontar dispositivos android

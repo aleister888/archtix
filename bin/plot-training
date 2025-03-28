@@ -105,7 +105,7 @@ process_csv() {
 		local -r Y_MAX="$4"
 		local -r TITLE="$5"
 
-		cat <<-EOF | gnuplot >/dev/null
+		cat <<-EOF | gnuplot >/dev/null 2>&1
 			set datafile separator ","
 			set terminal pngcairo size 1600,1200 enhanced font 'Verdana,16'
 			set output '$OUTPUT_FILE'

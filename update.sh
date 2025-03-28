@@ -266,41 +266,6 @@ for ASSOCIATION in "${WORD_ASSOCIATIONS[@]}"; do
 	xdg-mime default libreoffice-writer.desktop "$ASSOCIATION"
 done
 
-#####################
-# Archivos .desktop #
-#####################
-
-[ -d /usr/local/share/applications ] ||
-	sudo mkdir -p /usr/local/share/applications
-
-# Ocultar archivos .desktop innecesarios
-DESKTOPENT=(
-	"xdvi"
-	"envy24control"
-	"echomixer"
-	"hdajackretask"
-	"hdspconf"
-	"hdspmixer"
-	"hwmixvolume"
-	"qvidcap"
-	"qv4l2"
-	"Surge-XT"
-	"Surge-XT-FX"
-	"jconsole-java-openjdk"
-	"jshell-java-openjdk"
-	"lstopo"
-)
-
-# Ocultamos estas entradas .desktop
-for ENTRY in "${DESKTOPENT[@]}"; do
-	if [ -e "/usr/share/applications/$ENTRY.desktop" ]; then
-		sudo cp -f "/usr/share/applications/$ENTRY.desktop" \
-			"/usr/local/share/applications/$ENTRY.desktop"
-		echo 'NoDisplay=true' | sudo tee -a \
-			"/usr/local/share/applications/$ENTRY.desktop"
-	fi
-done >/dev/null
-
 #############################
 # Añadir diccionarios a vim #
 #############################
@@ -326,3 +291,54 @@ curl $LF_URL/icons.example -o ~/.config/lf/icons 2>/dev/null
 
 # Recargar las configuraciones de fuentes
 fc-cache -fv >/dev/null
+
+#############################
+# Ocultar archivos .desktop #
+#############################
+
+[ -d /usr/local/share/applications ] ||
+	sudo mkdir -p /usr/local/share/applications
+
+# Ocultar archivos .desktop innecesarios
+DESKTOPENT=(
+	"Surge-XT"
+	"Surge-XT-FX"
+	"avahi-discover"
+	"bssh"
+	"bvnc"
+	"cmake-gui"
+	"echomixer"
+	"envy24control"
+	"fluid"
+	"hdajackretask"
+	"hdspconf"
+	"hdspmixer"
+	"htop"
+	"hwmixvolume"
+	"jconsole-java-openjdk"
+	"jconsole-java17-openjdk"
+	"jconsole-java21-openjdk"
+	"jshell-java-openjdk"
+	"jshell-java17-openjdk"
+	"jshell-java21-openjdk"
+	"lf"
+	"lstopo"
+	"nitrogen"
+	"nvim"
+	"picom"
+	"qv4l2"
+	"qvidcap"
+	"redshift"
+	"redshift-gtk"
+	"xdvi"
+)
+
+# Ocultamos estas entradas .desktop
+for ENTRY in "${DESKTOPENT[@]}"; do
+	if [ -e "/usr/share/applications/$ENTRY.desktop" ]; then
+		sudo cp -f "/usr/share/applications/$ENTRY.desktop" \
+			"/usr/local/share/applications/$ENTRY.desktop"
+		echo 'NoDisplay=true' | sudo tee -a \
+			"/usr/local/share/applications/$ENTRY.desktop"
+	fi
+done >/dev/null

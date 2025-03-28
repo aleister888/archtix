@@ -17,16 +17,12 @@ nitrogen --restore
 # Cerrar instancias previas del script
 PROCESSLIST=/tmp/startScript_processes
 MY_ID=$BASHPID
-INSTANCES="$(pgrep -c -x "$(basename "$0")")"
-echo $MY_ID | tee -a $PROCESSLIST >/dev/null
-
-for _ in $(seq $((INSTANCES - 1))); do
-	pkill -o "$(basename "$0")"
-done
 
 grep -v "^$MY_ID$" "$PROCESSLIST" | while read -r ID; do
 	kill -9 "$ID" 2>/dev/null
 done
+
+echo $MY_ID | tee $PROCESSLIST >/dev/null
 
 # Permite al usuario root conectarse al servidor X (Para usar el porta-papeles)
 xhost +SI:localuser:root
@@ -106,7 +102,7 @@ fi
 
 # Iniciar hydroxide si está instalado
 # https://github.com/emersion/hydroxide?tab=readme-ov-file#usage
-[ -f /usr/bin/hydroxide ] && hydroxide imap &
+[ -x /usr/bin/hydroxide ] && hydroxide imap &
 
 # Limpiar directorio $HOME
 cleaner
