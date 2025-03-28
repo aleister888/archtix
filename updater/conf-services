@@ -1,14 +1,25 @@
 #!/bin/bash
 
+[ "$(id -u)" -eq 0 ] && exit 1
+
+[ ! -d "$HOME/.config/rc/runlevels/default" ] &&
+	mkdir -p "$HOME/.config/rc/runlevels/default"
+[ ! -d "$HOME/.config/rc/runlevels/shutdown" ] &&
+	mkdir -p "$HOME/.config/rc/runlevels/shutdown"
+
 # Activar servicio
 service_add() {
-	sudo rc-update add "$1" default
+	sudo rc-update add "$1" "$2"
 }
 # Activar servicio para el usuario
 user_service_add() {
+	SERVICE="$1"
+	RUNLEVEL="$2"
 	if [ -d /run/user/1000/ ]; then
-		rc-update add "$1" default -U
-		rc-service "$1" start -U
+		rc-update add "$SERVICE" "$RUNLEVEL" -U
+	else
+		ln -s "/etc/user/init.d/$SERVICE" \
+			"$HOME/.config/rc/runlevels/$RUNLEVEL/$SERVICE"
 	fi
 }
 
@@ -29,12 +40,12 @@ USER_SERVICES=(
 	"wireplumber"
 )
 
-# Activar los servicios del sistema
+# Activar los servicios del sistema del runlevel default
 for SERVICE in "${SERVICES[@]}"; do
-	service_add "$SERVICE"
+	service_add "$SERVICE" "default"
 done
 
-# Activar los servicios del usuario
+# Activar los servicios del usuario del runlevel default
 for USER_SERVICE in "${USER_SERVICES[@]}"; do
-	user_service_add "$USER_SERVICE"
+	user_service_add "$USER_SERVICE" "default"
 done
