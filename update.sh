@@ -15,9 +15,11 @@ ASSETDIR="$REPO_DIR/assets/configs"
 # Guardamos el hash del script para comprobar mas adelante si este ha cambiado
 OGHASH=$(sha256sum "$0" | awk '{print $1}')
 
-# Actualizamos repositorio
-sh -c "cd $REPO_DIR && git pull" >/dev/null ||
-	exit 1
+# Si tenemos conexión a internet actualizamos el repositorio
+if ping gnu.org -c 1 >/dev/null 2>&1; then
+	sh -c "cd $REPO_DIR && git pull" >/dev/null ||
+		exit 1
+fi
 
 # Guardamos el hash tras hacer pull
 HASH=$(sha256sum "$0" | awk '{print $1}')
@@ -36,9 +38,9 @@ REPO_PKG="$(jq -r '.[] | .[]' "$HOME"/.dotfiles/assets/packages/*.json)"
 INSTALLED_PKGS=$(yay -Qq)
 # Filtramos los paquetes que no están instalados
 PKGS_TO_INSTALL=$(echo "$REPO_PKG" | grep -vxF -f <(echo "$INSTALLED_PKGS"))
-# Si hay paquetes por instalar, los instalamos
-if [ -n "$PKGS_TO_INSTALL" ]; then
-	yay -Sy --noconfirm --needed --asexplicit $PKGS_TO_INSTALL >/dev/null 2>&1
+# Si hay paquetes por instalar y estamos conectados a internet, los instalamos
+if [ -n "$PKGS_TO_INSTALL" ] && ping gnu.org -c 1 >/dev/null 2>&1; then
+	yay -Sy --noconfirm --needed --asexplicit $PKGS_TO_INSTALL
 fi
 
 ###########

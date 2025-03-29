@@ -245,12 +245,11 @@ basestrap_install() {
 	BASESTRAP_PACKAGES+=" gc gcc groff guile libisl libmpc libtool m4 make"
 	BASESTRAP_PACKAGES+=" patch pkgconf texinfo which"
 
-	BASESTRAP_PACKAGES+=" linux-headers linux-lts linux-lts-headers"
-	BASESTRAP_PACKAGES+=" networkmanager networkmanager-openrc dosfstools"
+	BASESTRAP_PACKAGES+=" linux-headers libjpeg-turbo wpa_supplicant usbutils"
+	BASESTRAP_PACKAGES+=" networkmanager networkmanager-openrc dosfstools git"
 	BASESTRAP_PACKAGES+=" cronie cronie-openrc cups cups-openrc freetype2"
-	BASESTRAP_PACKAGES+=" libjpeg-turbo grub git wpa_supplicant usbutils"
 	BASESTRAP_PACKAGES+=" pciutils cryptsetup device-mapper-openrc dialog"
-	BASESTRAP_PACKAGES+=" cryptsetup-openrc acpid-openrc efibootmgr"
+	BASESTRAP_PACKAGES+=" cryptsetup-openrc acpid-openrc efibootmgr grub"
 
 	# Instalamos pipewire para evitar conflictos (p.e. se isntala jack2 y no
 	# pipewire-jack). Los paquetes para 32 bits se instalarán una vez

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 # Hacer que npm user la especificación de directorios XDG
 npm_xdg() {
@@ -42,7 +42,7 @@ move_hardcoded_dir() {
 	local OG XDG
 	OG="$1"
 	XDG="$2"
-	if [ ! -L "$OG" ] && [ -d "$OG" ]; then
+	if [[ ! -L "$OG" ]] && [ -d "$OG" ]; then
 		merge_delete "$OG" "$XDG"
 		ln -s "$XDG" "$OG"
 	fi
@@ -61,8 +61,6 @@ moveto_xdg "$HOME/.pulse-cookie" "$XDG_CONFIG_HOME/pulse/cookie"
 moveto_xdg "$HOME/.gitconfig" "$XDG_CONFIG_HOME/git/config"
 
 move_hardcoded_dir "$HOME/.java" "$XDG_CONFIG_HOME/java"
-move_hardcoded_dir "$HOME/.eclipse" "$XDG_CONFIG_HOME/eclipse"
-move_hardcoded_dir "$HOME/eclipse-workspace" "$XDG_DATA_HOME/eclipse-workspace"
 move_hardcoded_dir "$HOME/.codetogether" "$HOME/.config/codetogether"
 move_hardcoded_dir "$HOME/.webclipse" "$HOME/.config/webclipse"
 

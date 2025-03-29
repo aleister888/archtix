@@ -29,7 +29,8 @@
     "gnome-disk-utility",
     "ntfs-3g",
     "simple-mtpfs",
-    "udiskie"
+    "udiskie",
+    "udisks2-btrfs"
   ],
   "funcionalidades": [
     "desktop-file-utils",

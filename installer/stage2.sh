@@ -121,6 +121,24 @@ genlocale() {
 	echo "LANG=es_ES.UTF-8" >/etc/locale.conf
 }
 
+# Agrega módulos imprescindibles al initramfs
+modules_add() {
+	# Módulos a agregar
+	local -r MODULES="vfat snd_hda_intel usb_storage btusb nvme"
+
+	# Ruta de configuración de mkinitcpio
+	local -r MKINITCPIO_CONF="/etc/mkinitcpio.conf"
+
+	# Modificar la línea MODULES=
+	for MODULE in $MODULES; do
+		if ! grep -qE "MODULES=\(.*\b$MODULE\b.*\)" "$MKINITCPIO_CONF"; then
+			sed -i -E \
+				"s|MODULES=\(\s*\)|MODULES=( $MODULE )|; t; s|MODULES=\((.*)\)|MODULES=(\1$MODULE )|" \
+				"$MKINITCPIO_CONF"
+		fi
+	done
+}
+
 ##########
 # SCRIPT #
 ##########
@@ -168,6 +186,9 @@ arch_support
 
 # Configurar la codificación del sistema
 genlocale
+
+# Agregamos módulos imprescindibles al initramfs
+modules_add
 
 # Activamos servicios
 service_add NetworkManager
