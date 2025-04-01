@@ -28,25 +28,16 @@ user_pref("browser.sessionstore.privacy_level", 0);
 user_pref("privacy.clearOnShutdown.sessions", false);
 user_pref("privacy.clearOnShutdown.cache", false);
 
-// Mantener cookies hasta que estas expiren o se borren manualmente
-user_pref("network.cookie.lifetimePolicy", 0);
-user_pref("privacy.clearOnShutdown.cookies", false);
-
-// Borrar el resto de datos automáticamente
-user_pref("privacy.sanitize.sanitizeOnShutdown", true);
+// No borrar los datos automáticamente
+user_pref("privacy.sanitize.sanitizeOnShutdown", false);
 user_pref("privacy.sanitize.clearOnShutdown.hasMigratedToNewPrefs2", false);
 user_pref("privacy.sanitize.cpd.hasMigratedToNewPrefs2", false);
-user_pref("privacy.clearOnShutdown.siteSettings", true);
-user_pref("privacy.clearOnShutdown.history", true);
-user_pref("privacy.clearOnShutdown.formdata", true);
-user_pref("privacy.clearOnShutdown.downloads", true);
-user_pref("privacy.clearOnShutdown.offlineApps", true);
 
 // Pantalla de inicio
 user_pref("browser.startup.homepage", "about:home");
 user_pref("browser.startup.page", 1);
 user_pref("browser.newtabpage.enabled", true);
-user_pref("browser.newtabpage.activity-stream.feeds.topsites", false);
+user_pref("browser.newtabpage.activity-stream.feeds.topsites", true);
 
 // Desactivar notificaciones
 user_pref("dom.push.enabled", false);
