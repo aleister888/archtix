@@ -2,7 +2,7 @@
 user_pref("identity.fxaccounts.enabled", false);
 user_pref("identity.fxaccounts.toolbar.enabled", false);
 
-// Permitir las extensiones instaladas por el script
+// Permitir las extensiones instaladas de forma externa
 user_pref("extensions.autoDisableScopes", 0);
 
 // Desactivar pocket
@@ -37,10 +37,13 @@ user_pref("privacy.sanitize.cpd.hasMigratedToNewPrefs2", false);
 user_pref("browser.startup.homepage", "about:home");
 user_pref("browser.startup.page", 1);
 user_pref("browser.newtabpage.enabled", true);
-user_pref("browser.newtabpage.activity-stream.feeds.topsites", true);
+user_pref("browser.newtabpage.activity-stream.feeds.topsites", false);
 
 // Desactivar notificaciones
 user_pref("dom.push.enabled", false);
+
+// Desactivar historial
+user_pref("places.history.enabled", false);
 
 // Desactivar funciones experimentales
 user_pref("browser.preferences.experimental", false);
@@ -57,8 +60,10 @@ user_pref("browser.search.separatePrivateDefault", false);
 
 // Implementar medidas anti-trazado
 user_pref("privacy.resistFingerprinting", true);
+user_pref("privacy.resistFingerprinting.letterboxing", true);
 
-// Desactivar LBing
+// Desactivar sugerencias de búsqueda
+user_pref("browser.urlbar.suggest.history", false);
 user_pref("browser.urlbar.suggest.searches", false);
 
 // Desactivar OCSP
@@ -67,3 +72,6 @@ user_pref("security.ssl.enable_ocsp_stapling", false);
 
 // Permitir DRM
 user_pref("media.eme.enabled", true);
+
+// Desactivar el restaurar sesión (después de un crasheo)
+user_pref("browser.sessionstore.resume_from_crash", false);
