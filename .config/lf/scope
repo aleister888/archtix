@@ -37,7 +37,7 @@ case "$(xdg-mime query filetype "$1")" in
 text/troff) man ./ "$1" | col -b ;;
 
 # Imprimir los archivos de texto con bat
-text/* | */xml | */json | */x-shellscript | */x-xcursor | */x-theme | */x-desktop | */x-troff-man | */x-ruby | */yaml | */toml)
+text/* | */xml | */json | */x-shellscript | */x-xcursor | */x-theme | */x-desktop | */x-troff-man | */x-ruby | */yaml | */toml | */sql)
 	# Comprobar si es un archivo de texto
 	case "$(file --dereference --brief --mime-type -- "$1")" in
 	# Si es una clave gpg, mostar su información con gpg

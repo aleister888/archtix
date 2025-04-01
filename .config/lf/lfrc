@@ -284,7 +284,7 @@ case $(xdg-mime query filetype "$(readlink -f $f)") in
 		$EDITOR "$fx" ;;
 
 	image/*)
-		filelist=$(ls -1 . | grep '.*\.\(jpg\|jpeg\|png\|gif\|bmp\|tiff\|ppm\|svg\|webp\)$')
+		filelist=$(ls -1 . | grep '.*\.\(jpg\|JPG\|jpeg\|JPEG\|png\|PNG\|gif\|GIF\|bmp\|BMP\|tiff\|TIFF\|ppm\|PPM\|svg\|SVG\|webp\|WEBP\)$')
 		index=$(printf "%s\n" $filelist | nl | grep "$(basename "$fx")" | awk '{print $1}')
 		setsid -f nsxiv -n $index $filelist & ;;
 
