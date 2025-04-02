@@ -59,7 +59,6 @@ user_pref("signon.rememberSignons", false);
 user_pref("browser.search.separatePrivateDefault", false);
 
 // Implementar medidas anti-trazado
-user_pref("privacy.resistFingerprinting", true);
 user_pref("privacy.resistFingerprinting.letterboxing", true);
 
 // Desactivar sugerencias de búsqueda

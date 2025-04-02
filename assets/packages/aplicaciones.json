@@ -37,7 +37,7 @@
   ],
   "tauon": [
     "python-pypresence",
-    "tauon-music-box-git"
+    "tauon-music-box"
   ],
   "no-foss": [
     "discord",
