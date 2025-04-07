@@ -129,13 +129,21 @@ part_encrypt() {
 	local DEVICE="$2"
 	local DECRYPTED_NAME="$3"
 	local LUKS_PASSWORD
+	cryptsetup benchmark
 	while true; do
 		LUKS_PASSWORD=$(
 			get_password "Entrada de contraseña" "Confirmación de contraseña" \
 				"Introduce la contraseña de encriptación del disco $DISPLAY_NAME:" \
 				"Re-introduce la contraseña de encriptación del disco $DISPLAY_NAME:"
 		)
-		yes "$LUKS_PASSWORD" | cryptsetup luksFormat -q --verify-passphrase "/dev/$DEVICE" &&
+		yes "$LUKS_PASSWORD" | cryptsetup \
+			--type luks1 \
+			--cipher serpent-xts-plain64 \
+			--key-size 512 \
+			--hash whirlpool \
+			--iter-time 10000 \
+			--use-random \
+			--verify-passphrase -q luksFormat "/dev/$DEVICE" &&
 			break
 		# Si no se pudo encriptar el dispositivo, no se sale del bucle y se pide otra vez la contraseña
 		whip_msg "LUKS" "Hubo un error, deberá introducir la contraseña otra vez"
@@ -216,7 +224,7 @@ basestrap_install() {
 
 	BASESTRAP_PACKAGES="base elogind-openrc openrc linux linux-firmware"
 	BASESTRAP_PACKAGES+=" opendoas mkinitcpio wget libnewt btrfs-progs"
-	BASESTRAP_PACKAGES+=" neovim"
+	BASESTRAP_PACKAGES+=" neovim lvm2-openrc"
 
 	# Instalamos los paquetes del grupo base-devel manualmente para luego
 	# poder borrar sudo facilmente. (Si en su lugar instalamos el grupo,

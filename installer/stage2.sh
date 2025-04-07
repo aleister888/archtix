@@ -25,7 +25,7 @@ service_add() {
 install_grub() {
 	local -r CRYPT_ID=$(lsblk -nd -o UUID /dev/"$ROOT_PART_NAME")
 	# Obtener el UUID del volumen lógico raíz (LVM)
-	local -r LV_ROOT_UUID=$(lsblk -nd -o UUID /dev/mapper/"$VG_NAME"-"root")
+	local -r SWAP_UUID=$(lsblk -nd -o UUID /dev/mapper/"$VG_NAME"-"swap")
 
 	# Obtenemos el nombre del dispositivo donde se aloja la partición boot
 	case "$ROOT_DISK" in
@@ -48,10 +48,10 @@ install_grub() {
 	# encriptada y desencriptada.
 	if [ "$CRYPT_ROOT" = "true" ]; then
 		echo GRUB_ENABLE_CRYPTODISK=y >>/etc/default/grub
-		sed -i "s/\(^GRUB_CMDLINE_LINUX_DEFAULT=\".*\)\"/\1 cryptdevice=UUID=$CRYPT_ID:cryptroot root=UUID=$LV_ROOT_UUID\"/" /etc/default/grub
+		sed -i "s/\(^GRUB_CMDLINE_LINUX_DEFAULT=\".*\)\"/\1 cryptdevice=UUID=$CRYPT_ID:cryptroot resume=UUID=$SWAP_UUID net.ifnames=0\"/" /etc/default/grub
 	else
 		# Si no hay encriptación, indicamos el UUID del volumen lógico de LVM
-		sed -i "s/\(^GRUB_CMDLINE_LINUX_DEFAULT=\".*\)\"/\1 root=UUID=$LV_ROOT_UUID\"/" /etc/default/grub
+		sed -i "s/\(^GRUB_CMDLINE_LINUX_DEFAULT=\".*\)\"/\1 resume=UUID=$SWAP_UUID net.ifnames=0\"/" /etc/default/grub
 	fi
 
 	# Crear el archivo de configuración
@@ -125,7 +125,7 @@ genlocale() {
 
 # Agrega módulos imprescindibles al initramfs
 modules_add() {
-	local -r MODULES="vfat snd_hda_intel usb_storage btusb nvme"
+	local -r MODULES="vfat snd_hda_intel usb_storage btusb nvme lvm2"
 	local -r MKINITCPIO_CONF="/etc/mkinitcpio.conf"
 
 	for MODULE in $MODULES; do
@@ -194,6 +194,7 @@ service_add cupsd
 service_add cronie
 service_add acpid
 rc-update add device-mapper boot
+rc-update add lvm boot
 rc-update add dmcrypt boot
 rc-update add dmeventd boot
 
