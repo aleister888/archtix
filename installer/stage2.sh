@@ -130,7 +130,7 @@ mkinitcpio_conf() {
 	local HOOKS="block autodetect lvm2"
 
 	# Si se usa cifrado, añadir el gancho de encriptación
-	[ "$CRYPT_ROOT" = "true" ] && HOOKS+=" encrypt"
+	[ "$CRYPT_ROOT" = "true" ] && HOOKS="encrypt $HOOKS"
 
 	# Función interna para agregar elementos a MODULES o HOOKS
 	add_to_config() {
