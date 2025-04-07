@@ -13,6 +13,7 @@
 #   - Si se usa encriptación ($CRYPT_ROOT)
 #   - Nombre de la partición principal ($ROOT_PART_NAME)
 #   - Nombre de la partición desencriptada abierta ($CRYPT_NAME)
+#   - Nombre del grupo LVM ($VG_NAME)
 #   - Nombre del host ($HOSTNAME)
 #   - Driver de vídeo a usar ($GRAPHIC_DRIVER)
 #   - Variables con el software opcional elegido
@@ -154,7 +155,7 @@ disk_setup() {
 	# Borramos la firma del disco
 	wipefs --all "/dev/$ROOT_DISK"
 	# Creamos nuestra tabla de particionado y las dos particiones necesarias
-	printf "label: gpt\n,550M,U\n,,\n" | sfdisk "/dev/$ROOT_DISK"
+	printf "label: gpt\n,1G,U\n,,\n" | sfdisk "/dev/$ROOT_DISK"
 
 	# Formateamos la primera partición como EFI
 	mkfs.fat -F32 "/dev/$BOOT_PART"
@@ -606,6 +607,7 @@ artix-chroot /mnt sh -c "
 	CRYPT_ROOT=$CRYPT_ROOT \
 	ROOT_PART_NAME=$ROOT_PART_NAME \
 	CRYPT_NAME=$CRYPT_NAME \
+	VG_NAME=$VG_NAME \
 	HOSTNAME=$HOSTNAME \
 	GRAPHIC_DRIVER=$GRAPHIC_DRIVER \
 	CHOSEN_VIRT=$CHOSEN_VIRT \

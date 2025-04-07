@@ -23,9 +23,9 @@ service_add() {
 
 # Instalamos GRUB
 install_grub() {
-	local CRYPT_ID DECRYPT_ID
-	CRYPT_ID=$(lsblk -nd -o UUID /dev/"$ROOT_PART_NAME")
-	DECRYPT_ID=$(lsblk -n -o UUID /dev/mapper/"$CRYPT_NAME")
+	local -r CRYPT_ID=$(lsblk -nd -o UUID /dev/"$ROOT_PART_NAME")
+	# Obtener el UUID del volumen lógico raíz (LVM)
+	local -r LV_ROOT_UUID=$(lsblk -nd -o UUID /dev/mapper/"$VG_NAME"-"root")
 
 	# Obtenemos el nombre del dispositivo donde se aloja la partición boot
 	case "$ROOT_DISK" in
@@ -48,7 +48,10 @@ install_grub() {
 	# encriptada y desencriptada.
 	if [ "$CRYPT_ROOT" = "true" ]; then
 		echo GRUB_ENABLE_CRYPTODISK=y >>/etc/default/grub
-		sed -i "s/\(^GRUB_CMDLINE_LINUX_DEFAULT=\".*\)\"/\1 cryptdevice=UUID=$CRYPT_ID:cryptroot root=UUID=$DECRYPT_ID\"/" /etc/default/grub
+		sed -i "s/\(^GRUB_CMDLINE_LINUX_DEFAULT=\".*\)\"/\1 cryptdevice=UUID=$CRYPT_ID:cryptroot root=UUID=$LV_ROOT_UUID\"/" /etc/default/grub
+	else
+		# Si no hay encriptación, indicamos el UUID del volumen lógico de LVM
+		sed -i "s/\(^GRUB_CMDLINE_LINUX_DEFAULT=\".*\)\"/\1 root=UUID=$LV_ROOT_UUID\"/" /etc/default/grub
 	fi
 
 	# Crear el archivo de configuración
