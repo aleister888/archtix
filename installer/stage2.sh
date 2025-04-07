@@ -10,7 +10,6 @@
 # - Pasa como variables los siguientes parámetros al siguiente script:
 #   - DPI de la pantalla ($FINAL_DPI)
 #   - Driver de video a usar ($GRAPHIC_DRIVER)
-#   - El tipo de partición de la instalación ($ROOT_FILESYSTEM)
 #   - Variables con el software opcional elegido
 #     - $CHOSEN_AUDIO_PROD, $CHOSEN_LATEX, $CHOSEN_MUSIC, $CHOSEN_VIRT
 
@@ -24,9 +23,9 @@ service_add() {
 
 # Instalamos GRUB
 install_grub() {
-	local CRYPT_ID DECRYPT_ID
-	CRYPT_ID=$(lsblk -nd -o UUID /dev/"$ROOT_PART_NAME")
-	DECRYPT_ID=$(lsblk -n -o UUID /dev/mapper/"$CRYPT_NAME")
+	local -r CRYPT_ID=$(lsblk -nd -o UUID /dev/"$ROOT_PART_NAME")
+	local -r ROOT_UUID=$(lsblk -nd -o UUID /dev/mapper/"$VG_NAME"-"root")
+	local -r SWAP_UUID=$(lsblk -nd -o UUID /dev/mapper/"$VG_NAME"-"swap")
 
 	# Obtenemos el nombre del dispositivo donde se aloja la partición boot
 	case "$ROOT_DISK" in
@@ -49,7 +48,10 @@ install_grub() {
 	# encriptada y desencriptada.
 	if [ "$CRYPT_ROOT" = "true" ]; then
 		echo GRUB_ENABLE_CRYPTODISK=y >>/etc/default/grub
-		sed -i "s/\(^GRUB_CMDLINE_LINUX_DEFAULT=\".*\)\"/\1 cryptdevice=UUID=$CRYPT_ID:cryptroot root=UUID=$DECRYPT_ID\"/" /etc/default/grub
+		sed -i "s/\(^GRUB_CMDLINE_LINUX_DEFAULT=\".*\)\"/\1 cryptdevice=UUID=$CRYPT_ID:cryptroot root=UUID=$ROOT_UUID resume=UUID=$SWAP_UUID net.ifnames=0\"/" /etc/default/grub
+	else
+		# Si no hay encriptación, indicamos el UUID del volumen lógico de LVM
+		sed -i "s/\(^GRUB_CMDLINE_LINUX_DEFAULT=\".*\)\"/\1 resume=UUID=$SWAP_UUID net.ifnames=0\"/" /etc/default/grub
 	fi
 
 	# Crear el archivo de configuración
@@ -121,22 +123,16 @@ genlocale() {
 	echo "LANG=es_ES.UTF-8" >/etc/locale.conf
 }
 
-# Agrega módulos imprescindibles al initramfs
-modules_add() {
-	# Módulos a agregar
-	local -r MODULES="vfat snd_hda_intel usb_storage btusb nvme"
-
-	# Ruta de configuración de mkinitcpio
+# Configurar la creación del initramfs
+mkinitcpio_conf() {
 	local -r MKINITCPIO_CONF="/etc/mkinitcpio.conf"
+	local MODULES="vfat snd_hda_intel usb_storage btusb nvme"
+	local HOOKS="base udev autodetect microcode modconf kms keyboard keymap consolefont block filesystems fsck block"
+	[ "$CRYPT_ROOT" = "true" ] && HOOKS+=" encrypt"
+	HOOKS+=" autodetect lvm2"
 
-	# Modificar la línea MODULES=
-	for MODULE in $MODULES; do
-		if ! grep -qE "MODULES=\(.*\b$MODULE\b.*\)" "$MKINITCPIO_CONF"; then
-			sed -i -E \
-				"s|MODULES=\(\s*\)|MODULES=( $MODULE )|; t; s|MODULES=\((.*)\)|MODULES=(\1$MODULE )|" \
-				"$MKINITCPIO_CONF"
-		fi
-	done
+	sed -i "s/^MODULES=.*/MODULES=($MODULES)/" "$MKINITCPIO_CONF"
+	sed -i "s/^HOOKS=.*/HOOKS=($HOOKS)/" "$MKINITCPIO_CONF"
 }
 
 ##########
@@ -158,11 +154,6 @@ pacman-key --populate && pacman-key --refresh-keys
 # Configurar pacman
 sed -i 's/^#Color/Color\nILoveCandy/' /etc/pacman.conf
 sed -i 's/^#ParallelDownloads = 5/ParallelDownloads = 5/' /etc/pacman.conf
-
-# Si se utiliza encriptación, añadir el módulo encrypt a la imagen del kernel
-if [ "$CRYPT_ROOT" = "true" ]; then
-	sed -i -e '/^HOOKS=/ s/block/& encrypt/' /etc/mkinitcpio.conf
-fi
 
 if echo "$(
 	lspci
@@ -187,8 +178,8 @@ arch_support
 # Configurar la codificación del sistema
 genlocale
 
-# Agregamos módulos imprescindibles al initramfs
-modules_add
+# Agregamos los módulos y ganchos imprescindibles al initramfs
+mkinitcpio_conf
 
 # Activamos servicios
 service_add NetworkManager
@@ -196,14 +187,15 @@ service_add cupsd
 service_add cronie
 service_add acpid
 rc-update add device-mapper boot
+rc-update add lvm boot
 rc-update add dmcrypt boot
 rc-update add dmeventd boot
 
 # Hacemos que la swap se utilize despúes de montar todos los discos
 sed -i '/rc_need="localmount"/s/^#//g' /etc/conf.d/swap
 
-ln -s /usr/bin/nvim /usr/local/bin/vim
-ln -s /usr/bin/nvim /usr/local/bin/vi
+ln -sf /usr/bin/nvim /usr/local/bin/vim
+ln -sf /usr/bin/nvim /usr/local/bin/vi
 
 # Configuramos sudo para stage3.sh
 echo "root ALL=(ALL:ALL) ALL
@@ -215,8 +207,7 @@ su "$USERNAME" -c "
 	export \
 	FINAL_DPI=$FINAL_DPI \
 	GRAPHIC_DRIVER=$GRAPHIC_DRIVER \
-	ROOT_FILESYSTEM=$ROOT_FILESYSTEM \
-	CHOSEN_AUDIO_PROD=$CHOSEN_AUDIO_PROD
+	CHOSEN_AUDIO_PROD=$CHOSEN_AUDIO_PROD \
 	CHOSEN_LATEX=$CHOSEN_LATEX \
 	CHOSEN_MUSIC=$CHOSEN_MUSIC \
 	CHOSEN_VIRT=$CHOSEN_VIRT \

@@ -37,17 +37,18 @@ makeuserjs() {
 
 installffaddons() {
 	ADDON_LIST=(
-		"ublock-origin"
-		"decentraleyes"
-		"istilldontcareaboutcookies"
-		"violentmonkey"
-		"darkreader"
-		"xbs"
-		"clearurls"
-		"keepassxc-browser"
-		"sponsorblock"
 		"checkmarks-web-ext"
 		"clear-browsing-data"
+		"clearurls"
+		"darkreader"
+		"decentraleyes"
+		"enlight"
+		"istilldontcareaboutcookies"
+		"keepassxc-browser"
+		"sponsorblock"
+		"ublock-origin"
+		"violentmonkey"
+		"xbs"
 	)
 	ADDON_TMP="$(mktemp -d)"
 

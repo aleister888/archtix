@@ -11,9 +11,9 @@
 #   - Zona horaria del sistema ($SYSTEM_TIMEZONE)
 #   - Nombre del disco utilizado ($ROOT_DISK)
 #   - Si se usa encriptación ($CRYPT_ROOT)
-#   - El tipo de partición de la instalación ($ROOT_FILESYSTEM)
 #   - Nombre de la partición principal ($ROOT_PART_NAME)
 #   - Nombre de la partición desencriptada abierta ($CRYPT_NAME)
+#   - Nombre del grupo LVM ($VG_NAME)
 #   - Nombre del host ($HOSTNAME)
 #   - Driver de vídeo a usar ($GRAPHIC_DRIVER)
 #   - Variables con el software opcional elegido
@@ -116,7 +116,7 @@ scheme_setup() {
 
 		# Confirmamos los cambios
 		if scheme_show; then
-			break # Salir del bucle si se confirman los cambios
+			return # Salir del bucle si se confirman los cambios
 		else
 			whip_msg "ERROR" "Hubo un error al comprobar el esquema de particiones elegido, o el usuario cancelo la operación."
 		fi
@@ -125,103 +125,91 @@ scheme_setup() {
 
 # Encriptar el disco duro
 part_encrypt() {
+	local DISPLAY_NAME="$1"
+	local DEVICE="$2"
+	local DECRYPTED_NAME="$3"
 	local LUKS_PASSWORD
+	cryptsetup benchmark
 	while true; do
 		LUKS_PASSWORD=$(
 			get_password "Entrada de contraseña" "Confirmación de contraseña" \
-				"Introduce la contraseña de encriptación del disco $1:" \
-				"Re-introduce la contraseña de encriptación del disco $1:"
+				"Introduce la contraseña de encriptación del disco $DISPLAY_NAME:" \
+				"Re-introduce la contraseña de encriptación del disco $DISPLAY_NAME:"
 		)
-		yes "$LUKS_PASSWORD" | cryptsetup luksFormat -q --verify-passphrase "/dev/$2" && break
+		echo -ne "$LUKS_PASSWORD" | cryptsetup \
+			--type luks1 \
+			--cipher serpent-xts-plain64 \
+			--key-size 512 \
+			--hash whirlpool \
+			--iter-time 10000 \
+			--use-random \
+			--verify-passphrase -q luksFormat "/dev/$DEVICE" &&
+			break
+		# Si no se pudo encriptar el dispositivo, no se sale del bucle y se pide otra vez la contraseña
 		whip_msg "LUKS" "Hubo un error, deberá introducir la contraseña otra vez"
 	done
 
-	yes "$LUKS_PASSWORD" | cryptsetup open "/dev/$2" "$3" && return
+	echo -ne "$LUKS_PASSWORD" | cryptsetup open "/dev/$DEVICE" "$DECRYPTED_NAME" && return
 }
 
 disk_setup() {
-	# Elegimos el sistema de ficheros
-	ROOT_FILESYSTEM=$(
-		whip_menu "Sistema de archivos" \
-			"Selecciona el sistema de archivos para /:" \
-			"ext4" "Ext4" "btrfs" "Btrfs"
-	)
+	local LVM_DEVICE=
+	ROOT_PART_NAME="$ROOT_PART"
 
-	ROOT_PART_NAME=
-
-	# Nombre aleatorio de la partición encriptada abierta
+	# Nombres aleatorios para poder usar el instalado desde una instalación ya existente
 	CRYPT_NAME=$(tr -dc 'a-zA-Z' </dev/urandom | fold -w 5 | head -n 1)
+	VG_NAME=$(tr -dc 'a-zA-Z' </dev/urandom | fold -w 5 | head -n 1)
 
 	# Borramos la firma del disco
 	wipefs --all "/dev/$ROOT_DISK"
-
 	# Creamos nuestra tabla de particionado y las dos particiones necesarias
-	printf "label: gpt\n,550M,U\n,,\n" | sfdisk "/dev/$ROOT_DISK"
+	printf "label: gpt\n,1G,U\n,,\n" | sfdisk "/dev/$ROOT_DISK"
 
 	# Formateamos la primera partición como EFI
 	mkfs.fat -F32 "/dev/$BOOT_PART"
 
-	# Si se eligió usar LUKS, es el momento de encriptar la partición
+	# Si se eligió usar LUKS, encriptamos la partición
 	if [ "$CRYPT_ROOT" == "true" ]; then
-		part_encrypt "/" "$ROOT_PART" "$CRYPT_NAME" &&
-			# Cambiamos el indicador del disco a la partición encriptada
-			ROOT_PART_NAME="$ROOT_PART"
-		ROOT_PART="mapper/$CRYPT_NAME"
+		part_encrypt "/" "$ROOT_PART" "$CRYPT_NAME"
+		LVM_DEVICE="/dev/mapper/$CRYPT_NAME"
+	else
+		LVM_DEVICE="/dev/$ROOT_PART"
 	fi
 
-	# Formateamos y montamosnuestras particiones
-	if [ "$ROOT_FILESYSTEM" == "ext4" ]; then
+	# Inicializamos LVM
+	pvcreate "$LVM_DEVICE"
+	vgcreate "$VG_NAME" "$LVM_DEVICE"
 
-		mkfs.ext4 "/dev/$ROOT_PART"
+	lvcreate -L 16G -n swap "$VG_NAME"
+	lvcreate -l 100%FREE -n root "$VG_NAME"
 
-		# Creamos el archivo swap
-		mount "/dev/$ROOT_PART" /mnt
-		mkdir /mnt/swap
-		fallocate -l 8G /mnt/swap/swapfile
-		chmod 0600 /mnt/swap/swapfile
-		mkswap /mnt/swap/swapfile
+	ROOT_PART="$VG_NAME/root"
 
-	elif [ "$ROOT_FILESYSTEM" == "btrfs" ]; then
+	mkswap "/dev/$VG_NAME/swap"
+	swapon "/dev/$VG_NAME/swap"
 
-		mkfs.btrfs -f "/dev/$ROOT_PART"
+	# Formateamos y montamos nuestras particiones
+	mkfs.btrfs -f "/dev/$ROOT_PART"
 
-		mount "/dev/$ROOT_PART" /mnt
-		btrfs subvolume create /mnt/@
-		# Creamos el subvolumen home
-		btrfs subvolume create /mnt/@home
-		# Creamos el subvolumen swap
-		btrfs subvolume create /mnt/@swap
-		# Creamos un subvolumen para las imágenes de las máquinas virtuales,
-		# así, en caso de que el usuario instale libvirt, estas no se incluirán
-		# en las instantáneas
-		btrfs subvolume create /mnt/@images
-		umount -R /mnt
+	mount "/dev/$ROOT_PART" /mnt
 
-		mount -t btrfs \
-			-o noatime,compress=zstd:1,autodefrag,subvol=@ \
-			"/dev/$ROOT_PART" /mnt
+	btrfs subvolume create /mnt/@
+	btrfs subvolume create /mnt/@home
+	btrfs subvolume create /mnt/@images
+	umount -R /mnt
 
-		mkdir /mnt/home
-		mkdir /mnt/swap
-		mkdir -p /mnt/var/lib/libvirt/images
+	mount -t btrfs \
+		-o noatime,compress=zstd:1,autodefrag,subvol=@ \
+		"/dev/$ROOT_PART" /mnt
 
-		mount -t btrfs \
-			-o noatime,compress=zstd:1,autodefrag,subvol=@home \
-			"/dev/$ROOT_PART" /mnt/home
+	mkdir -p /mnt/{home,var/lib/libvirt/images}
 
-		mount -t btrfs \
-			-o noatime,autodefrag,subvol=@images \
-			"/dev/$ROOT_PART" /mnt/var/lib/libvirt/images
-
-		mount -t btrfs \
-			-o noatime,nodatacow,subvol=@swap \
-			"/dev/$ROOT_PART" /mnt/swap
-
-		btrfs filesystem mkswapfile -s 8G /mnt/swap/swapfile
-
-	fi
-
-	swapon /mnt/swap/swapfile
+	mount -t btrfs \
+		-o noatime,compress=zstd:1,autodefrag,subvol=@home \
+		"/dev/$ROOT_PART" /mnt/home
+	mount -t btrfs \
+		-o noatime,autodefrag,subvol=@images \
+		"/dev/$ROOT_PART" /mnt/var/lib/libvirt/images
 
 	mkdir /mnt/boot
 	mount "/dev/$BOOT_PART" /mnt/boot
@@ -236,7 +224,7 @@ basestrap_install() {
 
 	BASESTRAP_PACKAGES="base elogind-openrc openrc linux linux-firmware"
 	BASESTRAP_PACKAGES+=" opendoas mkinitcpio wget libnewt btrfs-progs"
-	BASESTRAP_PACKAGES+=" neovim"
+	BASESTRAP_PACKAGES+=" neovim lvm2-openrc"
 
 	# Instalamos los paquetes del grupo base-devel manualmente para luego
 	# poder borrar sudo facilmente. (Si en su lugar instalamos el grupo,
@@ -625,9 +613,9 @@ artix-chroot /mnt sh -c "
 	SYSTEM_TIMEZONE=$SYSTEM_TIMEZONE \
 	ROOT_DISK=$ROOT_DISK \
 	CRYPT_ROOT=$CRYPT_ROOT \
-	ROOT_FILESYSTEM=$ROOT_FILESYSTEM \
 	ROOT_PART_NAME=$ROOT_PART_NAME \
 	CRYPT_NAME=$CRYPT_NAME \
+	VG_NAME=$VG_NAME \
 	HOSTNAME=$HOSTNAME \
 	GRAPHIC_DRIVER=$GRAPHIC_DRIVER \
 	CHOSEN_VIRT=$CHOSEN_VIRT \
