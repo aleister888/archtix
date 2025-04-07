@@ -127,26 +127,12 @@ genlocale() {
 mkinitcpio_conf() {
 	local -r MKINITCPIO_CONF="/etc/mkinitcpio.conf"
 	local MODULES="vfat snd_hda_intel usb_storage btusb nvme"
-	local HOOKS="block autodetect lvm2"
+	local HOOKS="base udev autodetect microcode modconf kms keyboard keymap consolefont block filesystems fsck block"
+	[ "$CRYPT_ROOT" = "true" ] && HOOKS+=" encrypt"
+	HOOKS+=" autodetect lvm2"
 
-	# Si se usa cifrado, añadir el gancho de encriptación
-	[ "$CRYPT_ROOT" = "true" ] && HOOKS="encrypt $HOOKS"
-
-	# Función interna para agregar elementos a MODULES o HOOKS
-	add_to_config() {
-		local VAR_NAME=$1
-		local ELEMENTS=$2
-		for ELEMENT in $ELEMENTS; do
-			# Usar sed para agregar el elemento si no está presente
-			grep -qE "$VAR_NAME=\(.*\b$ELEMENT\b.*\)" "$MKINITCPIO_CONF" || sed -i -E \
-				"s|$VAR_NAME=\(\s*\)|$VAR_NAME=($ELEMENT )|; t; s|$VAR_NAME=\((.*)\)|$VAR_NAME=(\1 $ELEMENT)|" \
-				"$MKINITCPIO_CONF"
-		done
-	}
-
-	# Agregar módulos y ganchos
-	add_to_config "MODULES" "$MODULES"
-	add_to_config "HOOKS" "$HOOKS"
+	sed -i "s/^MODULES=.*/MODULES=($MODULES)/" "$MKINITCPIO_CONF"
+	sed -i "s/^HOOKS=.*/HOOKS=($HOOKS)/" "$MKINITCPIO_CONF"
 }
 
 ##########
