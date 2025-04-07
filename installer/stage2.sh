@@ -10,7 +10,6 @@
 # - Pasa como variables los siguientes parámetros al siguiente script:
 #   - DPI de la pantalla ($FINAL_DPI)
 #   - Driver de video a usar ($GRAPHIC_DRIVER)
-#   - El tipo de partición de la instalación ($ROOT_FILESYSTEM)
 #   - Variables con el software opcional elegido
 #     - $CHOSEN_AUDIO_PROD, $CHOSEN_LATEX, $CHOSEN_MUSIC, $CHOSEN_VIRT
 
@@ -123,13 +122,9 @@ genlocale() {
 
 # Agrega módulos imprescindibles al initramfs
 modules_add() {
-	# Módulos a agregar
 	local -r MODULES="vfat snd_hda_intel usb_storage btusb nvme"
-
-	# Ruta de configuración de mkinitcpio
 	local -r MKINITCPIO_CONF="/etc/mkinitcpio.conf"
 
-	# Modificar la línea MODULES=
 	for MODULE in $MODULES; do
 		if ! grep -qE "MODULES=\(.*\b$MODULE\b.*\)" "$MKINITCPIO_CONF"; then
 			sed -i -E \
@@ -202,8 +197,8 @@ rc-update add dmeventd boot
 # Hacemos que la swap se utilize despúes de montar todos los discos
 sed -i '/rc_need="localmount"/s/^#//g' /etc/conf.d/swap
 
-ln -s /usr/bin/nvim /usr/local/bin/vim
-ln -s /usr/bin/nvim /usr/local/bin/vi
+ln -sf /usr/bin/nvim /usr/local/bin/vim
+ln -sf /usr/bin/nvim /usr/local/bin/vi
 
 # Configuramos sudo para stage3.sh
 echo "root ALL=(ALL:ALL) ALL
@@ -215,8 +210,7 @@ su "$USERNAME" -c "
 	export \
 	FINAL_DPI=$FINAL_DPI \
 	GRAPHIC_DRIVER=$GRAPHIC_DRIVER \
-	ROOT_FILESYSTEM=$ROOT_FILESYSTEM \
-	CHOSEN_AUDIO_PROD=$CHOSEN_AUDIO_PROD
+	CHOSEN_AUDIO_PROD=$CHOSEN_AUDIO_PROD \
 	CHOSEN_LATEX=$CHOSEN_LATEX \
 	CHOSEN_MUSIC=$CHOSEN_MUSIC \
 	CHOSEN_VIRT=$CHOSEN_VIRT \
