@@ -15,8 +15,8 @@ ASSETDIR="$REPO_DIR/assets/configs"
 # Guardamos el hash del script para comprobar mas adelante si este ha cambiado
 OGHASH=$(sha256sum "$0" | awk '{print $1}')
 
-# Si tenemos conexión a internet actualizamos el repositorio
-if ping gnu.org -c 1 >/dev/null 2>&1; then
+# Si tenemos conexión a Internet y el repo. clonado, lo actualizamos
+if [ -d "$REPO_DIR/.git" ] && ping gnu.org -c 1 >/dev/null 2>&1; then
 	sh -c "cd $REPO_DIR && git pull" >/dev/null ||
 		exit 1
 fi
