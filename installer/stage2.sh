@@ -123,34 +123,30 @@ genlocale() {
 	echo "LANG=es_ES.UTF-8" >/etc/locale.conf
 }
 
-# Agrega módulos imprescindibles al initramfs
-modules_add() {
-	local -r MODULES="vfat snd_hda_intel usb_storage btusb nvme"
+# Configurar la creación del initramfs
+mkinitcpio_conf() {
 	local -r MKINITCPIO_CONF="/etc/mkinitcpio.conf"
-
-	for MODULE in $MODULES; do
-		if ! grep -qE "MODULES=\(.*\b$MODULE\b.*\)" "$MKINITCPIO_CONF"; then
-			sed -i -E \
-				"s|MODULES=\(\s*\)|MODULES=($MODULE )|; t; s|MODULES=\((.*)\)|MODULES=(\1 $MODULE)|" \
-				"$MKINITCPIO_CONF"
-		fi
-	done
-}
-
-# Agrega ganchos imprescindibles al initramfs
-hooks_add() {
+	local MODULES="vfat snd_hda_intel usb_storage btusb nvme"
 	local HOOKS="block autodetect lvm2"
-	local -r MKINITCPIO_CONF="/etc/mkinitcpio.conf"
 
+	# Si se usa cifrado, añadir el gancho de encriptación
 	[ "$CRYPT_ROOT" = "true" ] && HOOKS+=" encrypt"
 
-	for HOOK in $HOOKS; do
-		if ! grep -qE "HOOKS=\(.*\b$HOOK\b.*\)" "$MKINITCPIO_CONF"; then
-			sed -i -E \
-				"s|HOOKS=\(\s*\)|HOOKS=($HOOK )|; t; s|HOOKS=\((.*)\)|HOOKS=(\1 $HOOK)|" \
+	# Función interna para agregar elementos a MODULES o HOOKS
+	add_to_config() {
+		local VAR_NAME=$1
+		local ELEMENTS=$2
+		for ELEMENT in $ELEMENTS; do
+			# Usar sed para agregar el elemento si no está presente
+			grep -qE "$VAR_NAME=\(.*\b$ELEMENT\b.*\)" "$MKINITCPIO_CONF" || sed -i -E \
+				"s|$VAR_NAME=\(\s*\)|$VAR_NAME=($ELEMENT )|; t; s|$VAR_NAME=\((.*)\)|$VAR_NAME=(\1 $ELEMENT)|" \
 				"$MKINITCPIO_CONF"
-		fi
-	done
+		done
+	}
+
+	# Agregar módulos y ganchos
+	add_to_config "MODULES" "$MODULES"
+	add_to_config "HOOKS" "$HOOKS"
 }
 
 ##########
@@ -197,8 +193,7 @@ arch_support
 genlocale
 
 # Agregamos los módulos y ganchos imprescindibles al initramfs
-modules_add
-hooks_add
+mkinitcpio_conf
 
 # Activamos servicios
 service_add NetworkManager
