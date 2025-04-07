@@ -21,7 +21,7 @@ sudo pacman-key --populate && sudo pacman-key --refresh-keys
 # - xkeyboard-config: para elegir el layout de teclado
 # - bc: para calcular el DPI de la pantalla
 # - git: para clonar el repositorio
-sudo pacman -Sy --noconfirm --needed parted libnewt xkeyboard-config bc git
+sudo pacman -Sy --noconfirm --needed parted libnewt xkeyboard-config bc git lvm2
 
 # Clonamos el repositorio e iniciamos el instalador
 git clone --depth 1 https://github.com/aleister888/artix-installer.git \

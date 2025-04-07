@@ -174,7 +174,7 @@ disk_setup() {
 	lvcreate -L 16G -n swap "$VG_NAME"
 	lvcreate -l 100%FREE -n root "$VG_NAME"
 
-	ROOT_PART="/dev/$VG_NAME/root"
+	ROOT_PART="$VG_NAME/root"
 
 	# Formateamos y montamos nuestras particiones
 	mkfs.btrfs -f "/dev/$ROOT_PART"
