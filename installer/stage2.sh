@@ -127,9 +127,9 @@ genlocale() {
 mkinitcpio_conf() {
 	local -r MKINITCPIO_CONF="/etc/mkinitcpio.conf"
 	local MODULES="vfat snd_hda_intel usb_storage btusb nvme"
-	local HOOKS="base udev autodetect microcode modconf kms keyboard keymap consolefont block filesystems fsck block"
+	local HOOKS="base udev autodetect microcode modconf kms keyboard keymap consolefont block"
 	[ "$CRYPT_ROOT" = "true" ] && HOOKS+=" encrypt"
-	HOOKS+=" autodetect lvm2"
+	HOOKS+=" lvm2 resume filesystems fsck"
 
 	sed -i "s/^MODULES=.*/MODULES=($MODULES)/" "$MKINITCPIO_CONF"
 	sed -i "s/^HOOKS=.*/HOOKS=($HOOKS)/" "$MKINITCPIO_CONF"
