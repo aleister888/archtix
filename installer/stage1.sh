@@ -176,6 +176,9 @@ disk_setup() {
 
 	ROOT_PART="$VG_NAME/root"
 
+	mkswap "/dev/$VG_NAME/swap"
+	swapon "/dev/$VG_NAME/swap"
+
 	# Formateamos y montamos nuestras particiones
 	mkfs.btrfs -f "/dev/$ROOT_PART"
 

@@ -137,7 +137,6 @@ trash_dir
 # Configurar cronie para iniciar syncthing con el ordenador y asignar la swap
 cat <<-EOF | sudo tee -a /etc/crontab >/dev/null
 	@reboot $USER syncthing --no-browser --no-default-folder
-	@reboot root sleep 5 && swapon /swap/swapfile
 EOF
 
 # Si estamos usando una máquina virtual, configuramos X11 para funcionar a 1080p
