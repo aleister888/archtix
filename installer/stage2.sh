@@ -60,7 +60,7 @@ install_grub() {
 
 # Definimos el nombre de nuestra máquina y creamos el archivo hosts
 hostname_config() {
-	echo "$HOSTNAME" >/etc/HOSTNAME
+	echo "$HOSTNAME" >/etc/hostname
 
 	# Este archivo hosts bloquea el acceso a sitios maliciosos
 	curl -o /etc/hosts \
@@ -166,9 +166,6 @@ fi
 # Instalamos grub
 install_grub
 
-# Regeneramos el initramfs
-mkinitcpio -P
-
 # Definimos el nombre de nuestra máquina y creamos el archivo hosts
 hostname_config
 
@@ -180,6 +177,10 @@ genlocale
 
 # Agregamos los módulos y ganchos imprescindibles al initramfs
 mkinitcpio_conf
+# Regeneramos el initramfs
+mkinitcpio -P
+# Actualizamos la configuración de GRUB
+grub-mkconfig -o /boot/grub/grub.cfg
 
 # Activamos servicios
 service_add NetworkManager
