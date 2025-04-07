@@ -136,7 +136,7 @@ part_encrypt() {
 				"Introduce la contraseña de encriptación del disco $DISPLAY_NAME:" \
 				"Re-introduce la contraseña de encriptación del disco $DISPLAY_NAME:"
 		)
-		yes "$LUKS_PASSWORD" | cryptsetup \
+		echo -ne "$LUKS_PASSWORD" | cryptsetup \
 			--type luks1 \
 			--cipher serpent-xts-plain64 \
 			--key-size 512 \
@@ -149,7 +149,7 @@ part_encrypt() {
 		whip_msg "LUKS" "Hubo un error, deberá introducir la contraseña otra vez"
 	done
 
-	yes "$LUKS_PASSWORD" | cryptsetup open "/dev/$DEVICE" "$DECRYPTED_NAME" && return
+	echo -ne "$LUKS_PASSWORD" | cryptsetup open "/dev/$DEVICE" "$DECRYPTED_NAME" && return
 }
 
 disk_setup() {

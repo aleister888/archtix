@@ -125,13 +125,29 @@ genlocale() {
 
 # Agrega módulos imprescindibles al initramfs
 modules_add() {
-	local -r MODULES="vfat snd_hda_intel usb_storage btusb nvme lvm2"
+	local -r MODULES="vfat snd_hda_intel usb_storage btusb nvme"
 	local -r MKINITCPIO_CONF="/etc/mkinitcpio.conf"
 
 	for MODULE in $MODULES; do
 		if ! grep -qE "MODULES=\(.*\b$MODULE\b.*\)" "$MKINITCPIO_CONF"; then
 			sed -i -E \
-				"s|MODULES=\(\s*\)|MODULES=( $MODULE )|; t; s|MODULES=\((.*)\)|MODULES=(\1$MODULE )|" \
+				"s|MODULES=\(\s*\)|MODULES=($MODULE )|; t; s|MODULES=\((.*)\)|MODULES=(\1 $MODULE)|" \
+				"$MKINITCPIO_CONF"
+		fi
+	done
+}
+
+# Agrega ganchos imprescindibles al initramfs
+hooks_add() {
+	local HOOKS="block autodetect lvm2"
+	local -r MKINITCPIO_CONF="/etc/mkinitcpio.conf"
+
+	[ "$CRYPT_ROOT" = "true" ] && HOOKS+=" encrypt"
+
+	for HOOK in $HOOKS; do
+		if ! grep -qE "HOOKS=\(.*\b$HOOK\b.*\)" "$MKINITCPIO_CONF"; then
+			sed -i -E \
+				"s|HOOKS=\(\s*\)|HOOKS=($HOOK )|; t; s|HOOKS=\((.*)\)|HOOKS=(\1 $HOOK)|" \
 				"$MKINITCPIO_CONF"
 		fi
 	done
@@ -157,11 +173,6 @@ pacman-key --populate && pacman-key --refresh-keys
 sed -i 's/^#Color/Color\nILoveCandy/' /etc/pacman.conf
 sed -i 's/^#ParallelDownloads = 5/ParallelDownloads = 5/' /etc/pacman.conf
 
-# Si se utiliza encriptación, añadir el módulo encrypt a la imagen del kernel
-if [ "$CRYPT_ROOT" = "true" ]; then
-	sed -i -e '/^HOOKS=/ s/block/& encrypt/' /etc/mkinitcpio.conf
-fi
-
 if echo "$(
 	lspci
 	lsusb
@@ -185,8 +196,9 @@ arch_support
 # Configurar la codificación del sistema
 genlocale
 
-# Agregamos módulos imprescindibles al initramfs
+# Agregamos los módulos y ganchos imprescindibles al initramfs
 modules_add
+hooks_add
 
 # Activamos servicios
 service_add NetworkManager
