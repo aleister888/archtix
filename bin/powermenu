@@ -20,6 +20,7 @@ OPTIONS=(
 	" Cerrar sesión"
 	" Reinciar"
 	" Apagar"
+	"󰤄 Hibernar"
 	" BIOS"
 	" Reinciar dwm"
 )
@@ -43,6 +44,7 @@ case $CHOSEN in
 "${OPTIONS[3]}") $TERMINAL $TERMTITLE "scratchpad" $TERMEXEC doas pkill X ;;
 "${OPTIONS[4]}") doas /usr/bin/openrc-shutdown -r now ;;
 "${OPTIONS[5]}") doas /usr/bin/openrc-shutdown -p now ;;
-"${OPTIONS[6]}") loginctl reboot --firmware-setup ;;
-"${OPTIONS[7]}") pkill dwm ;;
+"${OPTIONS[6]}") loginctl hibernate ;;
+"${OPTIONS[7]}") loginctl reboot --firmware-setup ;;
+"${OPTIONS[8]}") pkill dwm ;;
 esac

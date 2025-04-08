@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 # shellcheck disable=SC2068
 # shellcheck disable=SC2154
 
@@ -23,33 +23,44 @@ driver_add() {
 
 	amd)
 		PACKAGES+=(
+			"lib32-mesa"
+			"lib32-vulkan-radeon"
+			"mesa"
+			"vulkan-radeon"
 			"xf86-video-amdgpu"
-			"mesa" "lib32-mesa"
-			"vulkan-radeon" "lib32-vulkan-radeon"
 		)
 		;;
 
 	nvidia)
 		PACKAGES+=(
-			"dkms" "nvidia-dkms" "nvidia-utils"
-			"libva-vdpau-driver" "libva-mesa-driver"
-			"nvidia-prime" "lib32-nvidia-utils"
-			"nvidia-utils-openrc" "opencl-nvidia"
+			"dkms"
+			"lib32-nvidia-utils"
+			"libva-mesa-driver"
+			"libva-vdpau-driver"
+			"nvidia-dkms"
+			"nvidia-prime"
+			"nvidia-utils"
+			"nvidia-utils-openrc"
+			"opencl-nvidia"
 		)
 		;;
 
 	intel)
 		PACKAGES+=(
+			"lib32-libva-intel-driver"
+			"lib32-vulkan-intel"
+			"libva-intel-driver"
+			"vulkan-intel"
 			"xf86-video-intel"
-			"libva-intel-driver" "lib32-libva-intel-driver"
-			"vulkan-intel" "lib32-vulkan-intel"
 		)
 		;;
 
 	vm)
 		PACKAGES+=(
-			"xf86-video-vmware" "xf86-input-vmmouse"
-			"vulkan-virtio" "lib32-vulkan-virtio"
+			"lib32-vulkan-virtio"
+			"vulkan-virtio"
+			"xf86-input-vmmouse"
+			"xf86-video-vmware"
 		)
 		;;
 
@@ -180,6 +191,8 @@ mkdir -p "$HOME"/.local/share/gnupg
 # Arreglos #
 ############
 
-pacman -Q poppler >/dev/null 2>&1 &&
-	sudo ln -s /usr/lib/libpoppler-cpp.so.2.0.0 \
-		/usr/lib/libpoppler-cpp.so.1 2>/dev/null
+if pacman -Q poppler &>/dev/null; then
+	if [ ! -L /usr/lib/libpoppler-cpp.so.1 ]; then
+		sudo ln -s /usr/lib/libpoppler-cpp.so.2.0.0 /usr/lib/libpoppler-cpp.so.1
+	fi
+fi

@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 # shellcheck disable=SC2068
 
 # Auto-instalador para Artix OpenRC (Parte 1)
@@ -10,7 +10,6 @@
 #   - DPI de la pantalla ($FINAL_DPI)
 #   - Zona horaria del sistema ($SYSTEM_TIMEZONE)
 #   - Nombre del disco utilizado ($ROOT_DISK)
-#   - Si se usa encriptación ($CRYPT_ROOT)
 #   - Nombre de la partición principal ($ROOT_PART_NAME)
 #   - Nombre de la partición desencriptada abierta ($CRYPT_NAME)
 #   - Nombre del grupo LVM ($VG_NAME)
@@ -54,10 +53,9 @@ echo_msg() {
 # Muestra como quedarían las particiones de nuestra instalación para confirmar
 # los cambios. También prepara las variables para formatear los discos
 scheme_show() {
-	local SCHEME    # Variable con el esquema de particiones completo
-	local ROOT_TYPE # Tipo de partición/ (LUKS o normal)
-	BOOT_PART=      # Partición de arranque
-	ROOT_PART=      # Partición con el sistema
+	local SCHEME # Variable con el esquema de particiones completo
+	BOOT_PART=   # Partición de arranque
+	ROOT_PART=   # Partición con el sistema
 
 	# Definimos el nombre de las particiones de nuestro disco principal
 	# (Los NVME tienen un sistema de nombrado distinto)
@@ -72,27 +70,19 @@ scheme_show() {
 		;;
 	esac
 
-	# Mostrar si la partición esta encriptada
-	if [ "$CRYPT_ROOT" == "true" ]; then
-		ROOT_TYPE="LUKS"
-	else
-		ROOT_TYPE="/"
-	fi
-
 	# Creamos el esquema que whiptail nos mostrará
 	SCHEME="/dev/$ROOT_DISK    $(lsblk -dn -o size /dev/"$ROOT_DISK")
 	/dev/$BOOT_PART  /boot
-	/dev/$ROOT_PART  $ROOT_TYPE
-	"
-	if [ "$CRYPT_ROOT" == "true" ]; then
-		SCHEME+="/dev/mapper/root  /"
-	fi
+	/dev/$ROOT_PART  LUKS
+		LVM          SWAP
+		LVM          /"
 
 	# Mostramos el esquema para confirmar los cambios
-	if ! whiptail --backtitle "$REPO_URL" \
+	if ! whiptail \
+		--backtitle "$REPO_URL" \
 		--title "Confirmar particionado" \
 		--yesno "$SCHEME" 15 60; then
-		whip_yes "Salir" "¿Desea cancelar la instalación? En caso contrario, volverá a elegir su esquema de particiones" &&
+		whip_yes "Salir" "¿Desea cancelar la instalación?" &&
 			exit 1
 	fi
 }
@@ -108,17 +98,11 @@ scheme_setup() {
 			) && break
 		done
 
-		if whip_yes "LUKS" "¿Desea encriptar el disco duro?"; then
-			CRYPT_ROOT=true
-		else
-			CRYPT_ROOT=false
-		fi
-
 		# Confirmamos los cambios
 		if scheme_show; then
 			return # Salir del bucle si se confirman los cambios
 		else
-			whip_msg "ERROR" "Hubo un error al comprobar el esquema de particiones elegido, o el usuario cancelo la operación."
+			whip_msg "ERROR" "Error al confirmar el esquema de particiones ¿Cancelo el usuario la operación?"
 		fi
 	done
 }
@@ -137,15 +121,10 @@ part_encrypt() {
 				"Re-introduce la contraseña de encriptación del disco $DISPLAY_NAME:"
 		)
 		echo -ne "$LUKS_PASSWORD" | cryptsetup \
-			--type luks1 \
-			--cipher serpent-xts-plain64 \
-			--key-size 512 \
-			--hash whirlpool \
-			--iter-time 10000 \
-			--use-random \
-			--verify-passphrase -q luksFormat "/dev/$DEVICE" &&
-			break
-		# Si no se pudo encriptar el dispositivo, no se sale del bucle y se pide otra vez la contraseña
+			--type luks2 \
+			--verify-passphrase -q luksFormat "/dev/$DEVICE" && break
+
+		# Cambiar la contraseña si hubo un error
 		whip_msg "LUKS" "Hubo un error, deberá introducir la contraseña otra vez"
 	done
 
@@ -168,13 +147,9 @@ disk_setup() {
 	# Formateamos la primera partición como EFI
 	mkfs.fat -F32 "/dev/$BOOT_PART"
 
-	# Si se eligió usar LUKS, encriptamos la partición
-	if [ "$CRYPT_ROOT" == "true" ]; then
-		part_encrypt "/" "$ROOT_PART" "$CRYPT_NAME"
-		LVM_DEVICE="/dev/mapper/$CRYPT_NAME"
-	else
-		LVM_DEVICE="/dev/$ROOT_PART"
-	fi
+	# Encriptamos la partición
+	part_encrypt "/" "$ROOT_PART" "$CRYPT_NAME"
+	LVM_DEVICE="/dev/mapper/$CRYPT_NAME"
 
 	# Inicializamos LVM
 	pvcreate "$LVM_DEVICE"
@@ -298,7 +273,7 @@ kb_layout_select() {
 }
 
 kb_layout_conf() {
-	sudo mkdir -p /mnt/etc/X11/xorg.conf.d/ # X11
+	mkdir -p /mnt/etc/X11/xorg.conf.d/ # X11
 	cat <<-EOF >/mnt/etc/X11/xorg.conf.d/00-keyboard.conf
 		Section "InputClass"
 		    Identifier "system-keyboard"
@@ -310,7 +285,7 @@ kb_layout_conf() {
 	EOF
 	# Si elegimos español, configurar el layout de la tty en español también
 	[ "$FINAL_LAYOUT" == "es" ] &&
-		sudo sed -i 's|keymap="us"|keymap="es"|' /etc/conf.d/keymaps
+		sed -i 's|keymap="us"|keymap="es"|' /etc/conf.d/keymaps
 }
 
 # Calcular el DPI
@@ -612,7 +587,6 @@ artix-chroot /mnt sh -c "
 	FINAL_DPI=$FINAL_DPI \
 	SYSTEM_TIMEZONE=$SYSTEM_TIMEZONE \
 	ROOT_DISK=$ROOT_DISK \
-	CRYPT_ROOT=$CRYPT_ROOT \
 	ROOT_PART_NAME=$ROOT_PART_NAME \
 	CRYPT_NAME=$CRYPT_NAME \
 	VG_NAME=$VG_NAME \

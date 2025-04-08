@@ -42,9 +42,6 @@ user_pref("browser.newtabpage.activity-stream.feeds.topsites", false);
 // Desactivar notificaciones
 user_pref("dom.push.enabled", false);
 
-// Desactivar historial
-user_pref("places.history.enabled", false);
-
 // Desactivar funciones experimentales
 user_pref("browser.preferences.experimental", false);
 user_pref("browser.preferences.experimental.hidden", true);
@@ -57,9 +54,6 @@ user_pref("signon.rememberSignons", false);
 
 // Usar el mismo buscador para las ventanas privadas
 user_pref("browser.search.separatePrivateDefault", false);
-
-// Implementar medidas anti-trazado
-user_pref("privacy.resistFingerprinting.letterboxing", true);
 
 // Desactivar sugerencias de búsqueda
 user_pref("browser.urlbar.suggest.history", false);
