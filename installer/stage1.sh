@@ -71,11 +71,11 @@ scheme_show() {
 	esac
 
 	# Creamos el esquema que whiptail nos mostrará
-	SCHEME="/dev/$ROOT_DISK    $(lsblk -dn -o size /dev/"$ROOT_DISK")
+	SCHEME="/dev/$ROOT_DISK      $(lsblk -dn -o size /dev/"$ROOT_DISK")
 	/dev/$BOOT_PART  /boot
 	/dev/$ROOT_PART  LUKS
-		LVM          SWAP
-		LVM          /"
+		LVM        SWAP
+		LVM        /"
 
 	# Mostramos el esquema para confirmar los cambios
 	if ! whiptail \
