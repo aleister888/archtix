@@ -72,9 +72,9 @@ scheme_show() {
 
 	# Creamos el esquema que whiptail nos mostrará
 	SCHEME="
-/dev/$ROOT_DISK    $(lsblk -dn -o size /dev/"$ROOT_DISK")
-├── /dev/$BOOT_PART        /boot
-└── /dev/$ROOT_PART        LUKS
+/dev/$ROOT_DISK [$(lsblk -dn -o size /dev/"$ROOT_DISK")]
+├── /dev/$BOOT_PART (/boot)
+└── /dev/$ROOT_PART (LUKS)
     └── LVM
         ├── SWAP
         └── /
@@ -116,7 +116,6 @@ part_encrypt() {
 	local DEVICE="$2"
 	local DECRYPTED_NAME="$3"
 	local LUKS_PASSWORD
-	cryptsetup benchmark
 	while true; do
 		LUKS_PASSWORD=$(
 			get_password "Entrada de contraseña" "Confirmación de contraseña" \

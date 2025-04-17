@@ -4,6 +4,7 @@
     "timeshift"
   ],
   "audio": [
+    "alsa-firmware",
     "alsa-plugins",
     "alsa-tools",
     "alsa-utils",
