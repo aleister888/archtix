@@ -1,0 +1,63 @@
+#!/usr/bin/env python3
+import os
+import re
+import sys
+
+# Caracteres no válidos
+invalid_chars_windows = r'[<>:"/\\|?*]'
+invalid_chars_android = r'[:?]'
+
+# Nombres reservados de Windows (sin extensión, insensibles a mayúsculas)
+reserved_names_windows = {
+    "CON", "PRN", "AUX", "NUL",
+    *{f"COM{i}" for i in range(1, 10)},
+    *{f"LPT{i}" for i in range(1, 10)},
+}
+
+def encontrar_invalidos(nombre, patron):
+    return sorted(set(re.findall(patron, nombre)))
+
+def es_nombre_reservado(nombre):
+    base = os.path.splitext(nombre)[0]
+    return base.upper() in reserved_names_windows
+
+def termina_con_espacio_o_punto(nombre):
+    return nombre.endswith(' ') or nombre.endswith('.')
+
+def check_invalid_filenames(path):
+    for root, dirs, files in os.walk(path):
+        for name in files + dirs:
+            conflictos = []
+            ruta_completa = os.path.join(root, name)
+
+            chars_win = encontrar_invalidos(name, invalid_chars_windows)
+            if chars_win:
+                conflictos.append(f"Windows: {' '.join(chars_win)}")
+
+            chars_android = encontrar_invalidos(name, invalid_chars_android)
+            if chars_android:
+                conflictos.append(f"Android: {' '.join(chars_android)}")
+
+            if es_nombre_reservado(name):
+                conflictos.append("Nombre reservado en Windows")
+
+            if termina_con_espacio_o_punto(name):
+                conflictos.append("Termina en espacio o punto (Windows)")
+
+            if conflictos:
+                print(f"{ruta_completa}")
+                for conflicto in conflictos:
+                    print(f"    ⚠️  {conflicto}")
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Uso: python3 script.py /ruta/a/carpeta")
+        sys.exit(1)
+
+    ruta = sys.argv[1]
+
+    if os.path.isdir(ruta):
+        check_invalid_filenames(ruta)
+    else:
+        print("Ruta no válida.")
+        sys.exit(1)

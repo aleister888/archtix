@@ -14,7 +14,7 @@ fi
 # Configurar OpenDoas
 echo "Configurando OpenDoas..."
 cat <<EOF >/etc/doas.conf
-permit nopass keepenv setenv { DISPLAY XAUTHORITY LANG LC_ALL } :wheel
+permit nopass keepenv setenv { SUDO_USER SUDO_UID SUDO_GID DISPLAY XAUTHORITY LANG LC_ALL } :wheel
 EOF
 
 if [ $? -ne 0 ]; then

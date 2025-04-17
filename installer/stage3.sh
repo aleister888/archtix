@@ -173,6 +173,9 @@ audio-setup
 # Configuramos el reloj según la zona horaria escogida
 sudo set-clock
 
+# Sincronizar las bases de datos de los paquetes
+sudo pacman -Fy
+
 # Añadir entradas a /etc/environment
 cat <<-'EOF' | sudo tee -a /etc/environment
 	CARGO_HOME="~/.local/share/cargo"

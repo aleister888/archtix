@@ -17,4 +17,5 @@ qemu-hw-display-virtio-vga-gl
 qemu-hw-usb-host
 qemu-hw-usb-redirect
 qemu-ui-sdl
+swtpm
 virt-manager
