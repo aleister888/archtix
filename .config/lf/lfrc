@@ -264,20 +264,13 @@ cmd restore-trash ${{
 # Abrir archivos en función del tipo
 cmd open ${{
 case $(xdg-mime query filetype "$(readlink -f $f)") in
-	*/x-7z-compressed | */vnd.rar | */x-tar | */x-compressed-tar | */gzip)
+	*/x-7z-compressed | */vnd.rar | */x-tar | */x-compressed-tar | */zip | */gzip)
 		xarchiver "$fx" ;;
-
-	*/zip | */vnd.comicbook+zip)
-		if [[ "$(readlink -f $f)" == *.cbz ]]; then
-			zathura "$f"
-		else
-			xarchiver "$fx"
-		fi ;;
 
 	*/vnd.*document*)
 		setsid -f libreoffice "$fx" ;;
 
-	*/pdf | */epub*)
+	*/pdf | */epub* | */vnd.comicbook*)
 		zathura "$f" ;;
 
 	text/* | */xml | */json | inode/x-empty | */x-shellscript | */pgp-encrypted | */x-xcursor | */x-theme | */x-desktop | */yaml )

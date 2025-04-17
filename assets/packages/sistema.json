@@ -20,10 +20,6 @@
     "squashfuse",
     "zsh"
   ],
-  "kernel": [
-    "linux-zen",
-    "linux-zen-headers"
-  ],
   "pacman": [
     "downgrade",
     "lostfiles",

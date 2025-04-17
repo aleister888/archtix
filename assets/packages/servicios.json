@@ -13,6 +13,7 @@
     "lib32-pipewire-jack",
     "pipewire-openrc",
     "pipewire-pulse-openrc",
+    "sof-firmware",
     "wireplumber-openrc"
   ],
   "openrc": [
