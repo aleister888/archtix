@@ -156,10 +156,10 @@ video/*)
 */vnd.comicbook+zip | */vnd.comicbook-rar)
 	HASH="$(file_hash "$1")"
 	CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/thumb.$HASH"
-	TMP_DIR="$(mktemp -d /tmp/lf.XXXX)"
 	if [ ! -f "$CACHE" ]; then
+		TMP_DIR="$(mktemp -d /tmp/lf.XXXX)"
 		# Obtener y extraer la 1ª imagen
-		FIRST_IMAGE=$(7z l "$1" | awk '/\.jpg$|\.png$/ { for(i=6;i<=NF;i++) printf "%s%s", $i, (i==NF ? "\n" : " ") }' | head -n1)
+		FIRST_IMAGE=$(7z l "$1" | awk '/\.jpg$|\.png$/ { for(i=6;i<=NF;i++) printf "%s%s", $i, (i==NF ? "\n" : " ") }' | sort | head -n1)
 		if [ -n "$FIRST_IMAGE" ]; then
 			7z e "$1" "$FIRST_IMAGE" -o"$TMP_DIR" >/dev/null 2>&1
 			mv "$TMP_DIR/$(basename "$FIRST_IMAGE")" "$CACHE"
