@@ -10,10 +10,10 @@ xlogin*translations:#override \
 xlogin*greeting:CLIENTHOST
 xlogin*namePrompt:Username:\040
 xlogin*passwdPrompt:Password:\040
-xlogin*fail:Incorrect password
+xlogin*fail:incorrect
 xlogin*greetFace:Iosevka\040Fixed\040SS05-36:style=Bold
-xlogin*promptFace:Iosevka\040Fixed\040SS05-24:style=Regular
 xlogin*face:Iosevka\040Fixed\040SS05-24:style=Regular
+xlogin*promptFace:Iosevka\040Fixed\040SS05-24:style=Regular
 xlogin*failFace:Iosevka\040Fixed\040SS05-24:style=Regular
 xlogin*shdColor:#282828
 xlogin*hiColor:#282828

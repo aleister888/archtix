@@ -192,7 +192,16 @@ cmd mkdir $mkdir -p "$(echo $* | tr ' ' '\ ')"
 cmd extract ${{
 	whiptail --title "¿Extraer archivo(s)?" \
 	--yesno "¿Quieres extraer el archivo $f?" 10 60 && \
-	aunpack $f && \
+	{
+		case "$(xdg-mime query filetype "$f")" in
+		*/x-zstd-compressed-tar)
+			unzstd "$f"
+			aunpack "$(basename -s .zst "$f")"
+			rm "$(basename -s .zst "$f")"
+			;;
+		*) aunpack $f ;;
+		esac
+	} && \
 	whiptail --title "Operación Completada" \
 	--msgbox "Los archivos se extrajeron correctamente" 10 60
 }}
@@ -277,7 +286,7 @@ case $(xdg-mime query filetype "$(readlink -f $f)") in
 		$EDITOR "$fx" ;;
 
 	image/*)
-		filelist=$(ls -1 . | grep '.*\.\(jpg\|JPG\|jpeg\|JPEG\|png\|PNG\|gif\|GIF\|bmp\|BMP\|tiff\|TIFF\|ppm\|PPM\|svg\|SVG\|webp\|WEBP\)$')
+		filelist=$(ls -1 . | grep '.*\.\(jpg\|JPG\|jpeg\|JPEG\|png\|PNG\|gif\|GIF\|bmp\|BMP\|tiff\|TIFF\|ppm\|PPM\|svg\|SVG\|webp\|WEBP\|xpm\|XPM\)$')
 		index=$(printf "%s\n" $filelist | nl | grep "$(basename "$fx")" | awk '{print $1}')
 		setsid -f nsxiv -n $index $filelist & ;;
 

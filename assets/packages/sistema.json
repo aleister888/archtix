@@ -17,8 +17,11 @@
     "man-db",
     "net-tools",
     "realtime-privileges",
-    "squashfuse",
-    "zsh"
+    "squashfuse"
+  ],
+  "kernel": [
+    "linux-lts",
+    "linux-lts-headers"
   ],
   "pacman": [
     "downgrade",
@@ -37,6 +40,7 @@
     "glow"
   ],
   "zsh": [
+    "zsh",
     "zsh-autosuggestions",
     "zsh-history-substring-search",
     "zsh-syntax-highlighting"

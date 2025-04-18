@@ -3,7 +3,7 @@
 # Visualizador de archivos para LF.
 
 # Crear el directorio para la caché
-[ -d "${XDG_CACHE_HOME:-$HOME/.cache}/lf" ] || mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}/lf"
+mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}/lf"
 
 set -C -f
 IFS="$(printf '%b_' '\n')"
@@ -26,16 +26,16 @@ image() {
 
 # Función para extraer el hash de un archivo
 file_hash() {
-	stat --printf '%n\0%i\0%F\0%s\0%W\0%Y' -- "$(readlink -f "$1")" | sha256sum | awk '{print $1}'
+	stat --printf '%n\0%i\0%F\0%s\0%W\0%Y' -- "$(readlink -f "$1")" |
+		sha256sum | awk '{print $1}'
 }
 
 # Función para la preview de archivos que se pueden convertir con imagemagick directamente
-convert_and_preview() {
+magick_convert() {
 	HASH="$(file_hash "$1")"
 	CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/thumb.$HASH"
-	[ ! -f "$CACHE.jpg" ] && convert "$1" "$CACHE.jpg"
-	image "$CACHE.jpg" "$2" "$3" "$4" "$5"
-	exit 1
+	[ ! -f "$CACHE.jpg" ] && magick "$1" "$CACHE.jpg" >/dev/null 2>&1
+	echo "$CACHE.jpg"
 }
 
 # Notesé que la caché se genera en función de la información del archivo,
@@ -58,12 +58,12 @@ text/* | */xml | */json | */x-shellscript | */x-xcursor | */x-theme | */x-deskto
 	esac
 	;;
 
-# Convertir los proyectos de GIMP a JPG
-image/x-xcf) convert_and_preview "$1" ;;
-# Convertir imágenes postscript a JPG
-*/postscript) convert_and_preview "$1" ;;
-# Convertir las imágenes AVIF a JPG
-image/avif) convert_and_preview "$1" ;;
+# Convertir con imagemagick a JPG
+*/postscript | */x-xpixmap | */x-xcf | */heif)
+	CACHE=$(magick_convert "$1")
+	image "$CACHE" "$2" "$3" "$4" "$5"
+	exit 1
+	;;
 
 # Convertir las imágenes vectoriales (.svg) a .png
 image/svg+xml)
@@ -74,7 +74,7 @@ image/svg+xml)
 	exit 1
 	;;
 
-# Convertir los gráficos .eps a .jpg
+# Convertir los gráficos EPS a JPG
 image/x-eps)
 	HASH="$(file_hash "$1")"
 	CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/thumb.$HASH"
@@ -99,12 +99,12 @@ audio/flac | audio/mpeg | audio/x-m4a | audio/mp4)
 	[ ! -f "$METADATA" ] && ffmpeg -i "$1" -y -f ffmetadata "$METADATA"
 	[ ! -f "$COVER" ] && ffmpeg -nostdin -i "$1" "$COVER"
 
+	image "$COVER" "$2" "$3" "$4" "$5" &
 	{
 		printf '\n%.0s' $(seq $(($4 / 5)))
 		printf '\n'
 		grep -ivwE "(comment|encoder|ffmetadata1)" "$METADATA"
 	}
-	image "$COVER" "$2" "$3" "$4" "$5"
 	exit 1
 	;;
 
@@ -134,12 +134,12 @@ video/*)
 		rm "$TMP"
 	fi
 
+	image "$THUMB" "$2" "$3" "$4" "$5" &
 	{
 		printf '\n%.0s' $(seq $(($4 / 5)))
 		printf '\n'
 		cat "$METADATA"
 	}
-	image "$THUMB" "$2" "$3" "$4" "$5"
 	exit 1
 	;;
 
