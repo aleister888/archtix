@@ -6,6 +6,7 @@
     "handbrake-cli",
     "keepassxc",
     "qbittorrent",
+    "seahorse",
     "vlc"
   ],
   "neovim": [

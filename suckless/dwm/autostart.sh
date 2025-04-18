@@ -67,7 +67,11 @@ grep "Q35\|VMware" /sys/devices/virtual/dmi/id/product_name ||
 
 # Servicios del sistema
 pgrep polkit-gnome || /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
-pgrep gnome-keyring || gnome-keyring-daemon -r -d &
+if ! pgrep gnome-keyring; then
+	gnome-keyring-daemon -r -d &
+	sleep 2
+	gnome-keyring-daemon --unlock &
+fi
 pgrep udiskie || udiskie -t -a & # Auto-montador de discos
 pgrep dwmblocks || dwmblocks &   # Barra de estado
 pgrep nm-applet || nm-applet &   # Applet de red
