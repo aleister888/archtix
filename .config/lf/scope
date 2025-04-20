@@ -176,45 +176,42 @@ video/*)
 */x-tar | */x-compressed-tar)
 	HASH="$(file_hash "$1")"
 	CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/$HASH.txt"
-	[ ! -f "$CACHE" ] && tar -tf "$1" | tail -n +1 | tee "$CACHE"
+	if [ ! -f "$CACHE" ]; then
+		tar -tf "$1" | tail -n +1 |
+			tee "$CACHE" >/dev/null
+	fi
 	cat "$CACHE"
 	exit 1
 	;;
-
-# Mostar un listado de los archivos comprimidos
 */vnd.rar)
 	HASH="$(file_hash "$1")"
 	CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/$HASH.txt"
 	if [ ! -f "$CACHE" ]; then
 		unrar l "$1" | tail -n +9 | head -n -3 |
 			awk '{ for(i=4; i<=NF; i++) printf "%s%s", $i, (i==NF ? "\n" : " ") }' |
-			tee "$CACHE"
+			tee "$CACHE" >/dev/null
 	fi
 	cat "$CACHE"
 	exit 1
 	;;
-
-# Mostar un listado de los archivos comprimidos
 */zip)
 	HASH="$(file_hash "$1")"
 	CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/$HASH.txt"
 	if [ ! -f "$CACHE" ]; then
 		unzip -l "$1" | tail -n +4 | head -n -2 |
 			awk '{ for(i=3; i<=NF; i++) printf "%s%s", $i, (i==NF ? "\n" : " ") }' |
-			tee "$CACHE"
+			tee "$CACHE" >/dev/null
 	fi
 	cat "$CACHE"
 	exit 1
 	;;
-
-# Mostar un listado de los archivos comprimidos
 */x-7z-compressed)
 	HASH="$(file_hash "$1")"
 	CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/$HASH.txt"
 	if [ ! -f "$CACHE" ]; then
 		7z l "$1" | tail -n +21 | head -n -2 |
 			awk '{ for(i=6; i<=NF; i++) printf "%s%s", $i, (i==NF ? "\n" : " ") }' |
-			tee "$CACHE"
+			tee "$CACHE" >/dev/null
 	fi
 	cat "$CACHE"
 	exit 1

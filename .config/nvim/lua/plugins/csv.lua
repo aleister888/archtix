@@ -14,7 +14,7 @@ return {
 		},
 	},
 	vim.keymap.set("n", "<leader>f", function()
-		vim.cmd("CsvViewToggle")
+		vim.cmd("CsvViewToggle display_mode=border")
 	end, { silent = true }),
 	cmd = { "CsvViewEnable", "CsvViewDisable", "CsvViewToggle" },
 }
