@@ -194,7 +194,7 @@ video/*)
 	cat "$CACHE"
 	exit 1
 	;;
-*/zip)
+*/zip | */vnd.android.package-archive)
 	HASH="$(file_hash "$1")"
 	CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/$HASH.txt"
 	if [ ! -f "$CACHE" ]; then
