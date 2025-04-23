@@ -147,7 +147,15 @@ video/*)
 */pdf)
 	HASH="$(file_hash "$1")"
 	CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/thumb.$HASH"
-	[ ! -f "$CACHE.jpg" ] && pdftoppm -jpeg -f 1 -singlefile "$1" "$CACHE"
+	TMP="/tmp/lf.$HASH"
+	if [ ! -f "$CACHE.jpg" ]; then
+		magick convert -density 150 "${1}[0]" -quality 90 -trim +repage "$CACHE.jpg"
+		# Si la preview resultante es menor de 50 KB, usamos pdftoppm
+		if [ "$(stat -c%s "$CACHE.jpg")" -lt 51200 ]; then
+			rm "$CACHE.jpg"
+			pdftoppm -jpeg -f 1 -singlefile "$1" "$CACHE"
+		fi
+	fi
 	image "$CACHE.jpg" "$2" "$3" "$4" "$5"
 	exit 1
 	;;
