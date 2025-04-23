@@ -52,6 +52,7 @@
     "odt2txt",
     "pamixer",
     "parallel",
+    "pdftk",
     "playerctl",
     "ripgrep",
     "shellcheck-bin",
