@@ -36,8 +36,8 @@ fi
 REPO_PKG="$(jq -r '.[] | .[]' "$HOME"/.dotfiles/assets/packages/*.json)"
 # Obtenemos los paquetes instalados
 INSTALLED_PKGS=$(yay -Qq)
-# Filtramos los paquetes que no están instalados
-PKGS_TO_INSTALL=$(echo "$REPO_PKG" | grep -vxF -f <(echo "$INSTALLED_PKGS"))
+# Filtramos los paquetes que no están instalados (ignorando el repositorio)
+PKGS_TO_INSTALL=$(echo "$REPO_PKG" | cut -d/ -f2 | grep -vxF -f <(echo "$INSTALLED_PKGS"))
 # Si hay paquetes por instalar y estamos conectados a internet, los instalamos
 if [ -n "$PKGS_TO_INSTALL" ] && ping gnu.org -c 1 >/dev/null 2>&1; then
 	yay -Sy --noconfirm --needed --asexplicit $PKGS_TO_INSTALL

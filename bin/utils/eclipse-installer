@@ -50,7 +50,10 @@ install() {
 
 uninstall() {
 	rm -rf "$INSTALL_DIR"
-	sudo rm $RUN_SCRIPT
+	sudo rm -f $RUN_SCRIPT
+}
+
+clean() {
 	rm -rf "${XDG_CACHE_HOME:-$HOME/.cache}"/Eclipse
 	rm -rf "${XDG_DATA_HOME:-$HOME/.local/share}"/Eclipse
 	rm -rf "${XDG_DATA_HOME:-$HOME/.local/share}"/eclipse-workspace
@@ -58,8 +61,8 @@ uninstall() {
 }
 
 help_msg() {
-	echo "Uso:
-  eclipse-installer [--install/--uninstall]" >&2
+	echo "Uso:" >&2
+	echo "  eclipse-installer [--install/--uninstall/--clean]" >&2
 }
 
 # Manejo de argumentos
@@ -68,7 +71,10 @@ case "$1" in
 	install
 	;;
 --uninstall)
-	uninstall 2>/dev/null
+	uninstall
+	;;
+--clean)
+	clean
 	;;
 *)
 	help_msg

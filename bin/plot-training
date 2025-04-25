@@ -1,8 +1,6 @@
 #!/bin/bash
 # shellcheck disable=SC2155
 
-# TODO: Buscar una mejor forma de mostrar el RPE
-
 # Parámetros del script
 INPUT_DIR=${1:-$(pwd)}
 DATA_DIR="$INPUT_DIR/data"
@@ -48,18 +46,28 @@ process_csv() {
 
 	for ROW in "${ALL_ROWS[@]}"; do
 		IFS=',' read -r DATE W R RPE STATUS NOTES <<<"$ROW"
+		# Nos saltamos las entradas que no tienen anotado el peso o las repeticiones
+		[[ -z "$W" || -z "$R" ]] && continue
 		[[ -n "$W" && -n "$R" ]] && VOLUME=$(echo "scale=0; $W * $R / 1" | bc) || VOLUME=0
 
 		# Si no hay RPE, asignamos el valor por defecto
 		RPE="${RPE:-$DEFAULT_RPE}"
 
+		# Variables que guardan el peso, repeticiones y volumen calculado que
+		# contiene la fecha en cada iteración
+		CURRENT_W=$(echo "${MAX_DATA[$DATE]}" | cut -d',' -f1)
+		CURRENT_R=$(echo "${MAX_DATA[$DATE]}" | cut -d',' -f2)
+		CURRENT_V=$(echo "${MAX_VOLUME[$DATE]}" | awk -F',' '{print $1 * $2}')
+
 		# Actualiza máximo de peso por fecha
-		if [[ -z "${MAX_DATA[$DATE]}" || "$(echo "$W > $(echo "${MAX_DATA[$DATE]}" | cut -d',' -f1)" | bc)" -eq 1 ]]; then
+		if [[ -z "${MAX_DATA[$DATE]}" ||
+			"$(echo "$W > $CURRENT_W" | bc)" -eq 1 ||
+			("$(echo "$W == $CURRENT_W" | bc)" -eq 1 && "$(echo "$R > $CURRENT_R" | bc)" -eq 1) ]]; then
 			MAX_DATA[$DATE]="$W,$R,$RPE,$STATUS,$NOTES"
 		fi
 
 		# Actualiza máximo de volumen por fecha
-		if [[ -z "${MAX_VOLUME[$DATE]}" || "$(echo "$VOLUME > $(echo "${MAX_VOLUME[$DATE]}" | awk -F',' '{print $1 * $2}')" | bc)" -eq 1 ]]; then
+		if [[ -z "${MAX_VOLUME[$DATE]}" || "$(echo "$VOLUME > $CURRENT_V" | bc)" -eq 1 ]]; then
 			MAX_VOLUME[$DATE]="$W,$R,$RPE,$STATUS,$NOTES"
 
 			# Actualiza pesos para gráfica de volumen

@@ -149,12 +149,9 @@ video/*)
 	CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/thumb.$HASH"
 	TMP="/tmp/lf.$HASH"
 	if [ ! -f "$CACHE.jpg" ]; then
-		magick convert -density 150 "${1}[0]" -quality 90 -trim +repage "$CACHE.jpg"
-		# Si la preview resultante es menor de 50 KB, usamos pdftoppm
-		if [ "$(stat -c%s "$CACHE.jpg")" -lt 51200 ]; then
-			rm "$CACHE.jpg"
-			pdftoppm -jpeg -f 1 -singlefile "$1" "$CACHE"
-		fi
+		# Usando -dUseCropBox usamos la parte visible de la página en vez de
+		# mantener el tamaño de página definido en el PDF
+		gs -sDEVICE=jpeg -dUseCropBox -dFirstPage=1 -dLastPage=1 -r300 -o "$CACHE.jpg" "$1" >/dev/null
 	fi
 	image "$CACHE.jpg" "$2" "$3" "$4" "$5"
 	exit 1

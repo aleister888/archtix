@@ -16,6 +16,7 @@ alias grep='grep --color=auto'
 # Alias para moverse rápidamente entre directorios
 alias ..='cd ..'
 alias ...='cd ../..'
+alias ....='cd ../../..'
 
 # Actualizar el sistema
 alias update='
@@ -35,6 +36,20 @@ alias lostfiles='sudo lostfiles | grep -iv "Theme\|opt\|Font"'
 
 # Detectar que paquetes del AUR necesitan recompilarse
 alias rebuild-detector="checkrebuild -v"
+
+# Para pasar el output de un comando al portapeles con
+# comando | clipboard
+alias clipboard="xclip -selection clipboard"
+
+# Para reinciar pipewire
+pw_restart() {
+	rc-service wireplumber stop -U
+	rc-service pipewire-pulse stop -U
+	rc-service pipewire stop -U
+	rc-service pipewire start -U
+	rc-service pipewire-pulse start -U
+	rc-service wireplumber start -U
+}
 
 # Limpiar dependencias innecesarias
 cleanup() {
@@ -146,7 +161,7 @@ push() {
 			git commit &&
 			git push
 	else
-		echo "No estás dentro de ningún repositorio"
+		echo "No estás dentro de ningún repositorio" >&2
 	fi
 }
 

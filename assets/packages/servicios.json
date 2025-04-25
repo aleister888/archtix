@@ -11,8 +11,10 @@
     "lib32-libpipewire",
     "lib32-pipewire",
     "lib32-pipewire-jack",
+    "lib32-pipewire-v4l2",
     "pipewire-openrc",
     "pipewire-pulse-openrc",
+    "pipewire-v4l2",
     "sof-firmware",
     "wireplumber-openrc"
   ],

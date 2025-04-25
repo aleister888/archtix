@@ -68,9 +68,9 @@ grep "Q35\|VMware" /sys/devices/virtual/dmi/id/product_name ||
 # Servicios del sistema
 pgrep polkit-gnome || /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
 pgrep gnome-keyring || gnome-keyring-daemon -r -d &
-pgrep udiskie || udiskie -t -a & # Auto-montador de discos
-pgrep dwmblocks || dwmblocks &   # Barra de estado
-pgrep nm-applet || nm-applet &   # Applet de red
+
+# Pasamos todas las variables del entorno de la sesión de dwm a dbus
+dbus-update-activation-environment --all
 
 # Si se detecta una tarjeta bluetooth, iniciar blueman-applet
 if echo "$(
@@ -80,6 +80,11 @@ if echo "$(
 	pgrep blueman-applet || blueman-applet &
 fi
 
+pgrep dunst || dunst &           # Notificaciones
+pgrep udiskie || udiskie -t -a & # Auto-montador de discos
+pgrep dwmblocks || dwmblocks &   # Barra de estado
+pgrep nm-applet || nm-applet &   # Applet de red
+
 # Corregir el nivel del micrófono en portátiles
 if [ -e /sys/class/power_supply/BAT0 ]; then
 	MIC=$(pactl list short sources |
@@ -87,9 +92,6 @@ if [ -e /sys/class/power_supply/BAT0 ]; then
 		awk '{print $1}')
 	pactl set-source-volume "$MIC" 50%
 fi
-
-# Servicio de notificaciones
-pgrep dunst || dunst &
 
 # Esperar a que se incie wireplumber para activar el micrófono virtual
 # (Para compartir el audio de las aplicaciones através del micrófono)
