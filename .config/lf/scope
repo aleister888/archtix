@@ -69,7 +69,7 @@ text/* | */xml | */json | */x-shellscript | */x-xcursor | */x-theme | */x-deskto
 image/svg+xml)
 	HASH="$(file_hash "$1")"
 	CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/thumb.$HASH"
-	[ ! -f "$CACHE.png" ] && inkscape --convert-dpi-method=none -o "$CACHE.png" --export-overwrite -D --export-png-color-mode=RGBA_16 "$1"
+	[ ! -f "$CACHE.png" ] && DISPLAY="" inkscape -o "$CACHE.png" --export-overwrite -D --export-width=256 "$1"
 	image "$CACHE.png" "$2" "$3" "$4" "$5"
 	exit 1
 	;;
@@ -78,7 +78,7 @@ image/svg+xml)
 image/x-eps)
 	HASH="$(file_hash "$1")"
 	CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/thumb.$HASH"
-	[ ! -f "$CACHE" ] && gs -dSAFER -dBATCH -dNOPAUSE -sDEVICE=jpeg -r300 -dEPSCrop -sOutputFile="$CACHE.jpg" "$1" >/dev/null 2>&1
+	[ ! -f "$CACHE.jpg" ] && gs -dSAFER -dBATCH -dNOPAUSE -sDEVICE=jpeg -r300 -dEPSCrop -sOutputFile="$CACHE.jpg" "$1" >/dev/null 2>&1
 	image "$CACHE.jpg" "$2" "$3" "$4" "$5"
 	exit 1
 	;;

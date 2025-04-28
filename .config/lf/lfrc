@@ -5,11 +5,13 @@
 # |_|_|    \___\___/|_| |_|_| |_|\__, |
 #                                |___/
 
-# Opciones
+############
+# Opciones #
+############
+
 set shell bash
 set shellopts '-eu'
 set ifs "\n"
-set filesep "\n"
 set scrolloff 10
 set icons
 set period 1
@@ -18,7 +20,62 @@ set info size:time
 set cleaner '~/.config/lf/cleaner'
 set previewer '~/.config/lf/scope'
 set ratios 3:5:4
+set autoquit true
 set hiddenfiles ".*:*.aux:*.toc:*.sty:*.out:*.log:*.bbl:*.blg:*.synctex.gz:*.bcf:*.nav:*.run.xml:*.snm:*.xwm"
+
+on-cd
+
+######################
+# Comandos/Funciones #
+######################
+
+cmd home :cd ~/
+cmd mkdir $mkdir -p "$(echo $* | tr ' ' '\ ')"
+
+# Abrir archivos en función del tipo
+cmd open ${{
+	case $(xdg-mime query filetype "$(readlink -f $f)") in
+		*/x-7z-compressed | */vnd.rar | */*-tar | */zip | */gzip)
+			setsid -f xarchiver "$fx" 2>/dev/null ;;
+		*/vnd.*document*)
+			setsid -f libreoffice "$fx" 2>/dev/null ;;
+		*/pdf | */epub* | */vnd.comicbook*)
+			setsid -f zathura "$f" 2>/dev/null ;;
+		text/* | */xml | */json | inode/x-empty | */x-shellscript | */x-desktop | */yaml | */sql)
+			$EDITOR "$fx" ;;
+		image/x-eps)
+			HASH="$(stat --printf '%n\0%i\0%F\0%s\0%W\0%Y' -- "$(readlink -f "$f")" | sha256sum | awk '{print $1}')"
+			CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/thumb.$HASH"
+			[ ! -f "$CACHE.jpg" ] && gs -dSAFER -dBATCH -dNOPAUSE -sDEVICE=jpeg -r300 -dEPSCrop -sOutputFile="$CACHE.jpg" "$f" >/dev/null 2>&1
+			sleep "0.25s"
+			setsid -f nsxiv "$CACHE.jpg" 2>/dev/null
+			;;
+		image/*)
+			BASE="$(basename "$f")"
+			/usr/bin/ls |
+			awk -v BASE="$BASE" \
+			'BEGIN { lines = ""; m = 0; } { if ($0 == BASE) { m = 1; } } { if (!m) { if (lines) { lines = lines"\n"; } lines = lines""$0; } else { print $0; } } END { print lines; }' |
+			grep -iE '.+\.(jpg|jpeg|png|gif|bmp|tiff|ppm|svg|webp|xpm)' |
+			setsid -f nsxiv -aio 2>/dev/null | while read -r file; do
+				[ -z "$file" ] && continue
+				lf -remote "send select \"$file\""
+				lf -remote "send toggle"
+			done &
+			;;
+		audio/*)
+			mpv --audio-display=no "$f" ;;
+		video/*)
+			mpv "$f" 2>/dev/null ;;
+		*/x-keepass2)
+			setsid -f keepassxc "$f" 2>/dev/null ;;
+		*/x-reaper-*)
+			setsid -f reaper "$f" 2>/dev/null ;;
+		*/x-tuxguitar | application/gpx+xml | application/x-gnuplot | application/x-gtp)
+			setsid -f tuxguitar-bin "$fx" 2>/dev/null ;;
+		# Si no tenemos configurada una forma de abrirlo, usamos xdg-open
+		*) for f in $fx; do setsid -f $OPENER $f >/dev/null 2>&1; done ;;
+	esac
+}}
 
 # Muestra información sobre el directorio actual
 cmd on-cd &{{
@@ -37,76 +94,6 @@ cmd on-cd &{{
 	lf -remote "send $id set promptfmt \"$fmt\""
 }}
 
-on-cd
-
-# Limpiar pantalla
-map R $clear
-# Recargar configuración
-map C &lf -remote "send $id source ~/.config/lf/lfrc"
-
-# Pegar archivos
-map p paste
-
-# Renombrar archivos
-map r rename
-map <c-r> bulk-rename
-
-# Gestionar papelera
-map S trash
-map D clean-trash
-map F restore-trash
-
-# Abrir scratchpad en el directorio actual
-map s cdterm
-
-# Cambiar de directorio
-map <esc> home
-map z home
-map t cd /tmp
-map T cd /run/media
-
-# Buscar archivo
-map / :fzf_search
-map <c-_> :fzf_grep
-
-# Extraer/comprimir archivos
-map E extract
-map <c-e> :compress; cd /tmp
-
-# Abrir archivos
-cmd open-with %export ; "$@" "$fx"
-map <enter> push :open-with<space>
-map o &mimeopen "$f"
-map O $mimeopen --ask $f
-
-# Mostrar/ocultar los archivos ocultos
-map h set hidden!
-
-# Abrir/crear archivo con vim
-map V push :!nvim<space>$f
-
-# Permitir arrastrar archivos hacia otra ventana
-map <c-z> $setsid -f dragon-drop -a -x $fx
-
-# Notificar del tamaño de los ítemes actuales
-map P size
-
-# Crear directorio
-map m push %mkdir<space>
-
-# Copiar el directorio del archivo actual al portapapeles
-map Y ${{
-	printf '"%s"' "$(dirname "$fx")" | xclip -selection clipboard
-	notify-send -i gpaste "Ruta copiada al portapapeles"
-}}
-
-# Salir del programa
-map q ${{
-	# Restaurar el título original de la ventana
-	printf '\033]0;\007'
-	/usr/bin/lf -remote "send $id quit"
-}}
-
 # Muestra información del archivo seleccionado con eza
 cmd on-select &{{
 	clear
@@ -117,22 +104,24 @@ cmd on-select &{{
 cmd compress ${{
 	if whiptail --title "$(echo $PWD)" \
 	--yesno "Comprimir:\n  Archivos de => $PWD\n  En el archivo => /tmp/$(basename $(echo $PWD)).*" 10 60; then
-		formato=$(whiptail --title "Formato" --menu "¿En que formato desea comprimirlos?" \
+		FORMATO=$(whiptail --title "Formato" --menu "¿En que formato desea comprimirlos?" \
 		15 60 3 "tar" ".tar.gz" "zip" ".zip" "7z" ".7z" 3>&1 1>&2 2>&3)
-		case "$formato" in
-		tar)
-			tar -zcvf "/tmp/$(basename $(echo $PWD)).tar.gz" . && \
-			whiptail --title "Operación Completada" \
-			--msgbox "Archivo comprimido en: /tmp/$(basename $(echo $PWD)).tar.gz" 10 60 ;;
-		zip)
-			zip -r "/tmp/$(basename $(echo $PWD)).zip" . && \
-			whiptail --title "Operación Completada" \
-			--msgbox "Archivo comprimido en: /tmp/$(basename $(echo $PWD)).zip" 10 60 ;;
-		7z)
-			7z a "/tmp/$(basename $(echo $PWD)).7z" . && \
-			whiptail --title "Operación Completada" \
-			--msgbox "Archivo comprimido en: /tmp/$(basename $(echo $PWD)).7z" 10 60 ;;
+		case "$FORMATO" in
+			tar)
+				ARCHIVO="/tmp/$(basename $(echo $PWD)).tar.gz"
+				tar -zcvf "$ARCHIVO" . ;;
+			zip)
+				ARCHIVO="/tmp/$(basename $(echo $PWD)).zip"
+				zip -r "$ARCHIVO" . ;;
+			7z)
+				ARCHIVO="/tmp/$(basename $(echo $PWD)).7z"
+				7z a "$ARCHIVO" . ;;
 		esac
+		if [ -e "$ARCHIVO" ]; then
+			whiptail --title "Operación Completada" \
+				--msgbox "Archivo comprimido en: $ARCHIVO" 10 60
+		fi
+		lf -remote "send select \"$ARCHIVO\""
 	fi
 	clear
 }}
@@ -148,8 +137,6 @@ cmd size &{{
 	notify-send -i system-file-manager \
 	"El tamaño es de $(/usr/bin/du -chs $fx | grep total | awk {'print $1'})"
 }}
-
-cmd home :cd ~/
 
 # Renombrar el contenido de un directorio con nvim
 cmd bulk-rename ${{
@@ -200,8 +187,6 @@ cmd fzf_search ${{
 	fi
 	clear
 }}
-
-cmd mkdir $mkdir -p "$(echo $* | tr ' ' '\ ')"
 
 # Extraer archive
 cmd extract ${{
@@ -285,51 +270,68 @@ cmd restore-trash ${{
 	clear
 }}
 
-# Abrir archivos en función del tipo
-cmd open ${{
+##########
+# Atajos #
+##########
 
-case $(xdg-mime query filetype "$(readlink -f $f)") in
+# Limpiar pantalla
+map R $clear
+# Recargar configuración
+map C &lf -remote "send $id source ~/.config/lf/lfrc"
 
-	*/x-7z-compressed | */vnd.rar | */*-tar | */zip | */gzip)
-		setsid -f xarchiver "$fx" >/dev/null 2>&1 ;;
+# Pegar archivos
+map p paste
 
-	*/vnd.*document*)
-		setsid -f libreoffice "$fx" >/dev/null 2>&1 ;;
+# Renombrar archivos
+map r rename
+map <c-r> bulk-rename
 
-	*/pdf | */epub* | */vnd.comicbook*)
-		setsid -f zathura "$f" >/dev/null 2>&1 ;;
+# Gestionar papelera
+map S trash
+map D clean-trash
+map F restore-trash
 
-	text/* | */xml | */json | inode/x-empty | */x-shellscript | */pgp-encrypted | */x-xcursor | */x-theme | */x-desktop | */yaml | application/sql )
-		$EDITOR "$fx" ;;
+# Abrir scratchpad en el directorio actual
+map s cdterm
 
-	image/x-eps)
-		HASH="$(stat --printf '%n\0%i\0%F\0%s\0%W\0%Y' -- "$(readlink -f "$f")" | sha256sum | awk '{print $1}')"
-		CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/thumb.$HASH"
-		[ ! -f "$CACHE" ] && gs -dSAFER -dBATCH -dNOPAUSE -sDEVICE=jpeg -r300 -dEPSCrop -sOutputFile="$CACHE.jpg" "$f" >/dev/null 2>&1
-		setsid -f nsxiv "$CACHE.jpg" >/dev/null 2>&1 &
-		;;
+# Cambiar de directorio
+map <esc> home
+map z home
+map t cd /tmp
+map T cd /run/media
 
-	image/*)
-		filelist=$(/usr/bin/ls -1 . | grep -E '.+\.(jpg|JPG|jpeg|JPEG|png|PNG|gif|GIF|bmp|BMP|tiff|TIFF|ppm|PPM|svg|SVG|webp|WEBP|xpm|XPM)')
-		index=$(printf "%s\n" $filelist | nl | grep "$(basename "$fx")" | awk '{print $1}')
-		setsid -f nsxiv -n $index $filelist >/dev/null 2>&1 ;;
+# Buscar archivo
+map / :fzf_search
+map <c-_> :fzf_grep
 
-	audio/*)
-		/usr/bin/mpv --audio-display=no "$f" ;;
+# Extraer/comprimir archivos
+map E extract
+map <c-e> compress
 
-	video/*)
-		/usr/bin/mpv "$f" >/dev/null 2>&1 ;;
+# Mostrar/ocultar los archivos ocultos
+map h set hidden!
 
-	*/x-keepass2)
-		setsid -f keepassxc "$f" >/dev/null 2>&1 ;;
+# Abrir/crear archivo con vim
+map V push :!nvim<space>$f
 
-	*/x-reaper-*)
-		setsid -f reaper "$f" >/dev/null 2>&1 ;;
+# Permitir arrastrar archivos hacia otra ventana
+map <c-z> $setsid -f dragon-drop -a -x $fx
 
-	*/x-tuxguitar | application/gpx+xml | application/x-gnuplot | application/x-gtp)
-		setsid -f tuxguitar-bin "$fx" >/dev/null 2>&1 ;;
+# Notificar del tamaño de los ítemes actuales
+map P size
 
-	*)
-		for f in $fx; do $OPENER "$f" 2>&1 && clear; done ;;
-esac
+# Crear directorio
+map m push %mkdir<space>
+
+# Copiar el directorio del archivo actual al portapapeles
+map Y ${{
+	printf '"%s"' "$(dirname "$fx")" | xclip -selection clipboard
+	notify-send -i gpaste "Ruta copiada al portapapeles"
+}}
+
+# Salir del programa
+map q ${{
+	# Restaurar el título original de la ventana
+	printf '\033]0;\007'
+	/usr/bin/lf -remote "send $id quit"
 }}

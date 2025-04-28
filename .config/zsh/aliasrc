@@ -3,43 +3,31 @@
 # Alias para herramientas comunes
 alias wget='wget --hsts-file="$XDG_CONFIG_HOME"/wget-hsts'
 alias gpg2='gpg2 --homedir "$XDG_DATA_HOME"/gnupg'
-
 # Alias de comandos básicos
-alias v='nvim'
-alias c='/bin/clear'
-alias mi='sudo make install'
 alias cp='cp -iv'
 alias cat='bat -p --tabs 8'
 alias ls='eza -lagX --time-style iso --group-directories-first --smart-group'
 alias grep='grep --color=auto'
-
 # Alias para moverse rápidamente entre directorios
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
-
 # Actualizar el sistema
-alias update='
-	yay -Syuu --answerclean --answerdiff --removemake \
-		--ignore i3lock-fancy-git --ignore eww-git
-'
-
+alias update='yay -Syuu --answerclean --answerdiff --removemake'
 # Herramientas
 alias xdotool_table='xmodmap -pk'
 alias du='BLOCKSIZE=1073741824 du -s * | sort -rnk 1'
 alias grub-update='sudo grub-mkconfig -o /boot/grub/grub.cfg'
-
 # Alias para encontrar enlaces simbólicos rotos y archivos no reclamados
 alias brokenlink='find / -xtype l -print 2>/dev/null'
 alias unownedfiles='sudo find / ! -name "/mnt/*" -nogroup -nouser -print 2>/dev/null'
 alias lostfiles='sudo lostfiles | grep -iv "Theme\|opt\|Font"'
-
 # Detectar que paquetes del AUR necesitan recompilarse
 alias rebuild-detector="checkrebuild -v"
-
-# Para pasar el output de un comando al portapeles con
-# comando | clipboard
+# Para pasar el output de un comando al portapeles con: comando | clipboard
 alias clipboard="xclip -selection clipboard"
+# Webcam
+alias webcam="ffplay /dev/video0"
 
 # Para reinciar pipewire
 pw_restart() {
@@ -53,10 +41,10 @@ pw_restart() {
 
 # Limpiar dependencias innecesarias
 cleanup() {
-	packages=$(yay -Qdtq)
-	if [ -n "$packages" ]; then
+	PACKAGES=$(yay -Qdtq)
+	if [ -n "$PACKAGES" ]; then
 		# shellcheck disable=SC2086
-		yay -Rcns $packages
+		yay -Rcns $PACKAGES
 	fi
 }
 
@@ -64,7 +52,6 @@ deepcleanup() {
 	pacman -Qqd 2>/dev/null |
 		pacman -Rsu --print - 2>/dev/null |
 		grep - | sed 's/-[0-9].*//g' >/tmp/pacman_unneeded
-
 	if grep -qv ca-certificates /tmp/pacman_unneeded; then
 		grep -v ca-certificates /tmp/pacman_unneeded | xargs yay --noconfirm -Rcns
 	fi
@@ -79,23 +66,12 @@ reinstall() {
 # Función para restaurar los paquetes
 # instalados explícitamente como tales
 reexplicit() {
-	for pack in $(yay -Qq); do
+	for PACK in $(yay -Qq); do
 		if grep -E "\[ALPM\] installed" /var/log/pacman.log |
-			grep "$pack" >/dev/null 2>&1; then
-			sudo pacman -D --asexplicit "$pack"
+			grep "$PACK" >/dev/null 2>&1; then
+			sudo pacman -D --asexplicit "$PACK"
 		fi
 	done
-}
-
-# Recuperación en caso de paquetes rotos
-recoverypacman() {
-	yay "$@" \
-		--logfile /dev/null \
-		--noscriptlet \
-		--dbonly \
-		--overwrite "*" \
-		--nodeps \
-		--needed
 }
 
 # Imprimir instancia, clase y título de la ventana seleccionada
@@ -115,26 +91,23 @@ xprop_wininfo() {
 
 # Borrar entornos de un código laTeX
 desencapsular() {
-	tag="$1"
+	TAG="$1"
 	shift
-	perl -pe "s/\\\\$tag\\{([^{}]*(?:\\{$tag\\}[^{}]*)*)\\}/\$1/g" "$@"
+	perl -pe "s/\\\\$TAG\\{([^{}]*(?:\\{$TAG\\}[^{}]*)*)\\}/\$1/g" "$@"
 }
 
 # Grabar la pantalla
 screenrecord() {
 	# Verificar si se proporcionó un archivo de salida
-	[ -z "$1" ] && {
+	if [ -z "$1" ]; then
 		echo "Se debe dar como argumento el archivo de salida" >&2
 		return 1
-	}
-
+	fi
 	# Detectar resolución de pantalla
 	RESOLUTION=$(xrandr | grep '\*' | awk '{print $1}')
-
 	# Definir dispositivos de audio
 	MICROPHONE=$(pactl list sources | grep -oP "Name: \K.*input.*" | head -n 1)
 	APPLICATIONS=$(pactl list sources | grep -oP "Name: \K.*output.*" | head -n 1)
-
 	ffmpeg \
 		-video_size "$RESOLUTION" \
 		-framerate 30 \
@@ -157,9 +130,9 @@ yabridgectl_dirs() {
 
 push() {
 	if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-		git add . &&
-			git commit &&
-			git push
+		git add .
+		git commit
+		git push
 	else
 		echo "No estás dentro de ningún repositorio" >&2
 	fi
@@ -168,18 +141,18 @@ push() {
 # Alias para encontrar archivos pac de pacman
 pac() {
 	# Buscar archivos .pacnew y .pacsave
-	sudo find /etc \( -name "*.pacnew" -o -name "*.pacsave" \) 2>/dev/null | while read -r file; do
+	sudo find /etc \( -name "*.pacnew" -o -name "*.pacsave" \) 2>/dev/null | while read -r FILE; do
 		# Obtener el nombre del archivo original
-		original_file="${file%.pacnew}"
-		original_file="${original_file%.pacsave}"
+		ORIGINAL_FILE="${FILE%.pacnew}"
+		ORIGINAL_FILE="${ORIGINAL_FILE%.pacsave}"
 
 		# Mostrar encabezado
-		echo "##$(printf '#%.0s' $(seq 1 ${#original_file}))##"
-		echo "# $original_file #"
-		echo "##$(printf '#%.0s' $(seq 1 ${#original_file}))##"
+		echo "##$(printf '#%.0s' $(seq 1 ${#ORIGINAL_FILE}))##"
+		echo "# $ORIGINAL_FILE #"
+		echo "##$(printf '#%.0s' $(seq 1 ${#ORIGINAL_FILE}))##"
 
 		# Mostrar diferencias y limitar la salida
-		diff -d "$file" "$original_file" | head -n 20
+		diff -d "$FILE" "$ORIGINAL_FILE" | head -n 20
 	done
 }
 
@@ -190,57 +163,43 @@ indent_check() {
 		echo "Uso: indent_check <nº espacios> <archivo>"
 		return 1
 	fi
-
-	nEspacios=$1
-	archivo=$2
-
-	awk -v n="$nEspacios" '
+	awk -v n="$1" '
 	{
 		match($0, /^[ ]+/)
 		if (RSTART == 1) {
 			spaces = RLENGTH
 			if (spaces % n != 0) print NR, "Indentación incorrecta:", spaces, "espacios ->", $0
 		}
-	}' "$archivo"
+	}' "$2"
 }
 
 # Función para ver el historial de commits
 git_view_commits() {
 	git log --oneline --graph --decorate | nvim -
 }
-
 # Función para restaurar con git reset --hard origin
 git_reset_hard() {
-	unset respuesta
-
+	unset RESPUESTA
 	echo "¿Estás seguro? Se perderán los cambios locales (s/N)"
-
-	read -r respuesta
-
-	if [ "$respuesta" = "s" ] || [ "$respuesta" = "S" ]; then
+	read -r RESPUESTA
+	if [ "$RESPUESTA" = "s" ] || [ "$RESPUESTA" = "S" ]; then
 		git reset --hard origin
 	else
 		echo "Operación cancelada."
 	fi
 }
-
 # Función para hacer reset a un commit específico
 git_reset_to_commit() {
-	unset commitHash
-	unset respuesta
-
+	unset COMMIT_HASH
+	unset ANS
 	echo "Por favor, introduce el hash del commit:"
-
-	read -r commitHash
-
+	read -r COMMIT_HASH
 	# Confirmar antes de hacer el reset
-	echo "¿Estás seguro de que quieres retroceder al commit $commitHash? (s/N)"
-
+	echo "¿Estás seguro de que quieres retroceder al commit $COMMIT_HASH? (s/N)"
 	read -r respuesta
-
-	if [ "$respuesta" = "s" ] || [ "$respuesta" = "S" ]; then
+	if [ "$ANS" = "s" ] || [ "$ANS" = "S" ]; then
 		# Realizar el reset al commit seleccionado
-		git reset --hard "$commitHash"
+		git reset --hard "$COMMIT_HASH"
 	else
 		echo "Operación cancelada."
 	fi
@@ -248,35 +207,20 @@ git_reset_to_commit() {
 
 code_format() {
 	# Directorio donde se encuentran los scripts
-	directorio=$1
-
+	DIRECTORIO=$1
 	# Si no se pasó un directorio, usamos el directorio actual
-	if [ -z "$directorio" ]; then
-		directorio="."
+	if [ -z "$DIRECTORIO" ]; then
+		DIRECTORIO="."
 	fi
-
 	# Buscar todos los archivos en el directorio
-	find "$directorio" -type d -name ".git" -prune -o -type f | while read -r archivo; do
+	find "$DIRECTORIO" -type d -name ".git" -prune -o -type f | while read -r ARCHIVO; do
 		# Obtener el tipo MIME del archivo
-		mime_type=$(xdg-mime query filetype "$archivo")
-
+		MIME_TYPE=$(xdg-mime query filetype "$ARCHIVO")
 		# Si el tipo MIME es 'application/x-shellscript', formatear el archivo
-		case "$mime_type" in
-		application/x-shellscript)
-			shfmt -w "$archivo" &&
-				echo "Formateado: $archivo"
-			;;
-		text/x-java)
-			astyle --style=allman --indent=tab=8 -n "$archivo" &&
-				echo "Formateado: $archivo"
-			;;
-		text/x-tex)
-			latexindent --cruft=/tmp -w "$archivo" >/dev/null 2>&1 &&
-				echo "Formateado: $archivo"
-			;;
-		esac
+		case "$MIME_TYPE" in
+		application/x-shellscript) shfmt -w "$ARCHIVO" ;;
+		text/x-java) astyle --style=allman --indent=tab=8 -n "$ARCHIVO" ;;
+		text/x-tex) latexindent --cruft=/tmp -w "$ARCHIVO" >/dev/null 2>&1 ;;
+		esac && echo "Formateado: $ARCHIVO"
 	done
-
-	# Mensaje final
-	echo "Todos los archivos han sido formateados."
 }
