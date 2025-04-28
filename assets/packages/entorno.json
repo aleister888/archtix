@@ -1,10 +1,10 @@
 {
   "general": [
     "extra/j4-dmenu-desktop",
+    "fastfetch",
     "feh",
     "i3lock-fancy-rapid-git",
     "mediainfo",
-    "pfetch-rs-bin",
     "tk",
     "xmenu",
     "yad",
