@@ -38,6 +38,22 @@ magick_convert() {
 	echo "$CACHE.jpg"
 }
 
+thumbnail_resize() {
+	THUMBNAIL="$1"
+
+	# Ancho mínimo: 1/3 del ancho de pantalla
+	THIRD="$(($(xrandr | grep '\*' | awk '{print $1}' | cut -dx -f1) / 3))"
+	WIDTH=$(identify -format "%w" "$THUMBNAIL")
+	# Si el ancho es menor al requerido, lo reescalamos proporcionalmente
+	if [ "$WIDTH" -lt "$THIRD" ]; then
+		TMP="$(mktemp /tmp/lf.XXXXXX.jpg)"
+		convert "$THUMBNAIL" -resize "${THIRD}x" "$TMP"
+		mv -f "$TMP" "$THUMBNAIL"
+	else
+		mv "$TMP" "$THUMB"
+	fi
+}
+
 # Notesé que la caché se genera en función de la información del archivo,
 # un mismo archivo que esta en múltiples directorios solo generará un archivo en cache.
 
@@ -97,7 +113,9 @@ audio/flac | audio/mpeg | audio/x-m4a | audio/mp4)
 	COVER="$CACHE_DIR/cover.jpg"
 	[ ! -d "$CACHE_DIR" ] && mkdir -p "$CACHE_DIR"
 	[ ! -f "$METADATA" ] && ffmpeg -i "$1" -y -f ffmetadata "$METADATA"
-	[ ! -f "$COVER" ] && ffmpeg -nostdin -i "$1" "$COVER"
+	if [ ! -f "$COVER" ]; then
+		ffmpeg -nostdin -i "$1" "$COVER" && thumbnail_resize "$COVER"
+	fi
 
 	image "$COVER" "$2" "$3" "$4" "$5" &
 	{
@@ -134,42 +152,40 @@ video/*)
 	THUMB="$CACHE_DIR/thumb.jpg"
 	METADATA="$CACHE_DIR/metadata.txt"
 	[ ! -d "$CACHE_DIR" ] && mkdir -p "$CACHE_DIR"
-	[ ! -f "$THUMB" ] && ffmpegthumbnailer -i "$1" -o "$THUMB" -s 0
+	if [ ! -f "$THUMB" ]; then
+		ffmpegthumbnailer -i "$1" -o "$THUMB" -s 0 && thumbnail_resize "$THUMB"
+	fi
 	if [ ! -f "$METADATA" ]; then
 		TMP="$(mktemp /tmp/lf.XXXX)"
-		mediainfo "$1" | tr '\t' ' ' | tr -s " " |
-			tee "$TMP" >/dev/null
+		mediainfo "$1" | tr '\t' ' ' | tr -s " " | tee "$TMP" >/dev/null
 		# Extraemos la información necesaria
-		grep "^File size" "$TMP" | head -n1 |
-			tee "$METADATA" >/dev/null
-		grep "^Duration" "$TMP" | head -n1 |
-			tee -a "$METADATA" >/dev/null
-		grep "^Frame rate" "$TMP" | head -n1 |
-			tee -a "$METADATA" >/dev/null
-		grep "^Format" "$TMP" | head -n1 |
-			tee -a "$METADATA" >/dev/null
-		grep "^Width" "$TMP" | head -n1 |
-			tee -a "$METADATA" >/dev/null
-		grep "^Height" "$TMP" | head -n1 |
-			tee -a "$METADATA" >/dev/null
-		grep "^Bit depth" "$TMP" | head -n1 |
-			tee -a "$METADATA" >/dev/null
-		grep "^Language" "$TMP" | sort -u |
-			tee -a "$METADATA" >/dev/null
+		for FIELD in "File size" "Duration" "Frame rate" "Format" "Width" "Height" "Bit depth"; do
+			grep "^$FIELD" "$TMP" | head -n1 >>"$METADATA"
+		done
+		grep "^Language" "$TMP" | sort -u >>"$METADATA"
 		rm "$TMP"
 	fi
 
 	image "$THUMB" "$2" "$3" "$4" "$5" &
 	{
-		# Determinamos el número de saltos de línea necesarios teniendo en
-		# cuenta el ratio de aspecto del vídeo
 		HEIGHT=$(grep -oP "Height : \K.[0-9 ]*" "$METADATA" | tr -d ' ')
 		WIDTH=$(grep -oP "Width : \K.[0-9 ]*" "$METADATA" | tr -d ' ')
 		ROTATION=$(mediainfo "$1" | grep -oP "Rotation.*: \K[0-9]*")
-		if [ -n "$ROTATION" ] && { [ "$ROTATION" = "90" ] || [ "$ROTATION" = "270" ]; }; then
-			COUNT=$(echo "scale=2; (${4}/5) * ($WIDTH/$HEIGHT) + 1.5" | bc | cut -d. -f1)
+		DISPLAY_RATIO=$(mediainfo --Inform="Video;%DisplayAspectRatio%" "$1")
+
+		# Usamos el ratio proporcionado por los metadatos;
+		# si no está disponible, lo calculamos manualmente
+		if [ -n "$DISPLAY_RATIO" ]; then
+			RATIO="$DISPLAY_RATIO"
 		else
-			COUNT=$(echo "scale=2; (${4}/5) * ($HEIGHT/$WIDTH) + 1.5" | bc | cut -d. -f1)
+			RATIO=$(echo "scale=3; $WIDTH / $HEIGHT " | bc)
+		fi
+		# Determinamos el número de saltos de línea en
+		# función de si el vídeo está rotado o no
+		if [ "$ROTATION" = "90" ] || [ "$ROTATION" = "270" ]; then
+			COUNT=$(echo "scale=2; (${4}/5) * $RATIO + 1.5" | bc | cut -d. -f1)
+		else
+			COUNT=$(echo "scale=2; (${4}/5) / $RATIO + 1.5" | bc | cut -d. -f1)
 		fi
 		printf '\n%.0s' $(seq "$COUNT")
 		cat "$METADATA"
