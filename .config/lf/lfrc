@@ -23,8 +23,6 @@ set ratios 3:5:4
 set autoquit true
 set hiddenfiles ".*:*.aux:*.toc:*.sty:*.out:*.log:*.bbl:*.blg:*.synctex.gz:*.bcf:*.nav:*.run.xml:*.snm:*.xwm"
 
-on-cd
-
 ######################
 # Comandos/Funciones #
 ######################
@@ -269,6 +267,8 @@ cmd restore-trash ${{
 	fi && printf "Hecho!"
 	clear
 }}
+
+on-cd
 
 ##########
 # Atajos #

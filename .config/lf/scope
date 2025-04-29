@@ -109,7 +109,21 @@ audio/flac | audio/mpeg | audio/x-m4a | audio/mp4)
 	;;
 
 # Mostar información sobre los discos/imágenes de instalación
-*/x-iso9660-image | */vnd.efi.iso) isoinfo -d -i "$1" || exit 1 ;;
+*/x-iso9660-image | */vnd.efi.iso)
+	HASH="$(file_hash "$1")"
+	CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/$HASH.txt"
+	if [ ! -f "$CACHE" ]; then
+		TMP="$(mktemp /tmp/lf.XXXX)"
+		isoinfo -d -i "$1" | tee "$TMP" >/dev/null
+		grep "Volume id" "$TMP" | tee "$CACHE" >/dev/null
+		grep "Publisher id" "$TMP" | tee -a "$CACHE" >/dev/null
+		grep "Data preparer id" "$TMP" | tee -a "$CACHE" >/dev/null
+		grep "Application id" "$TMP" | tee -a "$CACHE" >/dev/null
+		rm "$TMP"
+	fi
+	chafa /usr/share/icons/Papirus-Dark/128x128/devices/drive-optical.svg
+	cat "$CACHE"
+	;;
 
 # Mostrar una pre-visualización e información sobre el video
 video/*)
@@ -124,13 +138,13 @@ video/*)
 		mediainfo "$1" | tr '\t' ' ' | tr -s " " >"$TMP"
 		# Extraemos la información necesaria
 		grep "File size" "$TMP" | head -n1 |
-			tee "$METADATA"
+			tee "$METADATA" >/dev/null
 		grep "Duration" "$TMP" | head -n1 |
-			tee -a "$METADATA"
+			tee -a "$METADATA" >/dev/null
 		grep "FPS" "$TMP" | head -n1 |
-			tee -a "$METADATA"
+			tee -a "$METADATA" >/dev/null
 		grep "Movie name" "$TMP" | head -n1 |
-			tee -a "$METADATA"
+			tee -a "$METADATA" >/dev/null
 		rm "$TMP"
 	fi
 

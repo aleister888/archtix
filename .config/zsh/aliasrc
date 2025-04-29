@@ -26,8 +26,9 @@ alias lostfiles='sudo lostfiles | grep -iv "Theme\|opt\|Font"'
 alias rebuild-detector="checkrebuild -v"
 # Para pasar el output de un comando al portapeles con: comando | clipboard
 alias clipboard="xclip -selection clipboard"
-# Webcam
+
 alias webcam="ffplay /dev/video0"
+alias filetype="xdg-mime query filetype"
 
 # Para reinciar pipewire
 pw_restart() {
