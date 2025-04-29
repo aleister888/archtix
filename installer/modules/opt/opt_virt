@@ -10,6 +10,9 @@ virt_install() {
 	xargs yay -S --noconfirm --disable-download-timeout --needed \
 		<"$HOME/.dotfiles/assets/packages/opt/virt"
 
+	sudo install -m 755 "$HOME/.dotfiles/assets/desktop/looking-glass-client.desktop" \
+		/usr/local/share/applications/looking-glass-client.desktop
+
 	# Configurar QEMU para usar el usuario actual
 	sudo sed -i "s/^#user = .*/user = \"$USER\"/" /etc/libvirt/qemu.conf
 	sudo sed -i "s/^#group = .*/group = \"$USER\"/" /etc/libvirt/qemu.conf
@@ -50,6 +53,7 @@ virt_uninstall() {
 	# Borrar archivos restantes
 	sudo rm -rf /var/lib/libvirt
 	sudo rm -rf /etc/libvirt
+	sudo rm -f /usr/local/share/applications/looking-glass-client.desktop
 
 	sync
 }
