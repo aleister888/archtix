@@ -49,8 +49,6 @@ thumbnail_resize() {
 		TMP="$(mktemp /tmp/lf.XXXXXX.jpg)"
 		convert "$THUMBNAIL" -resize "${THIRD}x" "$TMP"
 		mv -f "$TMP" "$THUMBNAIL"
-	else
-		mv "$TMP" "$THUMB"
 	fi
 }
 
