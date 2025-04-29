@@ -101,9 +101,11 @@ audio/flac | audio/mpeg | audio/x-m4a | audio/mp4)
 
 	image "$COVER" "$2" "$3" "$4" "$5" &
 	{
-		printf '\n%.0s' $(seq $(($4 / 5)))
-		printf '\n'
-		grep -ivwE "(comment|encoder|ffmetadata1)" "$METADATA"
+		# Determinamos el número de saltos de línea necesarios teniendo en
+		# cuenta que las carátulas tienen un ratio de aspecto de 1:1
+		COUNT=$(echo "$4 / 5 + 1" | bc)
+		printf '\n%.0s' $(seq "$COUNT")
+		grep -ivE "(comment|encoder|ffmetadata1)" "$METADATA"
 	}
 	exit 1
 	;;
@@ -121,7 +123,7 @@ audio/flac | audio/mpeg | audio/x-m4a | audio/mp4)
 		grep "Application id" "$TMP" | tee -a "$CACHE" >/dev/null
 		rm "$TMP"
 	fi
-	chafa /usr/share/icons/Papirus-Dark/128x128/devices/drive-optical.svg
+	chafa /usr/share/icons/Papirus-Dark/128x128/devices/media-optical.svg
 	cat "$CACHE"
 	;;
 
@@ -135,23 +137,41 @@ video/*)
 	[ ! -f "$THUMB" ] && ffmpegthumbnailer -i "$1" -o "$THUMB" -s 0
 	if [ ! -f "$METADATA" ]; then
 		TMP="$(mktemp /tmp/lf.XXXX)"
-		mediainfo "$1" | tr '\t' ' ' | tr -s " " >"$TMP"
+		mediainfo "$1" | tr '\t' ' ' | tr -s " " |
+			tee "$TMP" >/dev/null
 		# Extraemos la información necesaria
-		grep "File size" "$TMP" | head -n1 |
+		grep "^File size" "$TMP" | head -n1 |
 			tee "$METADATA" >/dev/null
-		grep "Duration" "$TMP" | head -n1 |
+		grep "^Duration" "$TMP" | head -n1 |
 			tee -a "$METADATA" >/dev/null
-		grep "FPS" "$TMP" | head -n1 |
+		grep "^Frame rate" "$TMP" | head -n1 |
 			tee -a "$METADATA" >/dev/null
-		grep "Movie name" "$TMP" | head -n1 |
+		grep "^Format" "$TMP" | head -n1 |
+			tee -a "$METADATA" >/dev/null
+		grep "^Width" "$TMP" | head -n1 |
+			tee -a "$METADATA" >/dev/null
+		grep "^Height" "$TMP" | head -n1 |
+			tee -a "$METADATA" >/dev/null
+		grep "^Bit depth" "$TMP" | head -n1 |
+			tee -a "$METADATA" >/dev/null
+		grep "^Language" "$TMP" | sort -u |
 			tee -a "$METADATA" >/dev/null
 		rm "$TMP"
 	fi
 
 	image "$THUMB" "$2" "$3" "$4" "$5" &
 	{
-		printf '\n%.0s' $(seq $(($4 / 5)))
-		printf '\n'
+		# Determinamos el número de saltos de línea necesarios teniendo en
+		# cuenta el ratio de aspecto del vídeo
+		HEIGHT=$(grep -oP "Height : \K.[0-9 ]*" "$METADATA" | tr -d ' ')
+		WIDTH=$(grep -oP "Width : \K.[0-9 ]*" "$METADATA" | tr -d ' ')
+		ROTATION=$(mediainfo "$1" | grep -oP "Rotation.*: \K[0-9]*")
+		if [ -n "$ROTATION" ] && { [ "$ROTATION" = "90" ] || [ "$ROTATION" = "270" ]; }; then
+			COUNT=$(echo "scale=2; (${4}/5) * ($WIDTH/$HEIGHT) + 1.5" | bc | cut -d. -f1)
+		else
+			COUNT=$(echo "scale=2; (${4}/5) * ($HEIGHT/$WIDTH) + 1.5" | bc | cut -d. -f1)
+		fi
+		printf '\n%.0s' $(seq "$COUNT")
 		cat "$METADATA"
 	}
 	exit 1
