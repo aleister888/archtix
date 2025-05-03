@@ -14,7 +14,6 @@ set shellopts '-eu'
 set ifs "\n"
 set scrolloff 10
 set icons
-set period 1
 set relativenumber
 set info size:time
 set cleaner '~/.config/lf/cleaner'
@@ -63,7 +62,7 @@ cmd open ${{
 		audio/*)
 			mpv --audio-display=no "$f" ;;
 		video/*)
-			mpv "$f" 2>/dev/null ;;
+			vlc "$f" 2>/dev/null ;;
 		*/x-keepass2)
 			setsid -f keepassxc "$f" 2>/dev/null ;;
 		*/x-reaper-*)
