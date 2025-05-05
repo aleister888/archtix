@@ -13,7 +13,7 @@ REPO_DIR="$HOME/.dotfiles"
 ASSETDIR="$REPO_DIR/assets/configs"
 
 # Guardamos el hash del script para comprobar mas adelante si este ha cambiado
-OGHASH=$(sha256sum "$0" | awk '{print $1}')
+OG_HASH=$(sha256sum "$0" | awk '{print $1}')
 
 # Si tenemos conexión a Internet y el repo. clonado, lo actualizamos
 if [ -d "$REPO_DIR/.git" ] && ping gnu.org -c 1 >/dev/null 2>&1; then
@@ -22,10 +22,10 @@ if [ -d "$REPO_DIR/.git" ] && ping gnu.org -c 1 >/dev/null 2>&1; then
 fi
 
 # Guardamos el hash tras hacer pull
-HASH=$(sha256sum "$0" | awk '{print $1}')
+NEW_HASH=$(sha256sum "$0" | awk '{print $1}')
 
 # Si el script se actualizó, usar la versión más reciente
-if [ "$OGHASH" != "$HASH" ]; then
+if [ "$OG_HASH" != "$NEW_HASH" ]; then
 	exec "$0" "$@"
 fi
 

@@ -214,14 +214,22 @@ code_format() {
 		DIRECTORIO="."
 	fi
 	# Buscar todos los archivos en el directorio
-	find "$DIRECTORIO" -type d -name ".git" -prune -o -type f | while read -r ARCHIVO; do
+	find "$DIRECTORIO" -wholename "$DIRECTORIO/.git*" -prune -o \
+		-type f -print | while read -r ARCHIVO; do
 		# Obtener el tipo MIME del archivo
 		MIME_TYPE=$(xdg-mime query filetype "$ARCHIVO")
+		# Obtener el hash del archivo original
+		OG_HASH=$(sha256sum "$ARCHIVO" | awk '{print $1}')
 		# Si el tipo MIME es 'application/x-shellscript', formatear el archivo
 		case "$MIME_TYPE" in
-		application/x-shellscript) shfmt -w "$ARCHIVO" ;;
-		text/x-java) astyle --style=allman --indent=tab=8 -n "$ARCHIVO" ;;
+		application/x-shellscript) shfmt -w "$ARCHIVO" >/dev/null 2>&1 ;;
+		text/x-java) astyle --style=allman --indent=tab=8 -n "$ARCHIVO" >/dev/null 2>&1 ;;
 		text/x-tex) latexindent --cruft=/tmp -w "$ARCHIVO" >/dev/null 2>&1 ;;
-		esac && echo "Formateado: $ARCHIVO"
+		esac
+		# Obtener el hash del archivo actualizado, para ver si se cambió algo
+		NEW_HASH=$(sha256sum "$ARCHIVO" | awk '{print $1}')
+		if [ "$OG_HASH" != "$NEW_HASH" ]; then
+			echo "Formateado: $ARCHIVO"
+		fi
 	done
 }

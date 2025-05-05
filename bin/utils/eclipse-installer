@@ -2,8 +2,8 @@
 
 # Script para instalar/desinstalar Eclipse IDE
 
-INSTALL_DIR="$HOME/.local/bin/eclipse"
-RUN_SCRIPT="/usr/bin/eclipse"
+INSTALL_DIR="$HOME/.local/opt/eclipse"
+RUN_SCRIPT="/usr/local/bin/eclipse"
 
 install() {
 	# Obtener el año y el mes actual
@@ -32,6 +32,7 @@ install() {
 	tar -xzf "$TAR_LOCATION" -C /tmp
 
 	# Instalarlo en $HOME
+	mkdir -p "$(dirname "$INSTALL_DIR")"
 	mv /tmp/eclipse "$INSTALL_DIR"
 
 	# Configurar el workspace por defecto
@@ -42,7 +43,7 @@ install() {
 	cat <<-EOF | sudo tee $RUN_SCRIPT >/dev/null
 		#!/bin/sh
 		export GTK_THEME=Adwaita:dark
-		$INSTALL_DIR/eclipse
+		dbus-launch $INSTALL_DIR/eclipse
 		rm -rf $HOME/.p2 $HOME/.eclipse
 	EOF
 	sudo chmod +x $RUN_SCRIPT
