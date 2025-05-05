@@ -1,0 +1,6 @@
+#!/bin/sh
+
+gcc -o /tmp/file-handler ~/.dotfiles/assets/file-handler.c \
+	$(pkg-config --cflags --libs dbus-1)
+
+install -m 755 /tmp/file-handler "$HOME/.local/bin"

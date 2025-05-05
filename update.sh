@@ -55,6 +55,8 @@ fi
 "$HOME"/.dotfiles/updater/suckless-compile >/dev/null 2>&1
 # Activar los servicios necesarios
 "$HOME"/.dotfiles/updater/conf-services >/dev/null 2>&1
+# Añade integración con dbus para lf
+"$HOME"/.dotfiles/updater/lf-dbus >/dev/null 2>&1
 
 #######################################
 # Archivos de configuración y scripts #

@@ -80,10 +80,11 @@ if echo "$(
 	pgrep blueman-applet || blueman-applet &
 fi
 
-pgrep dunst || dunst &           # Notificaciones
-pgrep udiskie || udiskie -t -a & # Auto-montador de discos
-pgrep dwmblocks || dwmblocks &   # Barra de estado
-pgrep nm-applet || nm-applet &   # Applet de red
+pgrep dunst || dunst &               # Notificaciones
+pgrep udiskie || udiskie -t -a &     # Auto-montador de discos
+pgrep dwmblocks || dwmblocks &       # Barra de estado
+pgrep nm-applet || nm-applet &       # Applet de red
+pgrep file-handler || file-handler & # Integración con dbus para lf
 
 # Corregir el nivel del micrófono en portátiles
 if [ -e /sys/class/power_supply/BAT0 ]; then
