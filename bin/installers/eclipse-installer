@@ -44,7 +44,7 @@ install() {
 	cat <<-EOF | sudo tee $RUN_SCRIPT >/dev/null
 		#!/bin/sh
 		export GTK_THEME=Adwaita:dark
-		dbus-launch $INSTALL_DIR/eclipse
+		$INSTALL_DIR/eclipse
 		rm -rf $HOME/.p2 $HOME/.eclipse
 	EOF
 	sudo chmod +x $RUN_SCRIPT
