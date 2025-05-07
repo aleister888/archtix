@@ -67,7 +67,7 @@ grep "Q35\|VMware" /sys/devices/virtual/dmi/id/product_name ||
 
 # Servicios del sistema
 pgrep polkit-gnome || /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
-pgrep gnome-keyring || gnome-keyring-daemon -r -d &
+pgrep gnome-keyring || gnome-keyring-daemon -r -d --components=secrets &
 
 # Pasamos todas las variables del entorno de la sesión de dwm a dbus
 dbus-update-activation-environment --all

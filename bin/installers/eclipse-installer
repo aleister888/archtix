@@ -45,7 +45,7 @@ install() {
 		#!/bin/sh
 		export GTK_THEME=Adwaita:dark
 		$INSTALL_DIR/eclipse
-		rm -rf $HOME/.p2 $HOME/.eclipse
+		rm -rf $HOME/.p2
 	EOF
 	sudo chmod +x $RUN_SCRIPT
 }
