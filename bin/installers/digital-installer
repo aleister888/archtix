@@ -1,0 +1,53 @@
+#!/bin/bash
+# shellcheck disable=SC2155
+
+# Script para instalar/desinstalar Digital
+
+INSTALL_DIR="$HOME/.local/opt/Digital"
+RUN_SCRIPT="/usr/local/bin/digital"
+
+install() {
+	local REPO="hneemann/Digital"
+	local REPLY="$(curl -s "https://api.github.com/repos/$REPO/releases/latest")"
+	local DOWNLOAD_URL="$(echo "$REPLY" | jq -r '.assets[] | select(.name | test("Digital\\.zip$")) | .browser_download_url')"
+	local FILENAME="$(basename "$DOWNLOAD_URL")"
+	local ZIP_LOCATION="/tmp/$FILENAME"
+
+	# Descargar y descomprimir el archivo
+	curl -L "$DOWNLOAD_URL" -o "$ZIP_LOCATION" || exit
+	unzip "$ZIP_LOCATION" -d /tmp >/dev/null
+
+	# Instalarlo en $HOME
+	mkdir -p "$(dirname "$INSTALL_DIR")"
+	mv /tmp/Digital "$INSTALL_DIR"
+
+	# Crear script de inicio
+	cat <<-EOF | sudo tee $RUN_SCRIPT >/dev/null
+		#!/bin/sh
+		$INSTALL_DIR/Digital.sh
+	EOF
+	sudo chmod +x $RUN_SCRIPT
+}
+
+uninstall() {
+	rm -rf "$INSTALL_DIR"
+	sudo rm -f $RUN_SCRIPT
+}
+
+clean() {
+	rm -rf "${XDG_CONFIG_HOME:-$HOME/.config}"/.digital.cfg
+}
+
+help_msg() {
+	echo "Uso:" >&2
+	echo "  $(basename "$0") [--install/--uninstall/--clean]" >&2
+	exit 1
+}
+
+# Manejo de argumentos
+case "$1" in
+--install) install ;;
+--uninstall) uninstall ;;
+--clean) clean ;;
+*) help_msg ;;
+esac

@@ -25,7 +25,7 @@ return {
 		format_on_save = { timeout_ms = 5000 },
 		formatters = {
 			astyle = {
-				prepend_args = { "--style=allman", "--indent=tab=8", "-n" },
+				prepend_args = { "--style=java", "--indent=tab=8", "--add-braces", "--squeeze-lines=1", "-n" },
 			},
 			latexindent = {
 				prepend_args = {

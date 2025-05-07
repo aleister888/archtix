@@ -25,6 +25,12 @@
     "xdm-openrc",
     "xorg-xdm"
   ],
+  "firmware": [
+    "fwupd-openrc",
+    "gnome-firmware",
+    "world/fwupd",
+    "world/fwupd-efi"
+  ],
   "syslog-ng": [
     "hiredis",
     "libdbi",

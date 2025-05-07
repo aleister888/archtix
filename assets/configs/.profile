@@ -10,22 +10,12 @@ if [ -e "${XDG_CONFIG_HOME:-$HOME/.config}/useralias" ]; then
 	. "${XDG_CONFIG_HOME:-$HOME/.config}/useralias"
 fi
 
-if [ -d "$HOME/.local/bin" ]; then
-	PATH="$HOME/.local/bin:$PATH"
-fi
-
-# Añadir scripts de eww a $PATH
-if [ -d "$HOME/.local/bin/eww" ]; then
-	PATH="$HOME/.local/bin/eww:$PATH"
-fi
+[ -d "$HOME/.local/bin" ] && PATH+=":$HOME/.local/bin"
 # Añadir scripts de dwmblocks a $PATH
-if [ -d "$HOME/.local/bin/sb" ]; then
-	PATH="$HOME/.local/bin/sb:$PATH"
-fi
+[ -d "$HOME/.local/bin/sb" ] && PATH+=":$HOME/.local/bin/sb"
 # Añadir scripts a $PATH
-if [ -d "$HOME/.local/bin/utils" ]; then
-	PATH="$HOME/.local/bin/utils:$PATH"
-fi
+[ -d "$HOME/.local/bin/utils" ] && PATH+=":$HOME/.local/bin/utils"
+[ -d "$HOME/.local/bin/installers/" ] && PATH+=":$HOME/.local/bin/installers"
 
 # Definir cursor usado por X11
 export XCURSOR_PATH="/usr/share/icons:${XDG_DATA_HOME}/icons"

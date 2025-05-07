@@ -223,7 +223,7 @@ code_format() {
 		# Si el tipo MIME es 'application/x-shellscript', formatear el archivo
 		case "$MIME_TYPE" in
 		application/x-shellscript) shfmt -w "$ARCHIVO" >/dev/null 2>&1 ;;
-		text/x-java) astyle --style=allman --indent=tab=8 -n "$ARCHIVO" >/dev/null 2>&1 ;;
+		text/x-java) astyle --style=java --indent=tab=8 --add-braces --squeeze-lines=1 -n "$ARCHIVO" >/dev/null 2>&1 ;;
 		text/x-tex) latexindent --cruft=/tmp -w "$ARCHIVO" >/dev/null 2>&1 ;;
 		esac
 		# Obtener el hash del archivo actualizado, para ver si se cambió algo

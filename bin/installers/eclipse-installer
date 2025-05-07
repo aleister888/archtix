@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC2155
 
 # Script para instalar/desinstalar Eclipse IDE
 
@@ -43,7 +44,7 @@ install() {
 	cat <<-EOF | sudo tee $RUN_SCRIPT >/dev/null
 		#!/bin/sh
 		export GTK_THEME=Adwaita:dark
-		$INSTALL_DIR/eclipse
+		dbus-launch $INSTALL_DIR/eclipse
 		rm -rf $HOME/.p2 $HOME/.eclipse
 	EOF
 	sudo chmod +x $RUN_SCRIPT
@@ -63,22 +64,14 @@ clean() {
 
 help_msg() {
 	echo "Uso:" >&2
-	echo "  eclipse-installer [--install/--uninstall/--clean]" >&2
+	echo "  $(basename "$0") [--install/--uninstall/--clean]" >&2
+	exit 1
 }
 
 # Manejo de argumentos
 case "$1" in
---install)
-	install
-	;;
---uninstall)
-	uninstall
-	;;
---clean)
-	clean
-	;;
-*)
-	help_msg
-	exit 1
-	;;
+--install) install ;;
+--uninstall) uninstall ;;
+--clean) clean ;;
+*) help_msg ;;
 esac

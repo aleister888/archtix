@@ -46,6 +46,7 @@
     "cdrtools",
     "chafa",
     "csvkit",
+    "expac",
     "eza",
     "ffmpegthumbnailer",
     "fzf",
@@ -67,7 +68,6 @@
   "aplicaciones_gui": [
     "arandr",
     "gcolor3",
-    "gnome-firmware",
     "mpv",
     "mpv-mpris",
     "nitrogen",

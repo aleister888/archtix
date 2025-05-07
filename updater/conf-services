@@ -26,11 +26,12 @@ user_service_add() {
 [ "$(id -u)" -eq 0 ] && exit 1
 
 SERVICES=(
-	"elogind"
 	"earlyoom"
+	"elogind"
+	"fwupd"
+	"syslog-ng"
 	"tlp"
 	"xdm"
-	"syslog-ng"
 )
 
 USER_SERVICES=(

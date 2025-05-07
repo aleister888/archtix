@@ -65,4 +65,3 @@ Agradecimientos especiales a:
 
 - [Luke Smith](https://github.com/LukeSmithxyz) por la inspiración y sus scripts.
 - [suckless.org](https://suckless.org) por las herramientas utilizadas.
-- [Sidhanth Rathod](https://github.com/siduck/dotfiles) por el widget de `eww`.
