@@ -175,7 +175,7 @@ static const Layout layouts[] = {
 /* Poner el foco/Mover a la primera ventana principal */ { MOD, XK_minus,      ACTION##stack, {.i = 0 } },
 
 // Invocador de comandos
-#define SHCMD(cmd) { .v = (const char*[]){ "/usr/bin/zsh", "-c", cmd, NULL } }
+#define SHCMD(cmd) { .v = (const char*[]){ "/usr/bin/sh", "-c", cmd, NULL } }
 
 // Comandos
 static char dmenumon[2] = "0"; // Comando para ejecutar dmenu
