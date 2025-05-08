@@ -73,7 +73,7 @@ text/* | */xml | */json | */x-shellscript | */x-xcursor | */x-theme | */x-deskto
 	;;
 
 # Convertir con imagemagick a JPG
-*/postscript | */x-xpixmap | */x-xcf | */heif)
+*/postscript | */x-xpixmap | */x-xcf | */heif | */bmp)
 	CACHE=$(magick_convert "$1")
 	image "$CACHE" "$2" "$3" "$4" "$5"
 	exit 1

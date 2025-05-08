@@ -28,7 +28,12 @@ alias rebuild-detector="checkrebuild -v"
 alias clipboard="xclip -selection clipboard"
 
 alias webcam="ffplay /dev/video0"
-alias filetype="xdg-mime query filetype"
+
+# Para obtener el mimetype del archivo
+filetype() {
+	printf "xdg-mime: %s\n" "$(xdg-mime query filetype "$1")"
+	printf "file:     %s" "$(file --dereference --brief --mime-type "$1")"
+}
 
 # Para reinciar pipewire
 pw_restart() {
@@ -197,7 +202,7 @@ git_reset_to_commit() {
 	read -r COMMIT_HASH
 	# Confirmar antes de hacer el reset
 	echo "¿Estás seguro de que quieres retroceder al commit $COMMIT_HASH? (s/N)"
-	read -r respuesta
+	read -r ANS
 	if [ "$ANS" = "s" ] || [ "$ANS" = "S" ]; then
 		# Realizar el reset al commit seleccionado
 		git reset --hard "$COMMIT_HASH"

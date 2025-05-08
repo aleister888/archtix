@@ -16,7 +16,7 @@ ASSETDIR="$REPO_DIR/assets/configs"
 OG_HASH=$(sha256sum "$0" | awk '{print $1}')
 
 # Si tenemos conexión a Internet y el repo. clonado, lo actualizamos
-if [ -d "$REPO_DIR/.git" ] && ping gnu.org -c 1 >/dev/null 2>&1; then
+if [ -d "$REPO_DIR/.git" ] && timeout -k 1s 3s ping gnu.org -c 1 >/dev/null 2>&1; then
 	sh -c "cd $REPO_DIR && git pull" >/dev/null ||
 		exit 1
 fi
@@ -39,7 +39,7 @@ INSTALLED_PKGS=$(yay -Qq)
 # Filtramos los paquetes que no están instalados (ignorando el repositorio)
 PKGS_TO_INSTALL=$(echo "$REPO_PKG" | cut -d/ -f2 | grep -vxF -f <(echo "$INSTALLED_PKGS"))
 # Si hay paquetes por instalar y estamos conectados a internet, los instalamos
-if [ -n "$PKGS_TO_INSTALL" ] && ping gnu.org -c 1 >/dev/null 2>&1; then
+if [ -n "$PKGS_TO_INSTALL" ] && timeout -k 1s 3s ping gnu.org -c 1 >/dev/null 2>&1; then
 	yay -Sy --noconfirm --needed --asexplicit $PKGS_TO_INSTALL
 fi
 

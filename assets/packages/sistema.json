@@ -17,6 +17,7 @@
     "man-db",
     "net-tools",
     "realtime-privileges",
+    "squashfs-tools",
     "squashfuse"
   ],
   "kernel": [

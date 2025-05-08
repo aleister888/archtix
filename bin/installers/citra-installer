@@ -1,0 +1,80 @@
+#!/bin/bash
+# shellcheck disable=SC2155
+
+# Script para instalar/desinstalar Citra
+
+INSTALL_DIR="$HOME/.local/opt/Citra"
+RUN_SCRIPT="/usr/local/bin/citra"
+DS_TOOL="/usr/local/bin/3dstool"
+
+install_3dstool() {
+	local REPO="dnasdw/3dstool"
+	local REPLY="$(curl -s "https://api.github.com/repos/$REPO/releases/latest")"
+	local DOWNLOAD_URL="$(echo "$REPLY" | jq -r '.assets[] | select(.name | test(".*linux_x86_64\\.tar\\.gz$")) | .browser_download_url')"
+	local FILENAME="$(basename "$DOWNLOAD_URL")"
+	local TAR_LOCATION="/tmp/$FILENAME"
+
+	# Descargar y descomprimir el archivo
+	curl -L "$DOWNLOAD_URL" -o "$TAR_LOCATION" || exit
+	tar -xzf "$TAR_LOCATION" -C /tmp
+
+	sudo cp /tmp/3dstool "$DS_TOOL"
+}
+
+install() {
+	local REPO="azahar-emu/azahar"
+	local REPLY="$(curl -s "https://api.github.com/repos/$REPO/releases/latest")"
+	local DOWNLOAD_URL="$(echo "$REPLY" | jq -r '.assets[] | select(.name | test("azahar\\.AppImage$")) | .browser_download_url')"
+	local FILENAME="$(basename "$DOWNLOAD_URL")"
+	local APPIMAGE_LOCATION="/tmp/$FILENAME"
+	local SQUASH="$(echo "$APPIMAGE_LOCATION" | cut -d. -f1).squashfs"
+
+	# Descargamos el AppImage
+	curl -L "$DOWNLOAD_URL" -o "$APPIMAGE_LOCATION" || exit
+
+	# Obtenemos si offset y extraemos solo el squashfs
+	chmod +x "$APPIMAGE_LOCATION"
+	local OFFSET=$("$APPIMAGE_LOCATION" --appimage-offset)
+	dd if="$APPIMAGE_LOCATION" of="$SQUASH" \
+		bs=4M skip="$OFFSET" iflag=skip_bytes status=progress
+
+	# Extraemos los contenidos del AppImage
+	unsquashfs -d /tmp/extracted "$SQUASH"
+	mv /tmp/extracted "$INSTALL_DIR"
+
+	# Instalamos utilidades que nos harán falta
+	yay -Sy --noconfirm --needed projectctr-makerom-bin ctrtool
+
+	# Crear script de inicio
+	cat <<-EOF | sudo tee $RUN_SCRIPT >/dev/null
+		#!/bin/sh
+		$INSTALL_DIR/AppRun
+	EOF
+	sudo chmod +x $RUN_SCRIPT
+}
+
+uninstall() {
+	rm -rf "$INSTALL_DIR"
+	sudo rm -f $RUN_SCRIPT
+	sudo rm -f "$DS_TOOL"
+	yay --noconfirm -Rcns projectctr-makerom-bin ctrtool
+}
+
+clean() {
+	rm -rf "${XDG_CONFIG_HOME:-$HOME/.config}/azahar-emu"
+	rm -rf "${XDG_DATA_HOME:-$HOME/.local/share}/azahar-emu"
+}
+
+help_msg() {
+	echo "Uso:" >&2
+	echo "  $(basename "$0") [--install/--uninstall/--clean]" >&2
+	exit 1
+}
+
+# Manejo de argumentos
+case "$1" in
+--install) install ;;
+--uninstall) uninstall ;;
+--clean) clean ;;
+*) help_msg ;;
+esac
