@@ -106,7 +106,7 @@ static const Rule rules[] = {
 	{ "Picard",                NULL,  NULL,   1<<6,  0,  0,  0,  0,  -1,    0 },
 	{ "krita",                 NULL,  NULL,   1<<7,  0,  0,  0,  0,  -1,    0 },
 	{ "Fr.handbrake.ghb",      NULL,  NULL,   1<<7,  0,  0,  0,  0,  -1,    0 },
-	{ "Gimp",                  NULL,  NULL,   1<<7,  0,  0,  0,  0,  -1,    0 },
+	{ "Gimp",                  NULL,  NULL,   1<<7,  0,  0,  1,  0,  -1,    0 },
 	{ "Timeshift-gtk",         NULL,  NULL,   1<<7,  0,  0,  0,  0,  -1,    0 },
 	{ "BleachBit",             NULL,  NULL,   1<<7,  0,  0,  0,  0,  -1,    0 },
 	{ "Gnome-disks",           NULL,  NULL,   1<<7,  0,  0,  0,  0,  -1,    0 },
@@ -143,7 +143,7 @@ static const Rule rules[] = {
 	{ "Standard Notes",        NULL,  NULL,  1<<13,  0,  0,  0,  0,  -1,    0 },
 	{ TERMC,                   NULL,  NULL,      0,  0,  0,  1,  0,  -1,    0 },
 	{ BROWSER,                 NULL,  NULL,      0,  0,  0,  1,  0,  -1,    0 },
-	{ NULL,  NULL,     "scratchpad",             0,  1,  0,  0,  0,  -1,  's' },
+	{ NULL,  NULL,     "scratchpad",             0,  1,  0,  1,  0,  -1,  's' },
 	{ NULL,  NULL,   "Media viewer",             0,  1,  0,  0,  0,  -1,    0 },
 };
 

@@ -256,14 +256,15 @@ cmd clean-trash ${{
 cmd restore-trash ${{
 	clear; tput bold
 	set -f
-	printf "Contenidos de la papelera:\n"
 	trash-list | sed "s|$HOME|~|"
-	printf "¿Restaurar papelera? [s/N] "
-	read ans
-	if [ $ans = "s" ]; then
+	if whiptail --title "Restaurar papelera" \
+		--yesno "¿Restaurar los archivos eliminados?" 10 60; then
 		clear
 		trash-restore
-	fi && printf "Hecho!"
+		notify-send -i \
+			/usr/share/icons/Papirus-Dark/128x128/places/user-trash.svg \
+			"Archivo(s) restaurado(s)"
+	fi
 	clear
 }}
 
@@ -312,6 +313,11 @@ map h set hidden!
 
 # Abrir/crear archivo con vim
 map V push :!nvim<space>$f
+
+
+# Abrir archivos
+cmd open-with %export ; "$@" "$fx"
+map <enter> push :open-with<space>
 
 # Permitir arrastrar archivos hacia otra ventana
 map <c-z> $setsid -f dragon-drop -a -x $fx
