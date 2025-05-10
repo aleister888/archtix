@@ -18,10 +18,14 @@ static void show_items(DBusMessage* message) {
         dbus_message_iter_get_basic(&array, &item);
         const char* path = item;
         // Handle 'file://' and 'file:/'
-        if (strncmp(item, "file://", 7) == 0) {
+        if (strncmp(item, "file:///", 8) == 0) {
+            // file:///path → skip "file://"
             path = item + 7;
         } else if (strncmp(item, "file:/", 6) == 0) {
+            // file:/path → skip "file:"
             path = item + 5;
+        } else {
+            path = item;
         }
         char* cmd;
         asprintf(&cmd, "%s lf '%s' &", term, path);

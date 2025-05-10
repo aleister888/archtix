@@ -42,6 +42,6 @@ vim.keymap.set("n", "<leader>s", "<C-w>w", { noremap = true, silent = true })
 vim.keymap.set("n", "<leader>S", function()
 	local terminal = os.getenv("TERMINAL") or ""
 	local termtitle = os.getenv("TERMTITLE") or ""
-	local cmd = string.format("%s %s scratchpad >/dev/null 2>&1", terminal, termtitle)
+	local cmd = string.format("%s %s scratchpad &>/dev/null &", terminal, termtitle)
 	vim.fn.execute("!" .. cmd)
 end, { silent = true })

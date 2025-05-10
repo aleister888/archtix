@@ -1,10 +1,9 @@
 local servers = {
-	"lua_ls",
-	"texlab",
 	"bashls",
-	"markdown_oxide",
 	"cssls",
-	"jdtls",
+	"lua_ls",
+	"markdown_oxide",
+	"texlab",
 }
 
 return {
@@ -61,17 +60,10 @@ return {
 			local capabilities = vim.lsp.protocol.make_client_capabilities()
 			-- Configurar servidores LSP
 			for _, lsp in ipairs(servers) do
-				if lsp ~= "jdtls" then
-					lspconfig[lsp].setup({
-						capabilities = capabilities,
-					})
-				end
+				lspconfig[lsp].setup({
+					capabilities = capabilities,
+				})
 			end
-			require("mason-tool-installer").setup({
-				ensure_installed = { "java-debug-adapter", "java-test" },
-				auto_update = true,
-				run_on_start = true,
-			})
 		end,
 	},
 	{

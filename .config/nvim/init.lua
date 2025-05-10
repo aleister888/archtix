@@ -14,6 +14,7 @@ vim.opt.rtp:prepend(lazypath)
 
 -- Definimos la tecla leader antes de iniciar lazy
 vim.g.mapleader = ","
+vim.g.maplocalleader = "."
 
 require("core.options")
 require("core.indent")
