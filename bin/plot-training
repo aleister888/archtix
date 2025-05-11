@@ -2,13 +2,13 @@
 # shellcheck disable=SC2155
 
 # Parámetros del script
-INPUT_DIR=${1:-$(pwd)}
-DATA_DIR="$INPUT_DIR/data"
-PROCESSED_DATA_DIR="$INPUT_DIR/processed_data"
-WEIGHT_DIR="$PROCESSED_DATA_DIR/max"
-VOLUME_DIR="$PROCESSED_DATA_DIR/volume"
-WEIGHT_PLOT_DIR="$PROCESSED_DATA_DIR/max_plots"
-VOLUME_PLOT_DIR="$PROCESSED_DATA_DIR/volume_plots"
+export INPUT_DIR=${1:-$(pwd)}
+export DATA_DIR="$INPUT_DIR/data"
+export PROCESSED_DATA_DIR="$INPUT_DIR/processed_data"
+export WEIGHT_DIR="$PROCESSED_DATA_DIR/max"
+export VOLUME_DIR="$PROCESSED_DATA_DIR/volume"
+export WEIGHT_PLOT_DIR="$PROCESSED_DATA_DIR/max_plots"
+export VOLUME_PLOT_DIR="$PROCESSED_DATA_DIR/volume_plots"
 
 # Función para procesar cada archivo CSV
 process_csv() {
@@ -166,6 +166,7 @@ if [[ ! -d "$DATA_DIR" ]]; then
 	exit 1
 fi
 
-find "$DATA_DIR" -type f -name "*.csv" ! -path "$WEIGHT_DIR/*" ! -path "$VOLUME_DIR/*" | while read -r FILE; do
-	process_csv "$FILE"
-done
+export -f process_csv
+
+find "$DATA_DIR" -type f -name "*.csv" ! -path "$WEIGHT_DIR/*" ! -path "$VOLUME_DIR/*" |
+	parallel process_csv {}
