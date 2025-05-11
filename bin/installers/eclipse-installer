@@ -4,7 +4,7 @@
 # Script para instalar/desinstalar Eclipse IDE
 
 INSTALL_DIR="$HOME/.local/opt/eclipse"
-RUN_SCRIPT="/usr/local/bin/eclipse"
+RUN_SCRIPT="$HOME/.local/bin/eclipse"
 
 install() {
 	# Obtener el año y el mes actual

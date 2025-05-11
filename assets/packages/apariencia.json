@@ -1,7 +1,9 @@
 {
   "qt": [
+    "qt5-base",
     "qt5-tools",
     "qt5ct",
+    "qt6-base",
     "qt6ct"
   ],
   "iconos_temas_y_cursores": [

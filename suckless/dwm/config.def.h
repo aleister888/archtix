@@ -89,6 +89,7 @@ static const Rule rules[] = {
 	{ "Arandr",                NULL,  NULL,      0,  1,  0,  0,  0,  -1,    0 },
 	{ "Nl.hjdskes.gcolor3",    NULL,  NULL,      0,  1,  0,  0,  0,  -1,    0 },
 	{ "Qalculate-gtk",         NULL,  NULL,      0,  1,  0,  0,  0,  -1,    0 },
+	{ "citrahold",             NULL,  NULL,      0,  1,  0,  0,  0,  -1,    0 },
 	{ "tauonmb",               NULL,  NULL,   1<<0,  0,  0,  0,  0,  -1,    0 },
 	{ "thunderbird",           NULL,  NULL,   1<<1,  0,  0,  0,  0,  -1,    0 },
 	{ "xfreerdp",              NULL,  NULL,   1<<3,  0,  0,  0,  0,  -1,    0 },

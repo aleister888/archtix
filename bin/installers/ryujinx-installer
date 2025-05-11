@@ -4,7 +4,7 @@
 # Script para instalar/desinstalar Ryujinx
 
 INSTALL_DIR="$HOME/.local/opt/Ryujinx"
-RUN_SCRIPT="/usr/local/bin/ryujinx"
+RUN_SCRIPT="$HOME/.local/bin/ryujinx"
 
 install() {
 	local REPO="Ryubing/Canary-Releases"

@@ -4,8 +4,8 @@
 # Script para instalar/desinstalar Citra
 
 INSTALL_DIR="$HOME/.local/opt/Citra"
-RUN_SCRIPT="/usr/local/bin/citra"
-DS_TOOL="/usr/local/bin/3dstool"
+RUN_SCRIPT="$HOME/.local/bin/citra"
+DS_TOOL="$HOME/.local/bin/3dstool"
 
 install_3dstool() {
 	local REPO="dnasdw/3dstool"

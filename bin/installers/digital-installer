@@ -4,7 +4,7 @@
 # Script para instalar/desinstalar Digital
 
 INSTALL_DIR="$HOME/.local/opt/Digital"
-RUN_SCRIPT="/usr/local/bin/digital"
+RUN_SCRIPT="$HOME/.local/bin/digital"
 
 install() {
 	local REPO="hneemann/Digital"
