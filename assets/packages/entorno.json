@@ -50,7 +50,7 @@
     "eza",
     "ffmpegthumbnailer",
     "fzf",
-    "gnuplot",
+    "extra/gnuplot",
     "odt2txt",
     "pamixer",
     "parallel",
