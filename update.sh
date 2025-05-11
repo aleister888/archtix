@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 # shellcheck disable=SC2046
 # shellcheck disable=SC2086
 
@@ -11,6 +11,7 @@ DATA_DIR="${XDG_DATA_HOME:-$HOME/.local/share}"
 CONF_DIR="${XDG_CONFIG_HOME:-$HOME/.config}"
 REPO_DIR="$HOME/.dotfiles"
 ASSETDIR="$REPO_DIR/assets/configs"
+XDG_LOCKFILE="/tmp/xdg-mime.lock"
 
 # Guardamos el hash del script para comprobar mas adelante si este ha cambiado
 OG_HASH=$(sha256sum "$0" | awk '{print $1}')
@@ -48,46 +49,42 @@ fi
 ###########
 
 # Instalar/actualizar archivos de configuración
-"$HOME"/.dotfiles/updater/install-conf >/dev/null 2>&1
+"$HOME"/.dotfiles/updater/install-conf &
 # Crear enlaces simbólicos en /usr/local/bin para ciertos scripts
-"$HOME"/.dotfiles/updater/install-bin >/dev/null 2>&1
-# Compilar aplicaciones suckless
-"$HOME"/.dotfiles/updater/suckless-compile >/dev/null 2>&1
+"$HOME"/.dotfiles/updater/install-bin &
 # Activar los servicios necesarios
-"$HOME"/.dotfiles/updater/conf-services >/dev/null 2>&1
+"$HOME"/.dotfiles/updater/conf-services &
 # Añade integración con dbus para lf
-"$HOME"/.dotfiles/updater/lf-dbus >/dev/null 2>&1
+"$HOME"/.dotfiles/updater/lf-dbus &
+wait
+# Compilar aplicaciones suckless
+"$HOME"/.dotfiles/updater/suckless-compile &
 
 #######################################
 # Archivos de configuración y scripts #
 #######################################
 
 # Crear los directorios necesarios
-[ -d "$CONF_DIR" ] ||
-	mkdir -p "$CONF_DIR"
-[ -d "$HOME/.local/bin" ] ||
-	mkdir -p "$HOME/.local/bin"
-[ -d "$HOME/.cache" ] ||
-	mkdir -p "$HOME/.cache"
-[ -d "$DATA_DIR" ] ||
-	mkdir -p "$DATA_DIR"
-[ -d "$DATA_DIR/dwm" ] ||
-	mkdir -p "$DATA_DIR/dwm"
+[ -d "$HOME/.local/bin" ] || mkdir -p "$HOME/.local/bin"
+[ -d "$HOME/.cache" ] || mkdir -p "$HOME/.cache"
+[ -d "$CONF_DIR" ] || mkdir -p "$CONF_DIR"
+[ -d "$DATA_DIR" ] || mkdir -p "$DATA_DIR"
+[ -d "$DATA_DIR/dwm" ] || mkdir -p "$DATA_DIR/dwm"
 
 # Instalar archivos de configuración y scripts
-sh -c "cd $REPO_DIR && stow --target=${HOME}/.local/bin/ bin/" >/dev/null
-sh -c "cd $REPO_DIR && stow --target=${HOME}/.config/ .config/" >/dev/null
+sh -c "cd $REPO_DIR && stow --target=${HOME}/.local/bin/ bin/" >/dev/null &
+sh -c "cd $REPO_DIR && stow --target=${HOME}/.config/ .config/" >/dev/null &
 
 ln -sf "$REPO_DIR/assets/configs/.profile" "$HOME/.profile"
 ln -sf "$REPO_DIR/assets/configs/.profile" "$CONF_DIR/zsh/.zprofile"
 
 # Borrar enlaces rotos
-find "$HOME/.local/bin" -type l ! -exec test -e {} \; -delete
-find "$CONF_DIR" -type l ! -exec test -e {} \; -delete
+find "$HOME/.local/bin" -type l ! -exec test -e {} \; -delete &
+find "$CONF_DIR" -type l ! -exec test -e {} \; -delete &
 
 # Enlazar nuestro script de inicio
 ln -sf ~/.dotfiles/suckless/dwm/autostart.sh \
-	~/.local/share/dwm/autostart.sh
+	$HOME/.local/share/dwm/autostart.sh
 
 #########################
 # Configurar apariencia #
@@ -102,14 +99,14 @@ if [ ! -e "$CONF_DIR/nitrogen/bg-saved.cfg" ]; then
 		mode=5
 		bgcolor=#000000"
 	EOF
-fi
+fi &
 
 # Configurar el tema del cursor
 if [ ! -e "$REPO_DIR/assets/configs/index.theme" ]; then
 	mkdir -p "$DATA_DIR/icons/default"
 	cp "$REPO_DIR/assets/configs/index.theme" \
 		"$DATA_DIR/icons/default/index.theme"
-fi
+fi &
 
 #######################
 # Configurar GTK y QT #
@@ -151,17 +148,17 @@ sudo sh -c "
 		cp -rf \"$ASSETDIR/gtk/gtk-3.0\"    /root/.config/gtk-3.0/
 		cp -rf \"$ASSETDIR/gtk/gtk-4.0\"    /root/.config/gtk-4.0/
 	fi
-"
+" &
 
 # Instalamos el tema de GTK4
 if [ ! -d /usr/share/themes/Gruvbox-Dark ]; then
 	# Clona el tema de gtk4
-	git clone \
+	git clone --depth=1 \
 		https://github.com/Fausto-Korpsvart/Gruvbox-GTK-Theme.git \
 		/tmp/Gruvbox_Theme >/dev/null
 	# Copia el tema deseado a la carpeta de temas
 	sudo bash /tmp/Gruvbox_Theme/themes/install.sh
-fi
+fi &
 
 # Configuramos QT
 if [ ! -e "$CONF_DIR/qt5ct/qt5ct.conf" ] ||
@@ -179,122 +176,6 @@ if [ ! -e "$CONF_DIR/qt5ct/qt5ct.conf" ] ||
 		general="Iosevka Fixed SS05 Semibold,12,0,0,0,0,0,0,0,0,Regular"
 	EOF
 fi
-
-############################
-# Aplicaciones por defecto #
-############################
-
-rm -f "$CONF_DIR/mimeapps.list"
-rm -rf ~/.local/share/mime:
-
-mkdir -p "$DATA_DIR/mime/packages"
-
-sudo rm -f /usr/share/applications/mimeinfo.cache
-
-update-mime-database ~/.local/share/mime
-#sudo update-mime-database /usr/share/mime
-
-[ ! -d "$DATA_DIR/applications" ] &&
-	mkdir -p "$DATA_DIR/applications"
-
-# Copiamos y modificamos los archivos .desktop
-
-cp -f "$REPO_DIR/assets/desktop/lft.desktop" \
-	"$DATA_DIR/applications/file.desktop" 2>/dev/null
-echo "Exec=${TERMINAL:-st} ${TERMEXEC:-} lf %F" | tee -a \
-	"$DATA_DIR/applications/file.desktop" >/dev/null
-
-cp -f "$REPO_DIR/assets/desktop/nvimt.desktop" \
-	"$DATA_DIR/applications/text.desktop" 2>/dev/null
-echo "Exec=${TERMINAL:-st} ${TERMEXEC:-} nvim %F" | tee -a \
-	"$DATA_DIR/applications/text.desktop" >/dev/null
-
-# Visor de imágenes
-cp -f "$REPO_DIR/assets/desktop/image.desktop" \
-	"$DATA_DIR/applications/image.desktop" 2>/dev/null
-echo "Exec=setsid -f ${VIEWER:-nsxiv} %F" | tee -a \
-	"$DATA_DIR/applications/image.desktop" >/dev/null
-
-# Función para establecer: visor de imagenes, video, audio y editor de texto
-set_default_mime_types() {
-	local PATTERN="$1"
-	local DESKTOP_FILE="$2"
-	awk -v pattern="$PATTERN" '$0 ~ pattern {print $1}' /etc/mime.types |
-		while read -r LINE; do
-			xdg-mime default "$DESKTOP_FILE" "$LINE"
-		done
-}
-
-set_default_mime_types "^image" "image.desktop"
-set_default_mime_types "^*/pdf" "org.pwmt.zathura.desktop"
-set_default_mime_types "^video" "mpv.desktop"
-set_default_mime_types "^audio" "mpv.desktop"
-set_default_mime_types "^text" "text.desktop"
-
-# Establecemos el administrador de archivos predetermiando
-xdg-mime default file.desktop inode/directory
-xdg-mime default file.desktop x-directory/normal
-update-desktop-database "$DATA_DIR/applications"
-
-# Usar xdg-open para firefox
-[ -d "$DATA_DIR/dbus-1/services/" ] ||
-	mkdir -p "$DATA_DIR/dbus-1/services/"
-
-[ -f "$DATA_DIR/dbus-1/services/org.freedesktop.FileManager1.service" ] ||
-	echo "Exec=/bin/false" |
-	tee "$DATA_DIR/dbus-1/services/org.freedesktop.FileManager1.service"
-
-# Establecer navegador predeterminado
-xdg-settings set default-web-browser firefox.desktop 2>/dev/null
-
-# Asociar los tipos de archivos de MS Office con Libreoffice
-EXCEL_ASSOCIATIONS=(
-	"application/vnd.ms-excel"
-	"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-)
-POWERPOINT_ASSOCIATIONS=(
-	"application/vnd.ms-powerpoint"
-	"application/vnd.openxmlformats-officedocument.presentationml.presentation"
-)
-WORD_ASSOCIATIONS=(
-	"application/msword"
-	"application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-)
-for ASSOCIATION in "${EXCEL_ASSOCIATIONS[@]}"; do
-	xdg-mime default libreoffice-calc.desktop "$ASSOCIATION"
-done
-for ASSOCIATION in "${POWERPOINT_ASSOCIATIONS[@]}"; do
-	xdg-mime default libreoffice-impress.desktop "$ASSOCIATION"
-done
-for ASSOCIATION in "${WORD_ASSOCIATIONS[@]}"; do
-	xdg-mime default libreoffice-writer.desktop "$ASSOCIATION"
-done
-
-#############################
-# Añadir diccionarios a vim #
-#############################
-
-[ ! -d "$DATA_DIR/nvim/site/spell" ] &&
-	mkdir -p "$DATA_DIR/nvim/site/spell"
-
-[ ! -f "$DATA_DIR/nvim/site/spell/es.utf-8.spl" ] &&
-	wget 'https://ftp.nluug.nl/pub/vim/runtime/spell/es.utf-8.spl' -q -O \
-		"$DATA_DIR/nvim/site/spell/es.utf-8.spl"
-
-[ ! -f "$DATA_DIR/nvim/site/spell/es.utf-8.sug" ] &&
-	wget 'https://ftp.nluug.nl/pub/vim/runtime/spell/es.utf-8.sug' -q -O \
-		"$DATA_DIR/nvim/site/spell/es.utf-8.sug"
-
-####################################
-# Actualizar iconos y colores (lf) #
-####################################
-
-LF_URL="https://raw.githubusercontent.com/gokcehan/lf/master/etc"
-curl $LF_URL/colors.example -o ~/.config/lf/colors 2>/dev/null
-curl $LF_URL/icons.example -o ~/.config/lf/icons 2>/dev/null
-
-# Recargar las configuraciones de fuentes
-fc-cache -fv >/dev/null
 
 #############################
 # Ocultar archivos .desktop #
@@ -345,4 +226,127 @@ for ENTRY in "${DESKTOPENT[@]}"; do
 		echo 'NoDisplay=true' | sudo tee -a \
 			"/usr/local/share/applications/$ENTRY.desktop"
 	fi
-done >/dev/null
+done >/dev/null &
+
+####################################
+# Actualizar iconos y colores (lf) #
+####################################
+
+LF_URL="https://raw.githubusercontent.com/gokcehan/lf/master/etc"
+curl $LF_URL/colors.example -o ~/.config/lf/colors 2>/dev/null &
+curl $LF_URL/icons.example -o ~/.config/lf/icons 2>/dev/null &
+
+############################
+# Aplicaciones por defecto #
+############################
+
+trap 'update-desktop-database $DATA_DIR/applications' EXIT
+
+rm -f "$CONF_DIR/mimeapps.list"
+rm -rf ~/.local/share/mime:
+
+mkdir -p "$DATA_DIR/mime/packages"
+
+update-mime-database ~/.local/share/mime
+
+#sudo rm -f /usr/share/applications/mimeinfo.cache
+#sudo update-mime-database /usr/share/mime
+
+[ ! -d "$DATA_DIR/applications" ] &&
+	mkdir -p "$DATA_DIR/applications"
+
+# Copiamos y modificamos los archivos .desktop
+
+cp -f "$REPO_DIR/assets/desktop/lft.desktop" \
+	"$DATA_DIR/applications/file.desktop" 2>/dev/null
+echo "Exec=${TERMINAL:-st} ${TERMEXEC:-} lf %F" | tee -a \
+	"$DATA_DIR/applications/file.desktop" >/dev/null
+
+cp -f "$REPO_DIR/assets/desktop/nvimt.desktop" \
+	"$DATA_DIR/applications/text.desktop" 2>/dev/null
+echo "Exec=${TERMINAL:-st} ${TERMEXEC:-} nvim %F" | tee -a \
+	"$DATA_DIR/applications/text.desktop" >/dev/null
+
+# Visor de imágenes
+cp -f "$REPO_DIR/assets/desktop/image.desktop" \
+	"$DATA_DIR/applications/image.desktop" 2>/dev/null
+echo "Exec=setsid -f ${VIEWER:-nsxiv} %F" | tee -a \
+	"$DATA_DIR/applications/image.desktop" >/dev/null
+
+# Función para establecer: visor de imagenes, video, audio y editor de texto
+set_default_mime_types() {
+	local PATTERN="$1"
+	local DESKTOP_FILE="$2"
+
+	# Bloquear $XDG_LOCKFILE con flock para poder ejecutar xdg-mime en paralelo
+	awk -v pattern="$PATTERN" '$0 ~ pattern {print $1}' /etc/mime.types |
+		while read -r LINE; do
+			(
+				flock -x 200
+				xdg-mime default "$DESKTOP_FILE" "$LINE"
+			) 200>"$XDG_LOCKFILE" &
+		done
+}
+
+set_default_mime_types "^image" "image.desktop"
+set_default_mime_types "^*/pdf" "org.pwmt.zathura.desktop"
+set_default_mime_types "^video" "vlc.desktop"
+set_default_mime_types "^audio" "mpv.desktop"
+set_default_mime_types "^text" "text.desktop"
+
+# Establecemos el administrador de archivos predetermiando
+
+{
+	flock 200
+	xdg-mime default file.desktop inode/directory
+} 200>"$XDG_LOCKFILE" &
+{
+	flock 200
+	xdg-mime default file.desktop x-directory/normal
+} 200>"$XDG_LOCKFILE" &
+
+# Usar xdg-open para firefox
+[ -d "$DATA_DIR/dbus-1/services/" ] ||
+	mkdir -p "$DATA_DIR/dbus-1/services/"
+
+[ -f "$DATA_DIR/dbus-1/services/org.freedesktop.FileManager1.service" ] ||
+	echo "Exec=/bin/false" |
+	tee "$DATA_DIR/dbus-1/services/org.freedesktop.FileManager1.service"
+
+# Establecer navegador predeterminado
+xdg-settings set default-web-browser firefox.desktop 2>/dev/null
+
+# Asociaciones de archivos de Office
+declare -A OFFICE_ASSOCIATIONS=(
+	["application/vnd.ms-excel"]="libreoffice-calc.desktop"
+	["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"]="libreoffice-calc.desktop"
+	["application/vnd.ms-powerpoint"]="libreoffice-impress.desktop"
+	["application/vnd.openxmlformats-officedocument.presentationml.presentation"]="libreoffice-impress.desktop"
+	["application/msword"]="libreoffice-writer.desktop"
+	["application/vnd.openxmlformats-officedocument.wordprocessingml.document"]="libreoffice-writer.desktop"
+)
+
+for MIME in "${!OFFICE_ASSOCIATIONS[@]}"; do
+	{
+		flock 200
+		xdg-mime default "${OFFICE_ASSOCIATIONS[$MIME]}" "$MIME"
+	} 200>"$XDG_LOCKFILE" &
+done
+
+#############################
+# Añadir diccionarios a vim #
+#############################
+
+[ ! -d "$DATA_DIR/nvim/site/spell" ] &&
+	mkdir -p "$DATA_DIR/nvim/site/spell"
+
+[ ! -f "$DATA_DIR/nvim/site/spell/es.utf-8.spl" ] &&
+	wget 'https://ftp.nluug.nl/pub/vim/runtime/spell/es.utf-8.spl' -q -O \
+		"$DATA_DIR/nvim/site/spell/es.utf-8.spl" &
+
+[ ! -f "$DATA_DIR/nvim/site/spell/es.utf-8.sug" ] &&
+	wget 'https://ftp.nluug.nl/pub/vim/runtime/spell/es.utf-8.sug' -q -O \
+		"$DATA_DIR/nvim/site/spell/es.utf-8.sug" &
+
+# Recargar las configuraciones de fuentes
+fc-cache -f

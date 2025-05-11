@@ -9,14 +9,14 @@
 
 # Activar servicio
 service_add() {
-	sudo rc-update add "$1" "$2"
+	sudo rc-update -q add "$1" "$2"
 }
 # Activar servicio para el usuario
 user_service_add() {
 	SERVICE="$1"
 	RUNLEVEL="$2"
 	if [ -d /run/user/1000/ ]; then
-		rc-update add "$SERVICE" "$RUNLEVEL" -U
+		rc-update -q add "$SERVICE" "$RUNLEVEL" -U
 	else
 		ln -s "/etc/user/init.d/$SERVICE" \
 			"$HOME/.config/rc/runlevels/$RUNLEVEL/$SERVICE"

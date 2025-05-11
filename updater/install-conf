@@ -14,7 +14,7 @@ sudo cp -f "$HOME/.dotfiles/assets/system/udev/99-steam-controller-perms.rules" 
 	/usr/lib/udev/rules.d/
 
 # Permitir al usuario escanear redes Wi-Fi y cambiar ajustes de red
-id -nG "$USER" | grep network || sudo usermod -aG network "$USER"
+id -nG "$USER" | grep network -q || sudo usermod -aG network "$USER"
 [ -e /sys/class/power_supply/BAT0 ] &&
 	sudo cp -f "$HOME/.dotfiles/assets/system/udev/50-org.freedesktop.NetworkManager.rules" \
 		/etc/polkit-1/rules.d/
@@ -63,7 +63,7 @@ sudo install -m 755 "$HOME/.dotfiles/assets/system/services/elogind/nm-restart" 
 ##############
 
 # Desactivar el altavoz del PC
-echo "blacklist pcspkr" | sudo tee /etc/modprobe.d/nobeep.conf
+echo "blacklist pcspkr" | sudo tee /etc/modprobe.d/nobeep.conf >/dev/null
 
 # Suspender de forma automática cuando la batería cae por debajo del 10%
 if [ -e /sys/class/power_supply/BAT0 ]; then

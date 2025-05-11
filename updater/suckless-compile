@@ -33,8 +33,7 @@ compile_suckless_app() {
 	fi
 
 	# Compilar e instalar
-	sudo make install --directory "$SUCKLESS_DIR" >/dev/null 2>&1 &&
-		echo "$APP compilado con éxito" || return 1
+	sudo make install --directory "$SUCKLESS_DIR" >/dev/null 2>&1
 }
 
 # Recompilar aplicaciones suckless

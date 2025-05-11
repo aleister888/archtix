@@ -2,7 +2,7 @@
 
 PREFIX  := /usr/local
 CC      := cc # Compilador
-CFLAGS  := -pedantic -Wall -Wno-deprecated-declarations -Os
+CFLAGS  := -pedantic -Wall -Wno-deprecated-declarations -Os -Wno-incompatible-pointer-types
 LDFLAGS := -lX11
 
 # Descomenta esta línea para compilar en FreeBSD
