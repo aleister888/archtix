@@ -1,5 +1,4 @@
 #!/bin/bash
-# shellcheck disable=SC2155
 
 # Script para instalar/desinstalar Eclipse IDE
 
@@ -8,7 +7,7 @@ RUN_SCRIPT="$HOME/.local/bin/eclipse"
 
 install() {
 	# Obtener el año y el mes actual
-	local YEAR MONTH
+	local YEAR MONTH URL FILENAME DOWNLOAD_URL TAR_LOCATION
 	YEAR=$(date +'%Y')
 	MONTH=$(date +'%m')
 
@@ -23,10 +22,10 @@ install() {
 	fi
 
 	# Definir URL y nombre del archivo
-	local URL="https://www.eclipse.org/downloads/download.php"
-	local FILENAME="eclipse-java-$YEAR-$RELEASE_MONTH-R-linux-gtk-x86_64.tar.gz"
-	local DOWNLOAD_URL="$URL?file=/technology/epp/downloads/release/$YEAR-$RELEASE_MONTH/R/$FILENAME&r=1"
-	local TAR_LOCATION="/tmp/$FILENAME"
+	URL="https://www.eclipse.org/downloads/download.php"
+	FILENAME="eclipse-java-$YEAR-$RELEASE_MONTH-R-linux-gtk-x86_64.tar.gz"
+	DOWNLOAD_URL="$URL?file=/technology/epp/downloads/release/$YEAR-$RELEASE_MONTH/R/$FILENAME&r=1"
+	TAR_LOCATION="/tmp/$FILENAME"
 
 	# Descargar y descomprimir el archivo
 	curl -L "$DOWNLOAD_URL" -o "$TAR_LOCATION" || exit
@@ -41,18 +40,18 @@ install() {
 		"$INSTALL_DIR/eclipse.ini"
 
 	# Crear script de inicio
-	cat <<-EOF | sudo tee $RUN_SCRIPT >/dev/null
+	cat <<-EOF >"$RUN_SCRIPT"
 		#!/bin/sh
 		export GTK_THEME=Adwaita:dark
 		$INSTALL_DIR/eclipse
 		rm -rf $HOME/.p2
 	EOF
-	sudo chmod +x $RUN_SCRIPT
+	chmod +x "$RUN_SCRIPT"
 }
 
 uninstall() {
 	rm -rf "$INSTALL_DIR"
-	sudo rm -f $RUN_SCRIPT
+	rm -f "$RUN_SCRIPT"
 }
 
 clean() {

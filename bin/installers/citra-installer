@@ -1,5 +1,4 @@
 #!/bin/bash
-# shellcheck disable=SC2155
 
 # Script para instalar/desinstalar Citra
 
@@ -8,33 +7,35 @@ RUN_SCRIPT="$HOME/.local/bin/citra"
 DS_TOOL="$HOME/.local/bin/3dstool"
 
 install_3dstool() {
-	local REPO="dnasdw/3dstool"
-	local REPLY="$(curl -s "https://api.github.com/repos/$REPO/releases/latest")"
-	local DOWNLOAD_URL="$(echo "$REPLY" | jq -r '.assets[] | select(.name | test(".*linux_x86_64\\.tar\\.gz$")) | .browser_download_url')"
-	local FILENAME="$(basename "$DOWNLOAD_URL")"
-	local TAR_LOCATION="/tmp/$FILENAME"
+	local REPO REPLY DOWNLOAD_URL FILENAME TAR_LOCATION
+	REPO="dnasdw/3dstool"
+	REPLY="$(curl -s "https://api.github.com/repos/$REPO/releases/latest")"
+	DOWNLOAD_URL="$(echo "$REPLY" | jq -r '.assets[] | select(.name | test(".*linux_x86_64\\.tar\\.gz$")) | .browser_download_url')"
+	FILENAME="$(basename "$DOWNLOAD_URL")"
+	TAR_LOCATION="/tmp/$FILENAME"
 
 	# Descargar y descomprimir el archivo
 	curl -L "$DOWNLOAD_URL" -o "$TAR_LOCATION" || exit
 	tar -xzf "$TAR_LOCATION" -C /tmp
 
-	sudo cp /tmp/3dstool "$DS_TOOL"
+	cp /tmp/3dstool "$DS_TOOL"
 }
 
 install() {
-	local REPO="azahar-emu/azahar"
-	local REPLY="$(curl -s "https://api.github.com/repos/$REPO/releases/latest")"
-	local DOWNLOAD_URL="$(echo "$REPLY" | jq -r '.assets[] | select(.name | test("azahar\\.AppImage$")) | .browser_download_url')"
-	local FILENAME="$(basename "$DOWNLOAD_URL")"
-	local APPIMAGE_LOCATION="/tmp/$FILENAME"
-	local SQUASH="$(echo "$APPIMAGE_LOCATION" | cut -d. -f1).squashfs"
+	local REPO REPLY DOWNLOAD_URL FILENAME APPIMAGE_LOCATION SQUASH OFFSET
+	REPO="azahar-emu/azahar"
+	REPLY="$(curl -s "https://api.github.com/repos/$REPO/releases/latest")"
+	DOWNLOAD_URL="$(echo "$REPLY" | jq -r '.assets[] | select(.name | test("azahar\\.AppImage$")) | .browser_download_url')"
+	FILENAME="$(basename "$DOWNLOAD_URL")"
+	APPIMAGE_LOCATION="/tmp/$FILENAME"
+	SQUASH="$(echo "$APPIMAGE_LOCATION" | cut -d. -f1).squashfs"
 
 	# Descargamos el AppImage
 	curl -L "$DOWNLOAD_URL" -o "$APPIMAGE_LOCATION" || exit
 
 	# Obtenemos si offset y extraemos solo el squashfs
 	chmod +x "$APPIMAGE_LOCATION"
-	local OFFSET=$("$APPIMAGE_LOCATION" --appimage-offset)
+	OFFSET=$("$APPIMAGE_LOCATION" --appimage-offset)
 	dd if="$APPIMAGE_LOCATION" of="$SQUASH" \
 		bs=4M skip="$OFFSET" iflag=skip_bytes status=progress
 
@@ -46,17 +47,17 @@ install() {
 	yay -Sy --noconfirm --needed projectctr-makerom-bin ctrtool
 
 	# Crear script de inicio
-	cat <<-EOF | sudo tee $RUN_SCRIPT >/dev/null
+	cat <<-EOF >"$RUN_SCRIPT"
 		#!/bin/sh
 		$INSTALL_DIR/AppRun
 	EOF
-	sudo chmod +x $RUN_SCRIPT
+	chmod +x "$RUN_SCRIPT"
 }
 
 uninstall() {
 	rm -rf "$INSTALL_DIR"
-	sudo rm -f $RUN_SCRIPT
-	sudo rm -f "$DS_TOOL"
+	rm -f "$RUN_SCRIPT"
+	rm -f "$DS_TOOL"
 	yay --noconfirm -Rcns projectctr-makerom-bin ctrtool
 }
 

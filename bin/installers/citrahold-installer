@@ -1,11 +1,11 @@
-#!/bin/sh
-# shellcheck disable=SC2155
+#!/bin/bash
 
 # Script para instalar/desinstalar Citra
 
 FINAL_BIN="$HOME/.local/bin/citrahold"
 
 install() {
+	local REPO REPLY DOWNLOAD_URL ZIP_LOCATION EXTRACTED_NAME
 	REPO="regimensocial/citraholdUI"
 	REPLY="$(curl -s "https://api.github.com/repos/$REPO/releases/latest")"
 	DOWNLOAD_URL="$(echo "$REPLY" | grep -oP 'zipball_url": "\K.*v[0-9]+\.[0-9]+\.[0-9]+')"

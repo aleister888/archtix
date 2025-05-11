@@ -1,5 +1,4 @@
 #!/bin/bash
-# shellcheck disable=SC2155
 
 # Script para instalar/desinstalar Ryujinx
 
@@ -7,11 +6,12 @@ INSTALL_DIR="$HOME/.local/opt/Ryujinx"
 RUN_SCRIPT="$HOME/.local/bin/ryujinx"
 
 install() {
-	local REPO="Ryubing/Canary-Releases"
-	local REPLY="$(curl -s "https://api.github.com/repos/$REPO/releases/latest")"
-	local DOWNLOAD_URL="$(echo "$REPLY" | jq -r '.assets[] | select(.name | test(".*linux_x64.*\\.tar\\.gz$")) | .browser_download_url')"
-	local FILENAME="$(basename "$DOWNLOAD_URL")"
-	local TAR_LOCATION="/tmp/$FILENAME"
+	local REPO REPLY DOWNLOAD_URL FILENAME TAR_LOCATION
+	REPO="Ryubing/Canary-Releases"
+	REPLY="$(curl -s "https://api.github.com/repos/$REPO/releases/latest")"
+	DOWNLOAD_URL="$(echo "$REPLY" | jq -r '.assets[] | select(.name | test(".*linux_x64.*\\.tar\\.gz$")) | .browser_download_url')"
+	FILENAME="$(basename "$DOWNLOAD_URL")"
+	TAR_LOCATION="/tmp/$FILENAME"
 
 	# Descargar y descomprimir el archivo
 	curl -L "$DOWNLOAD_URL" -o "$TAR_LOCATION" || exit
@@ -22,16 +22,16 @@ install() {
 	mv /tmp/publish "$INSTALL_DIR"
 
 	# Crear script de inicio
-	cat <<-EOF | sudo tee $RUN_SCRIPT >/dev/null
+	cat <<-EOF >"$RUN_SCRIPT"
 		#!/bin/sh
 		$INSTALL_DIR/Ryujinx.sh
 	EOF
-	sudo chmod +x $RUN_SCRIPT
+	chmod +x "$RUN_SCRIPT"
 }
 
 uninstall() {
 	rm -rf "$INSTALL_DIR"
-	sudo rm -f $RUN_SCRIPT
+	rm -f "$RUN_SCRIPT"
 }
 
 clean() {
