@@ -294,13 +294,9 @@ set_default_mime_types "^audio" "mpv.desktop"
 set_default_mime_types "^text" "text.desktop"
 
 # Establecemos el administrador de archivos predetermiando
-
 {
 	flock 200
 	xdg-mime default file.desktop inode/directory
-} 200>"$XDG_LOCKFILE" &
-{
-	flock 200
 	xdg-mime default file.desktop x-directory/normal
 } 200>"$XDG_LOCKFILE" &
 
@@ -311,9 +307,6 @@ set_default_mime_types "^text" "text.desktop"
 [ -f "$DATA_DIR/dbus-1/services/org.freedesktop.FileManager1.service" ] ||
 	echo "Exec=/bin/false" |
 	tee "$DATA_DIR/dbus-1/services/org.freedesktop.FileManager1.service"
-
-# Establecer navegador predeterminado
-xdg-settings set default-web-browser firefox.desktop 2>/dev/null
 
 # Asociaciones de archivos de Office
 declare -A OFFICE_ASSOCIATIONS=(
