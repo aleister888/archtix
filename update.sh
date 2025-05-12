@@ -6,11 +6,13 @@
 # Licencia: GNU GPLv3
 
 # Variables
-DATA_DIR="${XDG_DATA_HOME:-$HOME/.local/share}"
-CONF_DIR="${XDG_CONFIG_HOME:-$HOME/.config}"
-REPO_DIR="$HOME/.dotfiles"
-ASSETDIR="$REPO_DIR/assets/configs"
-XDG_LOCKFILE="/tmp/xdg-mime.lock"
+export DATA_DIR="${XDG_DATA_HOME:-$HOME/.local/share}"
+export CONF_DIR="${XDG_CONFIG_HOME:-$HOME/.config}"
+export REPO_DIR="$HOME/.dotfiles"
+export ASSETDIR="$REPO_DIR/assets/configs"
+export XDG_LOCKFILE="/tmp/xdg-mime.lock"
+
+trap 'fc-cache -f' EXIT
 
 # Guardamos el hash del script para comprobar mas adelante si este ha cambiado
 OG_HASH=$(sha256sum "$0" | awk '{print $1}')
@@ -58,6 +60,21 @@ fi
 wait
 # Compilar aplicaciones suckless
 "$HOME"/.dotfiles/updater/suckless-compile &
+
+############################
+# Aplicaciones por defecto #
+############################
+
+# Establecer las aplicaciones por defecto para cada mimetype
+"$HOME"/.dotfiles/updater/xdg-config &
+
+# Usar xdg-open para firefox
+[ -d "$DATA_DIR/dbus-1/services/" ] ||
+	mkdir -p "$DATA_DIR/dbus-1/services/"
+
+[ -f "$DATA_DIR/dbus-1/services/org.freedesktop.FileManager1.service" ] ||
+	echo "Exec=/bin/false" |
+	tee "$DATA_DIR/dbus-1/services/org.freedesktop.FileManager1.service"
 
 #######################################
 # Archivos de configuración y scripts #
@@ -235,96 +252,6 @@ LF_URL="https://raw.githubusercontent.com/gokcehan/lf/master/etc"
 curl $LF_URL/colors.example -o ~/.config/lf/colors 2>/dev/null &
 curl $LF_URL/icons.example -o ~/.config/lf/icons 2>/dev/null &
 
-############################
-# Aplicaciones por defecto #
-############################
-
-trap 'update-desktop-database $DATA_DIR/applications' EXIT
-
-rm -f "$CONF_DIR/mimeapps.list"
-rm -rf ~/.local/share/mime:
-
-mkdir -p "$DATA_DIR/mime/packages"
-
-update-mime-database ~/.local/share/mime
-
-#sudo rm -f /usr/share/applications/mimeinfo.cache
-#sudo update-mime-database /usr/share/mime
-
-[ ! -d "$DATA_DIR/applications" ] &&
-	mkdir -p "$DATA_DIR/applications"
-
-# Copiamos y modificamos los archivos .desktop
-
-cp -f "$REPO_DIR/assets/desktop/lft.desktop" \
-	"$DATA_DIR/applications/file.desktop" 2>/dev/null
-echo "Exec=${TERMINAL:-st} ${TERMEXEC:-} lf %F" | tee -a \
-	"$DATA_DIR/applications/file.desktop" >/dev/null
-
-cp -f "$REPO_DIR/assets/desktop/nvimt.desktop" \
-	"$DATA_DIR/applications/text.desktop" 2>/dev/null
-echo "Exec=${TERMINAL:-st} ${TERMEXEC:-} nvim %F" | tee -a \
-	"$DATA_DIR/applications/text.desktop" >/dev/null
-
-# Visor de imágenes
-cp -f "$REPO_DIR/assets/desktop/image.desktop" \
-	"$DATA_DIR/applications/image.desktop" 2>/dev/null
-echo "Exec=setsid -f ${VIEWER:-nsxiv} %F" | tee -a \
-	"$DATA_DIR/applications/image.desktop" >/dev/null
-
-# Función para establecer: visor de imagenes, video, audio y editor de texto
-set_default_mime_types() {
-	local PATTERN="$1"
-	local DESKTOP_FILE="$2"
-
-	# Bloquear $XDG_LOCKFILE con flock para poder ejecutar xdg-mime en paralelo
-	awk -v pattern="$PATTERN" '$0 ~ pattern {print $1}' /etc/mime.types |
-		while read -r LINE; do
-			(
-				flock -x 200
-				xdg-mime default "$DESKTOP_FILE" "$LINE"
-			) 200>"$XDG_LOCKFILE" &
-		done
-}
-
-set_default_mime_types "^image" "image.desktop"
-set_default_mime_types "^*/pdf" "org.pwmt.zathura.desktop"
-set_default_mime_types "^video" "vlc.desktop"
-set_default_mime_types "^audio" "mpv.desktop"
-set_default_mime_types "^text" "text.desktop"
-
-# Establecemos el administrador de archivos predetermiando
-{
-	flock 200
-	xdg-mime default file.desktop inode/directory
-	xdg-mime default file.desktop x-directory/normal
-} 200>"$XDG_LOCKFILE" &
-
-# Usar xdg-open para firefox
-[ -d "$DATA_DIR/dbus-1/services/" ] ||
-	mkdir -p "$DATA_DIR/dbus-1/services/"
-
-[ -f "$DATA_DIR/dbus-1/services/org.freedesktop.FileManager1.service" ] ||
-	echo "Exec=/bin/false" |
-	tee "$DATA_DIR/dbus-1/services/org.freedesktop.FileManager1.service"
-
-# Asociaciones de archivos de Office
-declare -A OFFICE_ASSOCIATIONS=(
-	["application/vnd.ms-excel"]="libreoffice-calc.desktop"
-	["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"]="libreoffice-calc.desktop"
-	["application/vnd.ms-powerpoint"]="libreoffice-impress.desktop"
-	["application/vnd.openxmlformats-officedocument.presentationml.presentation"]="libreoffice-impress.desktop"
-	["application/msword"]="libreoffice-writer.desktop"
-	["application/vnd.openxmlformats-officedocument.wordprocessingml.document"]="libreoffice-writer.desktop"
-)
-
-for MIME in "${!OFFICE_ASSOCIATIONS[@]}"; do
-	{
-		flock 200
-		xdg-mime default "${OFFICE_ASSOCIATIONS[$MIME]}" "$MIME"
-	} 200>"$XDG_LOCKFILE" &
-done
-
 #############################
 # Añadir diccionarios a vim #
 #############################
@@ -339,6 +266,3 @@ done
 [ ! -f "$DATA_DIR/nvim/site/spell/es.utf-8.sug" ] &&
 	wget 'https://ftp.nluug.nl/pub/vim/runtime/spell/es.utf-8.sug' -q -O \
 		"$DATA_DIR/nvim/site/spell/es.utf-8.sug" &
-
-# Recargar las configuraciones de fuentes
-fc-cache -f

@@ -1,0 +1,82 @@
+#!/bin/bash
+
+trap 'update-desktop-database $DATA_DIR/applications' EXIT
+
+rm -f "$CONF_DIR/mimeapps.list"
+rm -rf ~/.local/share/mime:
+mkdir -p "$DATA_DIR/mime/packages"
+update-mime-database ~/.local/share/mime
+
+#sudo rm -f /usr/share/applications/mimeinfo.cache
+#sudo update-mime-database /usr/share/mime
+
+[ ! -d "$DATA_DIR/applications" ] &&
+	mkdir -p "$DATA_DIR/applications"
+
+# Copiamos y modificamos los archivos .desktop
+
+cp -f "$REPO_DIR/assets/desktop/lft.desktop" \
+	"$DATA_DIR/applications/file.desktop" 2>/dev/null
+echo "Exec=${TERMINAL:-st} ${TERMEXEC:-} lf %F" | tee -a \
+	"$DATA_DIR/applications/file.desktop" >/dev/null
+
+cp -f "$REPO_DIR/assets/desktop/nvimt.desktop" \
+	"$DATA_DIR/applications/text.desktop" 2>/dev/null
+echo "Exec=${TERMINAL:-st} ${TERMEXEC:-} nvim %F" | tee -a \
+	"$DATA_DIR/applications/text.desktop" >/dev/null
+
+# Visor de imágenes
+cp -f "$REPO_DIR/assets/desktop/image.desktop" \
+	"$DATA_DIR/applications/image.desktop" 2>/dev/null
+echo "Exec=setsid -f ${VIEWER:-nsxiv} %F" | tee -a \
+	"$DATA_DIR/applications/image.desktop" >/dev/null
+
+# Función para establecer: visor de imagenes, video, audio y editor de texto
+set_default_mime_types() {
+	local PATTERN="$1"
+	local DESKTOP_FILE="${2}.desktop"
+
+	# Bloquear $XDG_LOCKFILE con flock para poder ejecutar xdg-mime en paralelo
+	awk -v pattern="$PATTERN" '$0 ~ pattern {print $1}' /etc/mime.types |
+		while read -r LINE; do
+			(
+				flock -x 200
+				xdg-mime default "$DESKTOP_FILE" "$LINE"
+			) 200>"$XDG_LOCKFILE" &
+		done
+}
+
+set_default_mime_types "^image" "image"
+set_default_mime_types "^.*/pdf" "org.pwmt.zathura"
+set_default_mime_types "^.*/vnd.comicbook.*" "org.pwmt.zathura"
+set_default_mime_types "^video" "vlc"
+set_default_mime_types "^audio" "mpv"
+set_default_mime_types "^text" "text"
+set_default_mime_types "^.*/(g)?zip" "xarchiver"
+
+# Establecemos el administrador de archivos predetermiando
+{
+	flock 200
+	xdg-mime default file.desktop inode/directory
+	xdg-mime default file.desktop x-directory/normal
+	xdg-mime default xarchiver.desktop application/x-7z-compressed
+	xdg-mime default xarchiver.desktop application/x-compressed-tar
+	xdg-mime default xarchiver.desktop application/zip
+} 200>"$XDG_LOCKFILE" &
+
+# Asociaciones de archivos de Office
+declare -A OFFICE_ASSOCIATIONS=(
+	["application/vnd.ms-excel"]="libreoffice-calc"
+	["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"]="libreoffice-calc"
+	["application/vnd.ms-powerpoint"]="libreoffice-impress"
+	["application/vnd.openxmlformats-officedocument.presentationml.presentation"]="libreoffice-impress"
+	["application/msword"]="libreoffice-writer"
+	["application/vnd.openxmlformats-officedocument.wordprocessingml.document"]="libreoffice-writer"
+)
+
+for MIME in "${!OFFICE_ASSOCIATIONS[@]}"; do
+	{
+		flock 200
+		xdg-mime default "${OFFICE_ASSOCIATIONS[$MIME]}.desktop" "$MIME"
+	} 200>"$XDG_LOCKFILE" &
+done
