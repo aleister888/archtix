@@ -10,7 +10,6 @@ export DATA_DIR="${XDG_DATA_HOME:-$HOME/.local/share}"
 export CONF_DIR="${XDG_CONFIG_HOME:-$HOME/.config}"
 export REPO_DIR="$HOME/.dotfiles"
 export ASSETDIR="$REPO_DIR/assets/configs"
-export XDG_LOCKFILE="/tmp/xdg-mime.lock"
 
 trap 'fc-cache -f' EXIT
 

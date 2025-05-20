@@ -1,5 +1,7 @@
 #!/bin/bash
 
+XDG_LOCKFILE="/tmp/xdg-mime.lock"
+
 trap 'update-desktop-database $DATA_DIR/applications' EXIT
 
 rm -f "$CONF_DIR/mimeapps.list"

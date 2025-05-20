@@ -26,7 +26,7 @@
     "tesseract-data-spa",
     "zathura",
     "zathura-cb",
-    "zathura-pdf-mupdf"
+    "zathura-pdf-poppler"
   ],
   "mozilla": [
     "arkenfox-user.js",

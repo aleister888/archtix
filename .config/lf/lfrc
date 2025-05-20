@@ -20,7 +20,7 @@ set cleaner '~/.config/lf/cleaner'
 set previewer '~/.config/lf/scope'
 set ratios 3:5:4
 set autoquit true
-set hiddenfiles ".*:*.aux:*.toc:*.sty:*.out:*.log:*.bbl:*.blg:*.synctex.gz:*.bcf:*.nav:*.run.xml:*.snm:*.xwm"
+set hiddenfiles ".*:*.aux:*.toc:*.sty:*.out:*.log:*.bbl:*.blg:*.synctex.gz:_minted:*.bcf:*.nav:*.run.xml:*.snm:*.xwm"
 
 ######################
 # Comandos/Funciones #
@@ -37,7 +37,7 @@ cmd open ${{
 		*/vnd.*document*)
 			setsid -f libreoffice "$fx" 2>/dev/null ;;
 		*/pdf | */epub* | */vnd.comicbook*)
-			setsid -f zathura "$f" 2>/dev/null ;;
+			zathura "$f" 2>/dev/null ;;
 		text/* | */xml | */json | inode/x-empty | */x-shellscript | */x-desktop | */yaml | */sql)
 			$EDITOR "$fx" ;;
 		image/x-eps)

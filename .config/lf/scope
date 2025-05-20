@@ -75,7 +75,7 @@ text/* | */xml | */json | */x-shellscript | */x-xcursor | */x-theme | */x-deskto
 # Convertir con imagemagick a JPG
 */postscript | */x-xpixmap | */x-xcf | */heif | */bmp)
 	CACHE=$(magick_convert "$1")
-	image "$CACHE" "$2" "$3" "$4" "$5"
+	image "$CACHE" "$2" "$3" "$4" "$5" &
 	exit 1
 	;;
 
@@ -84,7 +84,7 @@ image/svg+xml)
 	HASH="$(file_hash "$1")"
 	CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/thumb.$HASH"
 	[ ! -f "$CACHE.png" ] && DISPLAY="" inkscape -o "$CACHE.png" --export-overwrite -D --export-width=256 "$1"
-	image "$CACHE.png" "$2" "$3" "$4" "$5"
+	image "$CACHE.png" "$2" "$3" "$4" "$5" &
 	exit 1
 	;;
 
@@ -93,13 +93,13 @@ image/x-eps)
 	HASH="$(file_hash "$1")"
 	CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/thumb.$HASH"
 	[ ! -f "$CACHE.jpg" ] && gs -dSAFER -dBATCH -dNOPAUSE -sDEVICE=jpeg -r300 -dEPSCrop -sOutputFile="$CACHE.jpg" "$1" >/dev/null 2>&1
-	image "$CACHE.jpg" "$2" "$3" "$4" "$5"
+	image "$CACHE.jpg" "$2" "$3" "$4" "$5" &
 	exit 1
 	;;
 
 # El resto de imágenes mostarlas tal cual con ueberzug
 image/*)
-	image "$1" "$2" "$3" "$4" "$5"
+	image "$1" "$2" "$3" "$4" "$5" &
 	exit 1
 	;;
 
@@ -201,7 +201,7 @@ video/*)
 		# mantener el tamaño de página definido en el PDF
 		gs -sDEVICE=jpeg -dUseCropBox -dFirstPage=1 -dLastPage=1 -r300 -o "$CACHE.jpg" "$1" >/dev/null
 	fi
-	image "$CACHE.jpg" "$2" "$3" "$4" "$5"
+	image "$CACHE.jpg" "$2" "$3" "$4" "$5" &
 	exit 1
 	;;
 
@@ -221,7 +221,7 @@ video/*)
 		fi
 		rm -rf "$TMP_DIR"
 	fi
-	image "$CACHE" "$2" "$3" "$4" "$5"
+	image "$CACHE" "$2" "$3" "$4" "$5" &
 	exit 1
 	;;
 

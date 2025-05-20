@@ -4,22 +4,23 @@
 # Parámetros del script
 export INPUT_DIR=${1:-$(pwd)}
 export DATA_DIR="$INPUT_DIR/data"
-export PROCESSED_DATA_DIR="$INPUT_DIR/processed_data"
-export WEIGHT_DIR="$PROCESSED_DATA_DIR/max"
-export VOLUME_DIR="$PROCESSED_DATA_DIR/volume"
-export WEIGHT_PLOT_DIR="$PROCESSED_DATA_DIR/max_plots"
-export VOLUME_PLOT_DIR="$PROCESSED_DATA_DIR/volume_plots"
+export WEIGHT_DIR="$INPUT_DIR/weight"
+export VOLUME_DIR="$INPUT_DIR/volume"
+export VOLUME_CSV_DIR="$VOLUME_DIR/csv"
+export VOLUME_PLOT_DIR="$VOLUME_DIR/plot"
+export WEIGHT_CSV_DIR="$WEIGHT_DIR/csv"
+export WEIGHT_PLOT_DIR="$WEIGHT_DIR/plot"
 
 # Función para procesar cada archivo CSV
 process_csv() {
 	local -r FILE="$1"
 	local -r EXERCISE_NAME=$(basename "$FILE" .csv)
 	local -r DIR_NAME=$(dirname "$FILE")
-	local -r MUSCLE_GROUP=$(basename "$DIR_NAME")
-	local -r WEIGHT_FILE="$WEIGHT_DIR/$MUSCLE_GROUP/$EXERCISE_NAME.csv"
-	local -r VOLUME_FILE="$VOLUME_DIR/$MUSCLE_GROUP/$EXERCISE_NAME.csv"
-	local -r WEIGHT_PLOT_FILE="$WEIGHT_PLOT_DIR/$MUSCLE_GROUP/$EXERCISE_NAME.png"
-	local -r VOLUME_PLOT_FILE="$VOLUME_PLOT_DIR/$MUSCLE_GROUP/$EXERCISE_NAME.png"
+	local -r OUT_DIR="${DIR_NAME#"${DATA_DIR}"/}"
+	local -r WEIGHT_FILE="$WEIGHT_CSV_DIR/$OUT_DIR/$EXERCISE_NAME.csv"
+	local -r VOLUME_FILE="$VOLUME_CSV_DIR/$OUT_DIR/$EXERCISE_NAME.csv"
+	local -r WEIGHT_PLOT_FILE="$WEIGHT_PLOT_DIR/$OUT_DIR/$EXERCISE_NAME.png"
+	local -r VOLUME_PLOT_FILE="$VOLUME_PLOT_DIR/$OUT_DIR/$EXERCISE_NAME.png"
 	# Cambiamos los '_' por ' ' y para cada palabra convertimos
 	# el primer caracter en mayúsucula y el resto en minúsculas
 	local -r PLOT_NAME="$(
@@ -36,7 +37,7 @@ process_csv() {
 
 	mapfile -t ALL_ROWS < <(awk -F, 'NR > 1 {print $0}' "$FILE")
 
-	declare -A MAX_DATA MAX_VOLUME
+	declare -A MAX_DATA MAX_VOLUME SERIES_COUNT
 	MAX_WEIGHT_GLOBAL=0
 	MAX_VOLUME_GLOBAL=0
 	MIN_WEIGHT_MAX=""
@@ -49,9 +50,14 @@ process_csv() {
 		# Nos saltamos las entradas que no tienen anotado el peso o las repeticiones
 		[[ -z "$W" || -z "$R" ]] && continue
 		[[ -n "$W" && -n "$R" ]] && VOLUME=$(echo "scale=0; $W * $R / 1" | bc) || VOLUME=0
+		# Nos saltamos las series con "warm" o "nolog"
+		[[ "$STATUS" = warm || "$STATUS" = "nolog" ]] && continue
 
 		# Si no hay RPE, asignamos el valor por defecto
 		RPE="${RPE:-$DEFAULT_RPE}"
+
+		# Contamos cuántas series hubo por ejercicio y día
+		SERIES_COUNT[$DATE]=$((${SERIES_COUNT[$DATE]:-0} + 1))
 
 		# Variables que guardan el peso, repeticiones y volumen calculado que
 		# contiene la fecha en cada iteración
@@ -89,19 +95,24 @@ process_csv() {
 		fi
 	done
 
-	# Genera archivo de pesos máximos
+	# Genera archivo de pesos máximos (solo días con más de 1 serie)
 	{
 		echo "fecha_Y-m-d,total_kg,reps,rpe,status,notes"
 		for DATE in $(echo "${!MAX_DATA[@]}" | tr ' ' '\n' | sort -V); do
-			echo "$DATE,${MAX_DATA[$DATE]}"
+			# Solo incluimos días con más de 1 serie
+			if ((${SERIES_COUNT[$DATE]} > 1)); then
+				echo "$DATE,${MAX_DATA[$DATE]}"
+			fi
 		done
 	} >"$WEIGHT_FILE"
 
-	# Genera archivo de volúmenes máximos
+	# Genera archivo de volúmenes máximos (solo días con más de 1 serie)
 	{
 		echo "fecha_Y-m-d,total_kg,reps,rpe,status,notes"
 		for DATE in $(echo "${!MAX_VOLUME[@]}" | tr ' ' '\n' | sort -V); do
-			echo "$DATE,${MAX_VOLUME[$DATE]}"
+			if ((${SERIES_COUNT[$DATE]} > 1)); then
+				echo "$DATE,${MAX_VOLUME[$DATE]}"
+			fi
 		done
 	} >"$VOLUME_FILE"
 
