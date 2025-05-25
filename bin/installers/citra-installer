@@ -44,7 +44,7 @@ install() {
 	mv /tmp/extracted "$INSTALL_DIR"
 
 	# Instalamos utilidades que nos harán falta
-	yay -Sy --noconfirm --needed projectctr-makerom-bin ctrtool
+	yay -Sy --noconfirm --needed projectctr-makerom-bin ctrtool joycond-git joycond-cemuhook-git
 
 	# Crear script de inicio
 	cat <<-EOF >"$RUN_SCRIPT"

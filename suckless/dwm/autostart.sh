@@ -86,6 +86,14 @@ pgrep dwmblocks || dwmblocks &       # Barra de estado
 pgrep nm-applet || nm-applet &       # Applet de red
 pgrep file-handler || file-handler & # Integración con dbus para lf
 
+# Joycond para emuladores
+if [ -x /usr/bin/joycond ] && ! pgrep -x joycond; then
+	/usr/bin/joycond &
+fi
+if [ -x /usr/bin/joycond-cemuhook ] && ! pgrep -f joycond-cemuhook; then
+	/usr/bin/joycond-cemuhook &
+fi
+
 # Corregir el nivel del micrófono en portátiles
 if [ -e /sys/class/power_supply/BAT0 ]; then
 	MIC=$(pactl list short sources |
