@@ -16,6 +16,7 @@ install() {
 	# Descargar y descomprimir el archivo
 	curl -L "$DOWNLOAD_URL" -o "$ZIP_LOCATION" || exit
 	unzip "$ZIP_LOCATION" -d /tmp >/dev/null
+	rm "$ZIP_LOCATION"
 
 	# Instalarlo en $HOME
 	mkdir -p "$(dirname "$INSTALL_DIR")"

@@ -13,7 +13,7 @@ alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
 # Actualizar el sistema
-alias update='yay -Syuu --answerclean --answerdiff --removemake'
+alias update='yay -Syuu --answerclean --answerdiff --removemake --ignore joycond-git --ignore joycond-cemuhook-git'
 # Herramientas
 alias xdotool_table='xmodmap -pk'
 alias du='BLOCKSIZE=1073741824 du -s * | sort -rnk 1'

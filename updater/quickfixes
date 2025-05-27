@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# 27-05-2025
+[ -x /usr/lib/libllhttp.so.9.2 ] && sudo ln -sf /usr/lib/libllhttp.so.9.2 /usr/lib/libllhttp.so.9.3

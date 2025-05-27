@@ -16,6 +16,7 @@ install() {
 	EXTRACTED_NAME="$(unzip -l "$ZIP_LOCATION" | grep -o "[[:alnum:]]*-citraholdUI-[[:alnum:]]*" | head -n1)"
 	rm -rf "/tmp/$EXTRACTED_NAME"
 	unzip -o "$ZIP_LOCATION" -d /tmp >/dev/null
+	rm "$ZIP_LOCATION"
 
 	# Compilamos e instalamos el programa
 	cd /tmp/"$EXTRACTED_NAME" || exit 1

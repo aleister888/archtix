@@ -56,6 +56,8 @@ fi
 "$HOME"/.dotfiles/updater/conf-services &
 # Añade integración con dbus para lf
 "$HOME"/.dotfiles/updater/lf-dbus &
+# Arreglos rápidos
+"$HOME"/.dotfiles/updater/quickfixes &
 wait
 # Compilar aplicaciones suckless
 "$HOME"/.dotfiles/updater/suckless-compile &

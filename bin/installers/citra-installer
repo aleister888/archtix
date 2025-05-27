@@ -17,8 +17,9 @@ install_3dstool() {
 	# Descargar y descomprimir el archivo
 	curl -L "$DOWNLOAD_URL" -o "$TAR_LOCATION" || exit
 	tar -xzf "$TAR_LOCATION" -C /tmp
+	rm "$TAR_LOCATION"
 
-	cp /tmp/3dstool "$DS_TOOL"
+	mv /tmp/3dstool "$DS_TOOL"
 }
 
 install() {
@@ -38,9 +39,11 @@ install() {
 	OFFSET=$("$APPIMAGE_LOCATION" --appimage-offset)
 	dd if="$APPIMAGE_LOCATION" of="$SQUASH" \
 		bs=4M skip="$OFFSET" iflag=skip_bytes status=progress
+	rm "$APPIMAGE_LOCATION"
 
 	# Extraemos los contenidos del AppImage
 	unsquashfs -d /tmp/extracted "$SQUASH"
+	rm "$SQUASH"
 	mv /tmp/extracted "$INSTALL_DIR"
 
 	# Instalamos utilidades que nos harán falta
@@ -52,6 +55,8 @@ install() {
 		$INSTALL_DIR/AppRun
 	EOF
 	chmod +x "$RUN_SCRIPT"
+
+	install_3dstool
 }
 
 uninstall() {
