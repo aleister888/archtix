@@ -22,10 +22,7 @@ static const Block blocks[] = {
 	// Fecha
 	{" \x07^c#D65D0E^ ^c#FE8019^" ,"date +'%d/%m'",                          60,  0},
 	// Hora
-	{" \x08^c#CC241D^ ^c#FB4934^" ,"date +'%I:%M:%S'",                        1,  0},
-	// Actualizaciones disponibles
-	{" \x0a^c#427b58^󰏔 ^c#689d6a^"  ,"echo $(checkupdates | wc -l )&",        60,  0},
-	{" "                           ,"true",                                    0,  0},
+	{" \x08^c#CC241D^ ^c#FB4934^" ,"date +'%I:%M:%S '",                       1,  0},
 	// Indicador Bloq Mayus
 	{"\x09^c#504945^"              ,"sb-bloq",                                 5,  2},
 	// Filtro de luz azul
