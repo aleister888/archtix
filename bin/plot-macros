@@ -61,9 +61,9 @@ make_plot() {
 		set style data histogram
 		set style fill solid border -1
 		set boxwidth 0.4
-		set yrange [0:$(echo "$GOAL * 1.2" | bc)]
+		set yrange [0:$(echo "$GOAL * 1.5" | bc)]
 
-		set arrow from graph 0, first $GOAL to graph 1, first $GOAL nohead lc rgb "$COLOR" lw 2 dashtype 2
+		set arrow from graph 0, first $GOAL to graph 1, first $GOAL nohead lc rgb "black" lw 2 dashtype 2 front
 
 		plot '-' using 2:xtic(1) lc rgb "$COLOR" with boxes title "$TITLE", \
 			 '' using 6 lc rgb "$COLOR" dt 2 title "$TITLE Objetivo"

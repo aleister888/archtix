@@ -24,12 +24,12 @@ static const Block blocks[] = {
 	// Hora
 	{" \x08^c#CC241D^ ^c#FB4934^" ,"date +'%I:%M:%S'",                        1,  0},
 	// Actualizaciones disponibles
-	{" \x0a^c#d5c4a1^󰏔 ^c#bdae93^"  ,"echo $(checkupdates | wc -l )&",        60,  0},
+	{" \x0a^c#427b58^󰏔 ^c#689d6a^"  ,"echo $(checkupdates | wc -l )&",        60,  0},
 	{" "                           ,"true",                                    0,  0},
 	// Indicador Bloq Mayus
 	{"\x09^c#504945^"              ,"sb-bloq",                                 5,  2},
 	// Filtro de luz azul
-	{"\x0b^d^"                     ,"sb-nighttime",                           60,  1},
+	{"\x0b"                        ,"sb-nighttime",                           60,  1},
 	// Contador Pomodoro
 	{"\x08^d^"                     ,"sb-timer",                                1,  0},
 };

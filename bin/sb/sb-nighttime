@@ -1,7 +1,7 @@
 #!/bin/sh
 
 if pgrep redshift >/dev/null 2>&1; then
-	printf "  "
+	printf "^c#665c54^ ^d^ "
 else
-	printf "  "
+	printf "^c#d79921^ ^d^ "
 fi
