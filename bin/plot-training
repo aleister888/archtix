@@ -1,6 +1,8 @@
 #!/bin/bash
 # shellcheck disable=SC2155
 
+#fecha_Y-m-d,total_kg,reps,rpe,status,note
+
 # Parámetros del script
 export INPUT_DIR=${1:-$(pwd)}
 export DATA_DIR="$INPUT_DIR/data"

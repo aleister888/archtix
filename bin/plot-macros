@@ -1,0 +1,122 @@
+#!/bin/bash
+# shellcheck disable=SC2155
+set -euo pipefail
+
+INPUT_FILE=$1
+TARGET_MACROS=$2
+DIRECTORY=$(dirname "$1")
+TMP_DIR="/tmp"
+PROCESSED_MACROS="${DIRECTORY}/processed_macros.csv"
+
+[[ ! -f "$INPUT_FILE" ]] && exit 1
+[[ ! -f "$TARGET_MACROS" ]] && exit 1
+
+read -r CAL_TARGET FAT_TARGET CARB_TARGET PROT_TARGET < <(tail -n +2 "$TARGET_MACROS" | head -1 |
+	awk -F',' '{gsub(/g/, "", $2); gsub(/g/, "", $3); gsub(/g/, "", $4); print $1,$2,$3,$4}')
+
+declare -A DAILY_DATA
+while IFS=',' read -r DATE _ _ _ CAL FAT_ CARBS PROT; do
+	# Limpiar espacios
+	CAL=${CAL//[[:space:]]/}
+	FAT_=${FAT_//[[:space:]]/}
+	CARBS=${CARBS//[[:space:]]/}
+	PROT=${PROT//[[:space:]]/}
+
+	# Leer valores previos con valores por defecto
+	IFS=',' read -r OLD_CAL OLD_FAT OLD_CARBS OLD_PROT <<<"${DAILY_DATA[$DATE]-0,0,0,0}"
+
+	# Acumular
+	NEW_CAL=$(echo "$OLD_CAL + $CAL" | bc)
+	NEW_FAT=$(echo "$OLD_FAT + $FAT_" | bc)
+	NEW_CARBS=$(echo "$OLD_CARBS + $CARBS" | bc)
+	NEW_PROT=$(echo "$OLD_PROT + $PROT" | bc)
+
+	# Actualizar array
+	DAILY_DATA[$DATE]="$NEW_CAL,$NEW_FAT,$NEW_CARBS,$NEW_PROT"
+done < <(tail -n +2 "$INPUT_FILE")
+
+TMP_DIR=$(mktemp -d)
+trap 'rm -rf "$TMP_DIR"' EXIT
+
+echo "date,calories,fat,carbs,protein,cal_goal,fat_goal,carb_goal,prot_goal" >"$PROCESSED_MACROS"
+
+for DATE in $(printf "%s\n" "${!DAILY_DATA[@]}" | sort); do
+	IFS=',' read -r C F CARB P <<<"${DAILY_DATA[$DATE]}"
+	echo "$DATE,$C,$F,$CARB,$P,$CAL_TARGET,$FAT_TARGET,$CARB_TARGET,$PROT_TARGET" >>"$PROCESSED_MACROS"
+done
+
+make_plot() {
+	local VALUE=$1
+	local GOAL=$2
+	local TITLE=$3
+	local COLOR=$4
+	local OUTPUT=$5
+
+	gnuplot >/dev/null 2>&1 <<-EOF
+		set terminal pngcairo size 400,400 enhanced font 'Verdana,12'
+		set output '$OUTPUT'
+		set title "$TITLE"
+		unset key
+		unset ylabel
+		set style data histogram
+		set style fill solid border -1
+		set boxwidth 0.4
+		set yrange [0:$(echo "$GOAL * 1.2" | bc)]
+
+		set arrow from graph 0, first $GOAL to graph 1, first $GOAL nohead lc rgb "$COLOR" lw 2 dashtype 2
+
+		plot '-' using 2:xtic(1) lc rgb "$COLOR" with boxes title "$TITLE", \
+			 '' using 6 lc rgb "$COLOR" dt 2 title "$TITLE Objetivo"
+		"" $VALUE
+		e
+	EOF
+}
+
+# Último día (datos individuales)
+IFS=',' read -r DATE CAL FAT CARBS PROT CAL_GOAL FAT_GOAL CARB_GOAL PROT_GOAL < <(tail -n 1 "$PROCESSED_MACROS")
+
+make_plot "$CAL" "$CAL_GOAL" "Calorías" "#e41a1c" "${TMP_DIR}/calories.png" &
+make_plot "$FAT" "$FAT_GOAL" "Grasa (g)" "#377eb8" "${TMP_DIR}/fat.png" &
+make_plot "$CARBS" "$CARB_GOAL" "Carbohidratos (g)" "#4daf4a" "${TMP_DIR}/carbs.png" &
+make_plot "$PROT" "$PROT_GOAL" "Proteína (g)" "#984ea3" "${TMP_DIR}/protein.png" &
+wait
+
+# Combinar imágenes horizontalmente
+OUTPUT_DAILY_COMBINED="${DIRECTORY}/daily.png"
+convert +append \
+	"${TMP_DIR}/calories.png" \
+	"${TMP_DIR}/fat.png" \
+	"${TMP_DIR}/carbs.png" \
+	"${TMP_DIR}/protein.png" \
+	"$OUTPUT_DAILY_COMBINED" >/dev/null 2>&1
+
+# Sumar últimos 7 días
+LAST_7=$(tail -n 7 "$PROCESSED_MACROS" | tail -n +2) # Ignora cabecera
+TOTAL_7_CAL=0
+TOTAL_7_FAT=0
+TOTAL_7_CARB=0
+TOTAL_7_PROT=0
+while IFS=',' read -r _ CAL_ FAT_ CARB_ PROT_ _ _ _ _; do
+	TOTAL_7_CAL=$(echo "$TOTAL_7_CAL + $CAL_" | bc)
+	TOTAL_7_FAT=$(echo "$TOTAL_7_FAT + $FAT_" | bc)
+	TOTAL_7_CARB=$(echo "$TOTAL_7_CARB + $CARB_" | bc)
+	TOTAL_7_PROT=$(echo "$TOTAL_7_PROT + $PROT_" | bc)
+done <<<"$LAST_7"
+GOAL_7_CAL=$(echo "$CAL_TARGET * 7" | bc)
+GOAL_7_FAT=$(echo "$FAT_TARGET * 7" | bc)
+GOAL_7_CARB=$(echo "$CARB_TARGET * 7" | bc)
+GOAL_7_PROT=$(echo "$PROT_TARGET * 7" | bc)
+
+make_plot "$TOTAL_7_CAL" "$GOAL_7_CAL" "Calorías" "#ff7f00" "${TMP_DIR}/7d_calories.png" &
+make_plot "$TOTAL_7_FAT" "$GOAL_7_FAT" "Grasa (g)" "#6a5acd" "${TMP_DIR}/7d_fat.png" &
+make_plot "$TOTAL_7_CARB" "$GOAL_7_CARB" "Carbohidratos (g)" "#3cb371" "${TMP_DIR}/7d_carbs.png" &
+make_plot "$TOTAL_7_PROT" "$GOAL_7_PROT" "Proteína (g)" "#da70d6" "${TMP_DIR}/7d_protein.png" &
+wait
+
+OUTPUT_WEEKLY_COMBINED="${DIRECTORY}/weekly.png"
+convert +append \
+	"${TMP_DIR}/7d_calories.png" \
+	"${TMP_DIR}/7d_fat.png" \
+	"${TMP_DIR}/7d_carbs.png" \
+	"${TMP_DIR}/7d_protein.png" \
+	"$OUTPUT_WEEKLY_COMBINED" >/dev/null 2>&1
