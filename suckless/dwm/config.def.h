@@ -26,12 +26,6 @@ static const float mfact               = 0.5; // Factor de escalado master [0.05
 static const int nmaster               = 1;   // Número de clientes en master
 static const int resizehints           = 1;   // ¿Respetar pistas de dibujado?
 static const int lockfullscreen        = 1;   // 1 == Fuerza el foco en las ventanas en pantalla completa
-static const unsigned int colorfultag  = 1;   // 1 == Los indicadores de etiqueta coloridos
-static const unsigned int ulinepad     = 0;   // Margen horizontal subrayado
-static const unsigned int ulinevoffset = 0;   // Margen vertical subrayado
-static const unsigned int ulinestroke  = 4;   // Grosor/Altura del subrayado
-static const int ulineall              = 0;   // 1 == Subrayado en todos los espacios
-
 
 static const char background[]     = "#282828";
 static const char background_sel[] = "#3c3836";
@@ -42,7 +36,7 @@ static const char col_blue[]       = "#83A598";
 static const char col_purple[]     = "#D3869B";
 
 // Nombre de los espacios cuando están vacíos y cuando tienen ventanas:
-static const char *tags[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "a", "b", "c", "d", "e", "f"};
+static const char *tags[] = { "", "", "󰈹", "", "", "", "", "󱁤", "󰸳", "10", "11", "", "", "󰇋", "󰇌", "󰇍", "󰇎", "󰇏"};
 
 static const char *colors[][3] = {
 	// Colores:             Fuente      Fondo           Borde
@@ -52,30 +46,6 @@ static const char *colors[][3] = {
 	[SchemeStickySel]   = { "#000000",  "#000000",      col_purple     }, // Sticky (Seleccionada)
 	[SchemeScratchNorm] = { "#000000",  "#000000",      background_sel }, // Scratchpad (Normal)
 	[SchemeScratchSel]  = { "#000000",  "#000000",      col_aqua       }, // Scratchpad (Seleccionada)
-	[SchemeTag1]        = { col_green,  background_sel, "#000000"      }, // Colores de los espacios
-	[SchemeTag2]        = { col_aqua,   background_sel, "#000000"      },
-	[SchemeTag3]        = { col_blue,   background_sel, "#000000"      },
-	[SchemeTag4]        = { col_purple, background_sel, "#000000"      },
-	[SchemeTag5]        = { col_green,  background_sel, "#000000"      },
-	[SchemeTag6]        = { col_aqua,   background_sel, "#000000"      },
-	[SchemeTag7]        = { col_blue,   background_sel, "#000000"      },
-	[SchemeTag8]        = { col_purple, background_sel, "#000000"      },
-	[SchemeTag9]        = { col_green,  background_sel, "#000000"      },
-	[SchemeTag10]       = { col_aqua,   background_sel, "#000000"      },
-	[SchemeTag11]       = { col_blue,   background_sel, "#000000"      },
-	[SchemeTag12]       = { col_purple, background_sel, "#000000"      },
-	[SchemeTag13]       = { col_green,  background_sel, "#000000"      },
-	[SchemeTag14]       = { col_aqua,   background_sel, "#000000"      },
-	[SchemeTag15]       = { col_blue,   background_sel, "#000000"      },
-	[SchemeTag16]       = { col_purple, background_sel, "#000000"      },
-	[SchemeTag17]       = { col_green,  background_sel, "#000000"      },
-	[SchemeTag18]       = { col_aqua,   background_sel, "#000000"      },
-};
-
-static const int tagschemes[] = {
-	SchemeTag1,  SchemeTag2,  SchemeTag3,  SchemeTag4, SchemeTag5,   SchemeTag6,
-	SchemeTag7,  SchemeTag8,  SchemeTag9,  SchemeTag10, SchemeTag11, SchemeTag12,
-	SchemeTag13, SchemeTag14, SchemeTag15, SchemeTag16, SchemeTag17, SchemeTag18
 };
 
 typedef struct {
@@ -85,44 +55,41 @@ typedef struct {
 
 static const Rule rules[] = {
 	// Clase, Instancia y Título. Tag, ><>, Full, Term, Swallow, Mon, Scratch
-	{ "Yad",                   NULL,  NULL,      0,  1,  0,  0,  0,  -1,    0 },
 	{ "Arandr",                NULL,  NULL,      0,  1,  0,  0,  0,  -1,    0 },
 	{ "Nl.hjdskes.gcolor3",    NULL,  NULL,      0,  1,  0,  0,  0,  -1,    0 },
 	{ "Qalculate-gtk",         NULL,  NULL,      0,  1,  0,  0,  0,  -1,    0 },
+	{ "Yad",                   NULL,  NULL,      0,  1,  0,  0,  0,  -1,    0 },
 	{ "citrahold",             NULL,  NULL,      0,  1,  0,  0,  0,  -1,    0 },
 	{ "tauonmb",               NULL,  NULL,   1<<0,  0,  0,  0,  0,  -1,    0 },
 	{ "thunderbird",           NULL,  NULL,   1<<1,  0,  0,  0,  0,  -1,    0 },
-	{ "xfreerdp",              NULL,  NULL,   1<<3,  0,  0,  0,  0,  -1,    0 },
+	{ BROWSER,                 NULL,  NULL,   1<<2,  0,  0,  1,  0,  -1,    0 },
 	{ "Soffice",               NULL,  NULL,   1<<3,  0,  0,  0,  0,  -1,    0 },
-	{ "discord",               NULL,  NULL,   1<<4,  0,  1,  0,  0,  -1,    0 },
+	{ "xfreerdp",              NULL,  NULL,   1<<3,  0,  0,  0,  0,  -1,    0 },
 	{ "TelegramDesktop",       NULL,  NULL,   1<<4,  0,  0,  0,  0,  -1,    0 },
+	{ "discord",               NULL,  NULL,   1<<4,  0,  1,  0,  0,  -1,    0 },
 	{ "Virt-manager",          NULL,  NULL,   1<<5,  0,  0,  0,  0,  -1,    0 },
 	{ "looking-glass-client",  NULL,  NULL,   1<<5,  0,  0,  0,  0,  -1,    0 },
-	{ "TuxGuitar",             NULL,  NULL,   1<<6,  0,  0,  0,  0,  -1,    0 },
-	{ "Gmetronome",            NULL,  NULL,   1<<6,  1,  0,  0,  0,  -1,    0 },
-	{ "REAPER",                NULL,  NULL,   1<<6,  0,  0,  0,  0,  -1,    0 },
-	{ "qBittorrent",           NULL,  NULL,   1<<6,  0,  0,  0,  0,  -1,    0 },
-	{ "Lrcget",                NULL,  NULL,   1<<6,  0,  0,  0,  0,  -1,    0 },
 	{ "Easytag",               NULL,  NULL,   1<<6,  0,  0,  0,  0,  -1,    0 },
+	{ "Gmetronome",            NULL,  NULL,   1<<6,  1,  0,  0,  0,  -1,    0 },
+	{ "Lrcget",                NULL,  NULL,   1<<6,  0,  0,  0,  0,  -1,    0 },
 	{ "Picard",                NULL,  NULL,   1<<6,  0,  0,  0,  0,  -1,    0 },
-	{ "krita",                 NULL,  NULL,   1<<7,  0,  0,  0,  0,  -1,    0 },
+	{ "REAPER",                NULL,  NULL,   1<<6,  0,  0,  0,  0,  -1,    0 },
+	{ "TuxGuitar",             NULL,  NULL,   1<<6,  0,  0,  0,  0,  -1,    0 },
+	{ "qBittorrent",           NULL,  NULL,   1<<6,  0,  0,  0,  0,  -1,    0 },
+	{ "BleachBit",             NULL,  NULL,   1<<7,  0,  0,  0,  0,  -1,    0 },
+	{ "Blueman-manager",       NULL,  NULL,   1<<7,  0,  0,  0,  0,  -1,    0 },
 	{ "Fr.handbrake.ghb",      NULL,  NULL,   1<<7,  0,  0,  0,  0,  -1,    0 },
 	{ "Gimp",                  NULL,  NULL,   1<<7,  0,  0,  1,  0,  -1,    0 },
-	{ "Timeshift-gtk",         NULL,  NULL,   1<<7,  0,  0,  0,  0,  -1,    0 },
-	{ "BleachBit",             NULL,  NULL,   1<<7,  0,  0,  0,  0,  -1,    0 },
 	{ "Gnome-disks",           NULL,  NULL,   1<<7,  0,  0,  0,  0,  -1,    0 },
-	{ "Nitrogen",              NULL,  NULL,   1<<7,  1,  0,  0,  0,  -1,    0 },
-	{ "Blueman-manager",       NULL,  NULL,   1<<7,  0,  0,  0,  0,  -1,    0 },
 	{ "Lxappearance",          NULL,  NULL,   1<<7,  0,  0,  0,  0,  -1,    0 },
-	{ "qt5ct",                 NULL,  NULL,   1<<7,  0,  0,  0,  0,  -1,    0 },
+	{ "Nitrogen",              NULL,  NULL,   1<<7,  1,  0,  0,  0,  -1,    0 },
+	{ "Seahorse",              NULL,  NULL,   1<<7,  0,  0,  0,  0,  -1,    0 },
+	{ "Timeshift-gtk",         NULL,  NULL,   1<<7,  0,  0,  0,  0,  -1,    0 },
 	{ "baobab",                NULL,  NULL,   1<<7,  0,  0,  0,  0,  -1,    0 },
-	{ "steam",                 NULL,  NULL,   1<<8,  0,  0,  0,  0,  -1,    0 },
+	{ "krita",                 NULL,  NULL,   1<<7,  0,  0,  0,  0,  -1,    0 },
+	{ "qt5ct",                 NULL,  NULL,   1<<7,  0,  0,  0,  0,  -1,    0 },
 	{ "Lutris",                NULL,  NULL,   1<<8,  0,  0,  0,  0,  -1,    0 },
-	{ "ProtonUp-Qt",           NULL,  NULL,   1<<8,  0,  0,  0,  0,  -1,    0 },
-	{ "heroic",                NULL,  NULL,   1<<8,  0,  0,  0,  0,  -1,    0 },
-	{ "PrismLauncher",         NULL,  NULL,   1<<8,  1,  0,  0,  0,  -1,    0 },
-	{ "Minecraft* 1.8.9",      NULL,  NULL,   1<<8,  0,  0,  0,  0,  -1,    0 },
-	{ "Minecraft* 1.9.4",      NULL,  NULL,   1<<8,  0,  0,  0,  0,  -1,    0 },
+	{ "Minecraft 1.21.4",      NULL,  NULL,   1<<8,  0,  0,  0,  0,  -1,    0 },
 	{ "Minecraft* 1.10.2",     NULL,  NULL,   1<<8,  0,  0,  0,  0,  -1,    0 },
 	{ "Minecraft* 1.11.2",     NULL,  NULL,   1<<8,  0,  0,  0,  0,  -1,    0 },
 	{ "Minecraft* 1.12.2",     NULL,  NULL,   1<<8,  0,  0,  0,  0,  -1,    0 },
@@ -136,14 +103,18 @@ static const Rule rules[] = {
 	{ "Minecraft* 1.20.6",     NULL,  NULL,   1<<8,  0,  0,  0,  0,  -1,    0 },
 	{ "Minecraft* 1.21.1",     NULL,  NULL,   1<<8,  0,  0,  0,  0,  -1,    0 },
 	{ "Minecraft* 1.21.4",     NULL,  NULL,   1<<8,  0,  0,  0,  0,  -1,    0 },
-	{ "Minecraft 1.21.4",      NULL,  NULL,   1<<8,  0,  0,  0,  0,  -1,    0 },
-	{ "Java",                  NULL,  NULL,  1<<11,  1,  0,  0,  0,  -1,    0 },
+	{ "Minecraft* 1.8.9",      NULL,  NULL,   1<<8,  0,  0,  0,  0,  -1,    0 },
+	{ "Minecraft* 1.9.4",      NULL,  NULL,   1<<8,  0,  0,  0,  0,  -1,    0 },
+	{ "PrismLauncher",         NULL,  NULL,   1<<8,  1,  0,  0,  0,  -1,    0 },
+	{ "ProtonUp-Qt",           NULL,  NULL,   1<<8,  0,  0,  0,  0,  -1,    0 },
+	{ "heroic",                NULL,  NULL,   1<<8,  0,  0,  0,  0,  -1,    0 },
+	{ "steam",                 NULL,  NULL,   1<<8,  0,  0,  0,  0,  -1,    0 },
 	{ "Eclipse",               NULL,  NULL,  1<<11,  0,  0,  0,  0,  -1,    0 },
+	{ "Java",                  NULL,  NULL,  1<<11,  1,  0,  0,  0,  -1,    0 },
 	{ "KeePassXC",             NULL,  NULL,  1<<12,  0,  0,  0,  0,  -1,    0 },
 	{ "gnome-contacts",        NULL,  NULL,  1<<12,  0,  0,  0,  0,  -1,    0 },
 	{ "Standard Notes",        NULL,  NULL,  1<<13,  0,  0,  0,  0,  -1,    0 },
 	{ TERMC,                   NULL,  NULL,      0,  0,  0,  1,  0,  -1,    0 },
-	{ BROWSER,                 NULL,  NULL,      0,  0,  0,  1,  0,  -1,    0 },
 	{ NULL,  NULL,     "scratchpad",             0,  1,  0,  1,  0,  -1,  's' },
 	{ NULL,  NULL,   "Media viewer",             0,  1,  0,  0,  0,  -1,    0 },
 };

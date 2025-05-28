@@ -72,10 +72,7 @@
 /* enums */
 enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
 enum { SchemeNorm, SchemeSel, SchemeScratchNorm,  /* color schemes */
-	SchemeScratchSel, SchemeStickyNorm, SchemeStickySel,
-	SchemeTag1,  SchemeTag2,  SchemeTag3,  SchemeTag4, SchemeTag5,   SchemeTag6,
-	SchemeTag7,  SchemeTag8,  SchemeTag9,  SchemeTag10, SchemeTag11, SchemeTag12,
-	SchemeTag13, SchemeTag14, SchemeTag15, SchemeTag16, SchemeTag17, SchemeTag18};
+       SchemeScratchSel, SchemeStickyNorm, SchemeStickySel };
 enum { NetSupported, NetWMName, NetWMState, NetWMCheck,
        NetWMFullscreen, NetWMSticky, NetActiveWindow, NetWMWindowType,
        NetWMWindowTypeDialog, NetClientList, NetClientInfo, NetLast }; /* EWMH atoms */
