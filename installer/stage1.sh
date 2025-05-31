@@ -596,7 +596,6 @@ cat <<-EOF >/mnt/tmp/user_creation.sh
 	useradd -m -G wheel,lp $USERNAME
 	echo "$USERNAME:$USER_PASSWORD" | chpasswd
 EOF
-EOF
 chmod +x /mnt/tmp/user_creation.sh
 if [ "$ID" = "artix" ]; then
 	artix-chroot /mnt /tmp/user_creation.sh
