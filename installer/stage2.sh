@@ -79,10 +79,12 @@ repos_conf() {
 	if [ "$ID" = "artix" ]; then
 		# Activar lib32
 		sed -i '/#\[lib32\]/{s/^#//;n;s/^.//}' /etc/pacman.conf && pacman -Sy
+
 		# Instalar paquetes necesarios
 		pacinstall archlinux-mirrorlist archlinux-keyring artix-keyring \
 			artix-archlinux-support lib32-artix-archlinux-support pacman-contrib \
 			rsync lib32-elogind
+
 		# Activar repositorios de Arch
 		grep -q "^\[extra\]" /etc/pacman.conf ||
 			cat <<-EOF >>/etc/pacman.conf
@@ -92,12 +94,12 @@ repos_conf() {
 				[multilib]
 				Include = /etc/pacman.d/mirrorlist-arch
 			EOF
-		# Actualizar cambios
-		pacman -Sy --noconfirm &&
-			pacman-key --populate archlinux
+
+		pacman -Sy --noconfirm && pacman-key --populate archlinux
 	elif [ "$ID" = "arch" ]; then
 		# Activar multilib
-		sed -i '/#\[multilib\]/{s/^#//;n;s/^.//}' /etc/pacman.conf && pacman -Sy
+		sed -i '/#\[multilib\]/{s/^#//;n;s/^.//}' /etc/pacman.conf
+		pacman -Sy --noconfirm
 	fi
 
 	pacinstall reflector
@@ -120,7 +122,6 @@ repos_conf() {
 	sudo pacman-key --recv-key 3056513887B78AEB \
 		--keyserver keyserver.ubuntu.com
 	sudo pacman-key --lsign-key 3056513887B78AEB
-
 	sudo pacman -U \
 		'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst' --noconfirm
 	sudo pacman -U \
@@ -165,12 +166,9 @@ genlocale() {
 mkinitcpio_conf() {
 	local -r MKINITCPIO_CONF="/etc/mkinitcpio.conf"
 	local MODULES="vfat usb_storage btusb nvme"
-	local HOOKS
-	if [ "$ID" = "artix" ]; then
-		HOOKS="base udev autodetect microcode modconf kms keyboard keymap consolefont block encrypt lvm2 resume filesystems fsck"
-	elif [ "$ID" = "arch" ]; then
-		HOOKS="base udev autodetect modconf kms keyboard keymap consolefont block lvm2 encrypt filesystems fsck"
-	fi
+	local HOOKS="base udev autodetect microcode modconf kms keyboard keymap consolefont block encrypt lvm2"
+	[ "$ID" = "artix" ] && HOOKS+=" resume"
+	HOOKS+=" filesystems fsck"
 	sed -i "s/^MODULES=.*/MODULES=($MODULES)/" "$MKINITCPIO_CONF"
 	sed -i "s/^HOOKS=.*/HOOKS=($HOOKS)/" "$MKINITCPIO_CONF"
 }

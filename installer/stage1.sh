@@ -7,9 +7,6 @@
 
 source /etc/os-release
 
-[ "$ID" = "artix" ] && CHROOT="artix-chroot"
-[ "$ID" = "arch" ] && CHROOT="arch-chroot"
-
 # - Pasa como variables los siguientes parámetros al siguiente script:
 #   - Nombre del usuario regular ($USERNAME)
 #   - DPI de la pantalla ($FINAL_DPI)
@@ -592,18 +589,27 @@ for DIR in dev proc sys run; do
 	mount --make-rslave /mnt/$DIR
 done
 
-eval "$CHROOT" /mnt sh -c "
+# Creamos el usuario
+cat <<-EOF >/mnt/tmp/user_creation.sh
+	#!/bin/sh
+	echo "root:$ROOT_PASSWORD" | chpasswd
 	useradd -m -G wheel,lp $USERNAME
-	yes $ROOT_PASSWORD | passwd
-	yes $USER_PASSWORD | passwd $USERNAME
-"
+	echo "$USERNAME:$USER_PASSWORD" | chpasswd
+EOF
+EOF
+chmod +x /mnt/tmp/user_creation.sh
+if [ "$ID" = "artix" ]; then
+	artix-chroot /mnt /tmp/user_creation.sh
+elif [ "$ID" = "arch" ]; then
+	arch-chroot /mnt /tmp/user_creation.sh
+fi
 
 # Copiamos el repositorio a la nueva instalación
 cp -r "$(dirname "$0")/.." "/mnt/home/$USERNAME/.dotfiles"
 
-# Corregimos el propietario del repositorio copiado y ejecutamos la siguiente
-# parte del script pasandole las variables correspondientes.
-eval "$CHROOT" /mnt sh -c "
+# Creamos el script para seguir instalando todo
+cat <<-EOF >/mnt/tmp/install.sh
+	#!/bin/sh
 	export \
 	USERNAME=$USERNAME \
 	FINAL_DPI=$FINAL_DPI \
@@ -624,4 +630,11 @@ eval "$CHROOT" /mnt sh -c "
 	cd /home/$USERNAME/.dotfiles/installer
 
 	./stage2.sh
-"
+EOF
+chmod +x /mnt/tmp/install.sh
+
+if [ "$ID" = "artix" ]; then
+	artix-chroot /mnt /tmp/install.sh
+elif [ "$ID" = "arch" ]; then
+	arch-chroot /mnt /tmp/install.sh
+fi

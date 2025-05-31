@@ -18,7 +18,7 @@ pacman -Sy --noconfirm openssh
 if [ "$ID" = "artix" ]; then
 	pacman -Sy --noconfirm openssh-openrc
 	rc-update add sshd default
-else
+elif [ "$ID" = "arch" ]; then
 	systemctl enable sshd
 fi
 
@@ -51,7 +51,7 @@ if [ ! -x /usr/bin/ufw ]; then
 	if [ "$ID" = "artix" ]; then
 		pacman -Sy --noconfirm ufw-openrc
 		rc-update add ufw default
-	else
+	elif [ "$ID" = "arch" ]; then
 		systemctl enable ufw
 	fi
 	ufw enable
@@ -70,7 +70,7 @@ if [ ! -x /usr/bin/fail2ban-server ]; then
 	if [ "$ID" = "artix" ]; then
 		pacman -Sy --noconfirm fail2ban-openrc
 		rc-update add fail2ban default
-	else
+	elif [ "$ID" = "arch" ]; then
 		systemctl enable fail2ban
 	fi
 fi

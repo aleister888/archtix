@@ -71,8 +71,8 @@ fi
 echo "blacklist pcspkr" | sudo tee /etc/modprobe.d/nobeep.conf >/dev/null
 
 # Suspender de forma automática cuando la batería cae por debajo del 10%
-if [ "$ID" = "artix" ]; then
-	if [ -e /sys/class/power_supply/BAT0 ]; then
+if [ -e /sys/class/power_supply/BAT0 ]; then
+	if [ "$ID" = "artix" ]; then
 		# Instalar los scripts y archivos del servicio de auto-suspensión
 		sudo install -m 755 "$HOME/.dotfiles/assets/system/services/auto-suspend/openrc/auto-suspend-service" \
 			/etc/init.d/auto-suspend
@@ -82,7 +82,8 @@ if [ "$ID" = "artix" ]; then
 			/usr/local/bin/
 		# Activar el servicio
 		sudo rc-update add auto-suspend default >/dev/null
+	elif [ "$ID" = "arch" ]; then
+		# TODO Implementar autosuspensión para arch también
+		true
 	fi
 fi
-
-# TODO Implementar autosuspensión para arch también
