@@ -44,6 +44,13 @@ if [ -n "$PKGS_TO_INSTALL" ] && timeout -k 1s 3s ping gnu.org -c 1 >/dev/null 2>
 	yay -Sy --noconfirm --needed --asexplicit $PKGS_TO_INSTALL
 fi
 
+# Crear los directorios necesarios
+[ -d "$HOME/.local/bin" ] || mkdir -p "$HOME/.local/bin"
+[ -d "$HOME/.cache" ] || mkdir -p "$HOME/.cache"
+[ -d "$CONF_DIR" ] || mkdir -p "$CONF_DIR"
+[ -d "$DATA_DIR" ] || mkdir -p "$DATA_DIR"
+[ -d "$DATA_DIR/dwm" ] || mkdir -p "$DATA_DIR/dwm"
+
 ###########
 # Módulos #
 ###########
@@ -72,13 +79,6 @@ wait
 #######################################
 # Archivos de configuración y scripts #
 #######################################
-
-# Crear los directorios necesarios
-[ -d "$HOME/.local/bin" ] || mkdir -p "$HOME/.local/bin"
-[ -d "$HOME/.cache" ] || mkdir -p "$HOME/.cache"
-[ -d "$CONF_DIR" ] || mkdir -p "$CONF_DIR"
-[ -d "$DATA_DIR" ] || mkdir -p "$DATA_DIR"
-[ -d "$DATA_DIR/dwm" ] || mkdir -p "$DATA_DIR/dwm"
 
 # Instalar archivos de configuración y scripts
 sh -c "cd $REPO_DIR && stow --target=${HOME}/.local/bin/ bin/" >/dev/null &
