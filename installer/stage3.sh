@@ -6,6 +6,8 @@
 # por aleister888 <pacoe1000@gmail.com>
 # Licencia: GNU GPLv3
 
+source /etc/os-release
+
 # Importamos todos los componentes en los que se separa el script
 PATH="$PATH:$(find ~/.dotfiles/installer/modules -type d | paste -sd ':' -)"
 
@@ -15,7 +17,25 @@ yayinstall() { # Instalar paquetes con yay
 
 # Guardamos nuestros paquetes a instalar en un array
 mapfile -t PACKAGES < <(
-	jq -r '.[] | .[]' "$HOME"/.dotfiles/assets/packages/*.json
+	if [ "$ID" = "artix" ]; then
+		# Añadimos todos los paquetes menos fwupd
+		find "$HOME/.dotfiles/assets/packages" -name '*.json' \
+			! -name 'fwup.json' \
+			-exec jq -r '.[] | .[]' {} +
+		# Instalamos fwupd
+		jq -r '.artix[]' "$HOME/.dotfiles/assets/packages/fwup.json"
+	elif [ "$ID" = "arch" ]; then
+		# Añadimos los paquetes que no dependen de la distro
+		find "$HOME/.dotfiles/assets/packages" -name '*.json' \
+			! -name 'servicios.json' \
+			! -name 'fwup.json' \
+			-exec jq -r '.[] | .[]' {} +
+		# Añadimos los servicios filtrando los paquetes para openrc
+		jq -r '.[] | .[]' "$HOME/.dotfiles/assets/packages/servicios.json" |
+			grep -v openrc
+		# Instalamos fwupd
+		jq -r '.arch[]' "$HOME/.dotfiles/assets/packages/fwup.json"
+	fi
 )
 
 driver_add() {
@@ -40,9 +60,12 @@ driver_add() {
 			"nvidia-dkms"
 			"nvidia-prime"
 			"nvidia-utils"
-			"nvidia-utils-openrc"
 			"opencl-nvidia"
 		)
+		[ "$ID" = "artix" ] &&
+			PACKAGES+=(
+				"nvidia-utils-openrc"
+			)
 		;;
 
 	intel)
@@ -99,8 +122,8 @@ trash_dir() {
 # Instalamos yay (https://aur.archlinux.org/packages/yay)
 yay-install
 
-# Reemplamos sudo por doas
-sudo sudo2doas
+# Reemplamos sudo por doas (Solo para Artix Linux)
+[ "$ID" = "artix" ] && sudo sudo2doas
 
 # Crear directorios
 for DIR in Documentos Música Imágenes Público Vídeos; do
@@ -189,13 +212,3 @@ rm "$HOME"/.bash* 2>/dev/null
 rm "$HOME"/.wget-hsts 2>/dev/null
 
 mkdir -p "$HOME"/.local/share/gnupg
-
-############
-# Arreglos #
-############
-
-if pacman -Q poppler &>/dev/null; then
-	if [ ! -L /usr/lib/libpoppler-cpp.so.1 ]; then
-		sudo ln -s /usr/lib/libpoppler-cpp.so.2.0.0 /usr/lib/libpoppler-cpp.so.1
-	fi
-fi

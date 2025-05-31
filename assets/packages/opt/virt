@@ -1,6 +1,7 @@
 bridge-utils
 dnsmasq
 edk2-ovmf
+libvirt
 libvirt-openrc
 looking-glass
 qemu-audio-sdl

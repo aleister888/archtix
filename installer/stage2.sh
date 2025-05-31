@@ -5,6 +5,8 @@
 # por aleister888 <pacoe1000@gmail.com>
 # Licencia: GNU GPLv3
 
+source /etc/os-release
+
 # Esta parte del script se ejecuta ya dentro de la instalación (chroot).
 
 # - Pasa como variables los siguientes parámetros al siguiente script:
@@ -18,7 +20,11 @@ pacinstall() {
 }
 
 service_add() {
-	rc-update add "$1" default
+	if [ "$ID" = "artix" ]; then
+		rc-update add "$1" default
+	elif [ "$ID" = "arch" ]; then
+		systemctl enable "$1"
+	fi
 }
 
 # Instalamos GRUB
@@ -68,45 +74,83 @@ hostname_config() {
 	EOF
 }
 
-# Activar repositorios de Arch Linux
-arch_support() {
-	# Activar lib32
-	sed -i '/#\[lib32\]/{s/^#//;n;s/^.//}' /etc/pacman.conf && pacman -Sy
+# Configurar pacman
+repos_conf() {
+	if [ "$ID" = "artix" ]; then
+		# Activar lib32
+		sed -i '/#\[lib32\]/{s/^#//;n;s/^.//}' /etc/pacman.conf && pacman -Sy
+		# Instalar paquetes necesarios
+		pacinstall archlinux-mirrorlist archlinux-keyring artix-keyring \
+			artix-archlinux-support lib32-artix-archlinux-support pacman-contrib \
+			rsync lib32-elogind
+		# Activar repositorios de Arch
+		grep -q "^\[extra\]" /etc/pacman.conf ||
+			cat <<-EOF >>/etc/pacman.conf
+				[extra]
+				Include = /etc/pacman.d/mirrorlist-arch
 
-	# Instalar paquetes necesarios
-	pacinstall archlinux-mirrorlist archlinux-keyring artix-keyring \
-		artix-archlinux-support lib32-artix-archlinux-support pacman-contrib \
-		rsync lib32-elogind
+				[multilib]
+				Include = /etc/pacman.d/mirrorlist-arch
+			EOF
+		# Actualizar cambios
+		pacman -Sy --noconfirm &&
+			pacman-key --populate archlinux
+	elif [ "$ID" = "arch" ]; then
+		# Activar multilib
+		sed -i '/#\[multilib\]/{s/^#//;n;s/^.//}' /etc/pacman.conf && pacman -Sy
+	fi
 
-	# Activar repositorios de Arch
-	grep -q "^\[extra\]" /etc/pacman.conf ||
-		cat <<-EOF >>/etc/pacman.conf
-			[extra]
-			Include = /etc/pacman.d/mirrorlist-arch
-
-			[multilib]
-			Include = /etc/pacman.d/mirrorlist-arch
-		EOF
-
-	# Actualizar cambios
-	pacman -Sy --noconfirm &&
-		pacman-key --populate archlinux
 	pacinstall reflector
 
 	# Escoger mirrors más rápidos de los repositorios de Arch
-	reflector --verbose --fastest 10 --age 6 \
-		--connection-timeout 1 --download-timeout 1 \
-		--threads "$(nproc)" \
-		--save /etc/pacman.d/mirrorlist-arch
+	if [ "$ID" = "artix" ]; then
+		reflector --verbose --fastest 10 --age 6 \
+			--connection-timeout 1 --download-timeout 1 \
+			--threads "$(nproc)" \
+			--save /etc/pacman.d/mirrorlist-arch
+	elif [ "$ID" = "arch" ]; then
+		reflector --verbose --fastest 10 --age 6 \
+			--connection-timeout 1 --download-timeout 1 \
+			--threads "$(nproc)" \
+			--save /etc/pacman.d/mirrorlist
+		cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.bak
+	fi
+
+	# Añadir chaotic AUR
+	sudo pacman-key --recv-key 3056513887B78AEB \
+		--keyserver keyserver.ubuntu.com
+	sudo pacman-key --lsign-key 3056513887B78AEB
+
+	sudo pacman -U \
+		'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst' --noconfirm
+	sudo pacman -U \
+		'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst' --noconfirm
+
+	cat <<-EOF | tee -a /etc/pacman.conf
+		[chaotic-aur]
+		Include = /etc/pacman.d/chaotic-mirrorlist
+	EOF
+
+	sudo pacman -Sy
 
 	# Configurar cronie para actualizar automáticamente los mirrors de Arch
 	cat <<-EOF >/etc/crontab
 		SHELL=/bin/bash
 		PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
-		# Escoger los mejores repositorios para Arch Linux
-		@hourly root ping gnu.org -c 1 && reflector --latest 10 --connection-timeout 1 --download-timeout 1 --sort rate --save /etc/pacman.d/mirrorlist-arch
 	EOF
+
+	if [ "$ID" = "artix" ]; then
+		cat <<-EOF | tee -a /etc/crontab
+			# Escoger los mejores repositorios para Arch Linux
+			@hourly root ping gnu.org -c 1 && reflector --latest 10 --connection-timeout 1 --download-timeout 1 --sort rate --save /etc/pacman.d/mirrorlist-arch
+		EOF
+	elif [ "$ID" = "arch" ]; then
+		cat <<-EOF | tee -a /etc/crontab
+			# Escoger los mejores repositorios para Arch Linux
+			@hourly root ping gnu.org -c 1 && reflector --latest 10 --connection-timeout 1 --download-timeout 1 --sort rate --save /etc/pacman.d/mirrorlist
+		EOF
+	fi
 }
 
 # Cambiar la codificación del sistema a español
@@ -121,7 +165,12 @@ genlocale() {
 mkinitcpio_conf() {
 	local -r MKINITCPIO_CONF="/etc/mkinitcpio.conf"
 	local MODULES="vfat usb_storage btusb nvme"
-	local HOOKS="base udev autodetect microcode modconf kms keyboard keymap consolefont block encrypt lvm2 resume filesystems fsck"
+	local HOOKS
+	if [ "$ID" = "artix" ]; then
+		HOOKS="base udev autodetect microcode modconf kms keyboard keymap consolefont block encrypt lvm2 resume filesystems fsck"
+	elif [ "$ID" = "arch" ]; then
+		HOOKS="base udev autodetect modconf kms keyboard keymap consolefont block lvm2 encrypt filesystems fsck"
+	fi
 	sed -i "s/^MODULES=.*/MODULES=($MODULES)/" "$MKINITCPIO_CONF"
 	sed -i "s/^HOOKS=.*/HOOKS=($HOOKS)/" "$MKINITCPIO_CONF"
 }
@@ -150,8 +199,13 @@ if echo "$(
 	lspci
 	lsusb
 )" | grep -i bluetooth; then
-	pacinstall bluez-openrc bluez-utils bluez-obex &&
+	pacinstall bluez bluez-utils bluez-obex
+	if [ "$ID" = "artix" ]; then
+		pacinstall bluez-openrc
 		service_add bluetoothd
+	elif [ "$ID" = "arch" ]; then
+		service_add bluetooth
+	fi
 fi
 
 # Instalamos grub
@@ -160,8 +214,8 @@ install_grub
 # Definimos el nombre de nuestra máquina y creamos el archivo hosts
 hostname_config
 
-# Activar repositorios de Arch Linux
-arch_support
+# Configurar pacman
+repos_conf
 
 # Configurar la codificación del sistema
 genlocale
@@ -175,16 +229,20 @@ grub-mkconfig -o /boot/grub/grub.cfg
 
 # Activamos servicios
 service_add NetworkManager
-service_add cupsd
 service_add cronie
 service_add acpid
-rc-update add device-mapper boot
-rc-update add lvm boot
-rc-update add dmcrypt boot
-rc-update add dmeventd boot
+if [ "$ID" = "artix" ]; then
+	service_add cupsd
+	rc-update add device-mapper boot
+	rc-update add lvm boot
+	rc-update add dmcrypt boot
+	rc-update add dmeventd boot
+elif [ "$ID" = "arch" ]; then
+	service_add cups
+fi
 
 # Hacemos que la swap se utilize despúes de montar todos los discos
-sed -i '/rc_need="localmount"/s/^#//g' /etc/conf.d/swap
+[ "$ID" = "artix" ] && sed -i '/rc_need="localmount"/s/^#//g' /etc/conf.d/swap
 
 ln -sf /usr/bin/nvim /usr/local/bin/vim
 ln -sf /usr/bin/nvim /usr/local/bin/vi

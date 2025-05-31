@@ -2,6 +2,8 @@
 
 set -e
 
+export REPO_NAME="artix-installer"
+export REPO_URL="https://github.com/aleister888/$REPO_NAME"
 REPO_DIR="/tmp/artix-installer"
 
 [ ! -d /sys/firmware/efi ] && exit 1
@@ -18,15 +20,16 @@ grep ubuntu /etc/pacman.d/gnupg/gpg.conf ||
 # - bc: para calcular el DPI de la pantalla
 # - git: para clonar el repositorio
 # - lvm2: para gestionar volúmenes lógicos
+sudo pacman -Sy
 sudo pacman -Sc --noconfirm
-sudo pacman-key --populate && sudo pacman-key --refresh-keys
-sudo pacman -Sy --noconfirm --needed parted libnewt xkeyboard-config bc git lvm2
+#sudo pacman-key --populate && sudo pacman-key --refresh-keys
+sudo pacman -S --noconfirm --needed parted libnewt xkeyboard-config bc git lvm2
 
 # Clonamos el repositorio solo si es necesario
 if [ -d ./installer ]; then
 	cd ./installer || exit 1
 else
-	git clone --depth 1 https://github.com/aleister888/artix-installer.git $REPO_DIR
+	git clone --depth 1 "$REPO_URL.git" $REPO_DIR
 	cd $REPO_DIR/installer || exit 1
 fi
 

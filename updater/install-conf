@@ -1,7 +1,9 @@
-#!/bin/sh
+#!/bin/bash
 
 # Script para recompilar las aplicaciones suckless
 # - Invocado por /update.sh
+
+source /etc/os-release
 
 [ "$(id -u)" -eq 0 ] && exit 1
 
@@ -54,9 +56,12 @@ sudo cp -f "$HOME/.dotfiles/assets/system/services/xdm/Xsetup_0" \
 # syslog-ng
 sudo cp -f "$HOME/.dotfiles/assets/system/services/syslog-ng/syslog-ng.conf" \
 	/etc/syslog-ng/
+
 # elogind
-sudo install -m 755 "$HOME/.dotfiles/assets/system/services/elogind/nm-restart" \
-	/lib/elogind/system-sleep/
+if [ "$ID" = "artix" ]; then
+	sudo install -m 755 "$HOME/.dotfiles/assets/system/services/elogind/nm-restart" \
+		/lib/elogind/system-sleep/
+fi
 
 ##############
 # Miscelánea #
@@ -66,14 +71,18 @@ sudo install -m 755 "$HOME/.dotfiles/assets/system/services/elogind/nm-restart" 
 echo "blacklist pcspkr" | sudo tee /etc/modprobe.d/nobeep.conf >/dev/null
 
 # Suspender de forma automática cuando la batería cae por debajo del 10%
-if [ -e /sys/class/power_supply/BAT0 ]; then
-	# Instalar los scripts y archivos del servicio de auto-suspensión
-	sudo install -m 755 "$HOME/.dotfiles/assets/system/services/auto-suspend/auto-suspend-service" \
-		/etc/init.d/auto-suspend
-	sudo install -m 755 "$HOME/.dotfiles/assets/system/services/auto-suspend/auto-suspend" \
-		/usr/local/bin/
-	sudo install -m 755 "$HOME/.dotfiles/assets/system/services/auto-suspend/auto-suspend-loop" \
-		/usr/local/bin/
-	# Activar el servicio
-	sudo rc-update add auto-suspend default >/dev/null
+if [ "$ID" = "artix" ]; then
+	if [ -e /sys/class/power_supply/BAT0 ]; then
+		# Instalar los scripts y archivos del servicio de auto-suspensión
+		sudo install -m 755 "$HOME/.dotfiles/assets/system/services/auto-suspend/openrc/auto-suspend-service" \
+			/etc/init.d/auto-suspend
+		sudo install -m 755 "$HOME/.dotfiles/assets/system/services/auto-suspend/openrc/auto-suspend" \
+			/usr/local/bin/
+		sudo install -m 755 "$HOME/.dotfiles/assets/system/services/auto-suspend/openrc/auto-suspend-loop" \
+			/usr/local/bin/
+		# Activar el servicio
+		sudo rc-update add auto-suspend default >/dev/null
+	fi
 fi
+
+# TODO Implementar autosuspensión para arch también

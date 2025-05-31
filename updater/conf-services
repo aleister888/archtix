@@ -1,25 +1,37 @@
 #!/bin/bash
 
+source /etc/os-release
+
 [ "$(id -u)" -eq 0 ] && exit 1
 
-[ ! -d "$HOME/.config/rc/runlevels/default" ] &&
-	mkdir -p "$HOME/.config/rc/runlevels/default"
-[ ! -d "$HOME/.config/rc/runlevels/shutdown" ] &&
-	mkdir -p "$HOME/.config/rc/runlevels/shutdown"
+if [ "$ID" = "artix" ]; then
+	[ ! -d "$HOME/.config/rc/runlevels/default" ] &&
+		mkdir -p "$HOME/.config/rc/runlevels/default"
+	[ ! -d "$HOME/.config/rc/runlevels/shutdown" ] &&
+		mkdir -p "$HOME/.config/rc/runlevels/shutdown"
+fi
 
 # Activar servicio
 service_add() {
-	sudo rc-update -q add "$1" "$2"
+	if [ "$ID" = "artix" ]; then
+		sudo rc-update -q add "$1" "$2"
+	elif [ "$ID" = "arch" ]; then
+		sudo systemctl enable "$1"
+	fi
 }
 # Activar servicio para el usuario
 user_service_add() {
 	SERVICE="$1"
 	RUNLEVEL="$2"
-	if [ -d /run/user/1000/ ]; then
-		rc-update -q add "$SERVICE" "$RUNLEVEL" -U
-	else
-		ln -s "/etc/user/init.d/$SERVICE" \
-			"$HOME/.config/rc/runlevels/$RUNLEVEL/$SERVICE"
+	if [ "$ID" = "artix" ]; then
+		if [ -d /run/user/1000/ ]; then
+			rc-update -q add "$SERVICE" "$RUNLEVEL" -U
+		else
+			ln -s "/etc/user/init.d/$SERVICE" \
+				"$HOME/.config/rc/runlevels/$RUNLEVEL/$SERVICE"
+		fi
+	elif [ "$ID" = "arch" ]; then
+		systemctl --user enable "$1"
 	fi
 }
 
@@ -27,7 +39,6 @@ user_service_add() {
 
 SERVICES=(
 	"earlyoom"
-	"elogind"
 	"fwupd"
 	"syslog-ng"
 	"tlp"
@@ -43,10 +54,12 @@ USER_SERVICES=(
 
 # Activar los servicios del sistema del runlevel default
 for SERVICE in "${SERVICES[@]}"; do
-	service_add "$SERVICE" "default"
+	service_add "$SERVICE" default
 done
+
+[ "$ID" = "artix" ] && service_add elogind default
 
 # Activar los servicios del usuario del runlevel default
 for USER_SERVICE in "${USER_SERVICES[@]}"; do
-	user_service_add "$USER_SERVICE" "default"
+	user_service_add "$USER_SERVICE" default
 done

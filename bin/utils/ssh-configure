@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source /etc/os-release
+
 # Script para instalar y configurar SSH en sistema Arch/Artix Linux
 # https://www.ssh-audit.com/hard ening_guide.html
 
@@ -12,8 +14,13 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 # Instalar OpenSSH y habilitar el servicio
-pacman -S --noconfirm openssh openssh-openrc
-rc-update add sshd default
+pacman -Sy --noconfirm openssh
+if [ "$ID" = "artix" ]; then
+	pacman -Sy --noconfirm openssh-openrc
+	rc-update add sshd default
+else
+	systemctl enable sshd
+fi
 
 # Generar las claves RSA y ED25519
 ssh-keygen -t rsa -b 4096 -f /etc/ssh/ssh_host_rsa_key -N ""
@@ -40,8 +47,13 @@ sed -i 's|#ClientAliveInterval 0|ClientAliveInterval 300|' /etc/ssh/sshd_config
 
 # Instalar (si no lo está ya) y activar UFW
 if [ ! -x /usr/bin/ufw ]; then
-	pacman -Sy --noconfirm ufw-openrc
-	rc-update add ufw default
+	pacman -Sy --noconfirm ufw
+	if [ "$ID" = "artix" ]; then
+		pacman -Sy --noconfirm ufw-openrc
+		rc-update add ufw default
+	else
+		systemctl enable ufw
+	fi
 	ufw enable
 fi
 
@@ -54,8 +66,13 @@ ufw default allow outgoing
 
 # Instalar (si no lo está ya) y activar fail2ban
 if [ ! -x /usr/bin/fail2ban-server ]; then
-	pacman -Sy --noconfirm fail2ban-openrc
-	rc-update add fail2ban default
+	pacman -Sy --noconfirm fail2ban
+	if [ "$ID" = "artix" ]; then
+		pacman -Sy --noconfirm fail2ban-openrc
+		rc-update add fail2ban default
+	else
+		systemctl enable fail2ban
+	fi
 fi
 
 # Usar fail2ban con UFW

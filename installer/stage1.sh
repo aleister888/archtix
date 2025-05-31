@@ -5,6 +5,11 @@
 # por aleister888 <pacoe1000@gmail.com>
 # Licencia: GNU GPLv3
 
+source /etc/os-release
+
+[ "$ID" = "artix" ] && CHROOT="artix-chroot"
+[ "$ID" = "arch" ] && CHROOT="arch-chroot"
+
 # - Pasa como variables los siguientes parámetros al siguiente script:
 #   - Nombre del usuario regular ($USERNAME)
 #   - DPI de la pantalla ($FINAL_DPI)
@@ -17,8 +22,6 @@
 #   - Driver de vídeo a usar ($GRAPHIC_DRIVER)
 #   - Variables con el software opcional elegido
 #     - $CHOSEN_AUDIO_PROD, $CHOSEN_LATEX, $CHOSEN_MUSIC, $CHOSEN_VIRT
-
-REPO_URL="https://github.com/aleister888/artix-installer"
 
 whip_msg() {
 	whiptail --backtitle "$REPO_URL" --title "$1" --msgbox "$2" 10 60
@@ -249,7 +252,15 @@ basestrap_install() {
 
 	# shellcheck disable=SC2086
 	while true; do
-		basestrap /mnt $BASESTRAP_PACKAGES && break
+		if [ "$ID" = "artix" ]; then
+			basestrap /mnt $BASESTRAP_PACKAGES && break
+		elif [ "$ID" = "arch" ]; then
+			FILTERED_PACKAGES=""
+			for PKG in $BASESTRAP_PACKAGES; do
+				[[ "$PKG" != *openrc* ]] && FILTERED_PACKAGES+="$PKG "
+			done
+			pacstrap /mnt $FILTERED_PACKAGES && break
+		fi
 	done
 }
 
@@ -286,8 +297,13 @@ kb_layout_conf() {
 		EndSection
 	EOF
 	# Si elegimos español, configurar el layout de la tty en español también
-	[ "$FINAL_LAYOUT" == "es" ] &&
-		sed -i 's|keymap="us"|keymap="es"|' /etc/conf.d/keymaps
+	if [ "$FINAL_LAYOUT" == "es" ]; then
+		if [ "$ID" = "artix" ]; then
+			sed -i 's|keymap="us"|keymap="es"|' /etc/conf.d/keymaps
+		elif [ "$ID" = "arch" ]; then
+			echo "KEYMAP=es" | sudo tee -a /etc/vconsole.conf
+		fi
+	fi
 }
 
 # Calcular el DPI
@@ -564,7 +580,11 @@ whip_msg "Hora del cafe" \
 basestrap_install
 
 # Creamos el fstab
-fstabgen -U /mnt >/mnt/etc/fstab
+if [ "$ID" = "artix" ]; then
+	fstabgen -U /mnt >/mnt/etc/fstab
+elif [ "$ID" = "arch" ]; then
+	genfstab -U /mnt >/mnt/etc/fstab
+fi
 
 # Montamos los directorios necesarios para el chroot
 for DIR in dev proc sys run; do
@@ -572,7 +592,7 @@ for DIR in dev proc sys run; do
 	mount --make-rslave /mnt/$DIR
 done
 
-artix-chroot /mnt sh -c "
+eval "$CHROOT" /mnt sh -c "
 	useradd -m -G wheel,lp $USERNAME
 	yes $ROOT_PASSWORD | passwd
 	yes $USER_PASSWORD | passwd $USERNAME
@@ -583,7 +603,7 @@ cp -r "$(dirname "$0")/.." "/mnt/home/$USERNAME/.dotfiles"
 
 # Corregimos el propietario del repositorio copiado y ejecutamos la siguiente
 # parte del script pasandole las variables correspondientes.
-artix-chroot /mnt sh -c "
+eval "$CHROOT" /mnt sh -c "
 	export \
 	USERNAME=$USERNAME \
 	FINAL_DPI=$FINAL_DPI \

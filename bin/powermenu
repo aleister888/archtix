@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source /etc/os-release
+
 # Función para obtener y validar la hora
 obtener_hora() {
 	local HORA
@@ -42,8 +44,14 @@ case $CHOSEN in
 	fi
 	;;
 "${OPTIONS[3]}") $TERMINAL $TERMTITLE "scratchpad" $TERMEXEC sudo pkill X ;;
-"${OPTIONS[4]}") sudo /usr/bin/openrc-shutdown -r now ;;
-"${OPTIONS[5]}") sudo /usr/bin/openrc-shutdown -p now ;;
+"${OPTIONS[4]}")
+	[ "$ID" = "artix" ] && sudo /usr/bin/openrc-shutdown -r now
+	[ "$ID" = "arch" ] && sudo systemctl reboot
+	;;
+"${OPTIONS[5]}")
+	[ "$ID" = "artix" ] && sudo /usr/bin/openrc-shutdown -p now
+	[ "$ID" = "arch" ] && sudo systemctl poweroff
+	;;
 "${OPTIONS[6]}") loginctl hibernate ;;
 "${OPTIONS[7]}") loginctl reboot --firmware-setup ;;
 "${OPTIONS[8]}") pkill dwm ;;

@@ -1,0 +1,13 @@
+{
+  "artix": [
+    "fwupd-openrc",
+    "gnome-firmware",
+    "world/fwupd",
+    "world/fwupd-efi"
+  ],
+  "arch": [
+    "gnome-firmware",
+    "fwupd",
+    "fwupd-efi"
+  ]
+}

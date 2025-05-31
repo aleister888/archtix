@@ -5,6 +5,8 @@
 # por aleister888 <pacoe1000@gmail.com>
 # Licencia: GNU GPLv3
 
+source /etc/os-release
+
 # Variables
 export DATA_DIR="${XDG_DATA_HOME:-$HOME/.local/share}"
 export CONF_DIR="${XDG_CONFIG_HOME:-$HOME/.config}"
@@ -34,13 +36,40 @@ fi
 # Instalar paquetes faltantes #
 ###############################
 
-REPO_PKG="$(jq -r '.[] | .[]' "$HOME"/.dotfiles/assets/packages/*.json)"
-# Obtenemos los paquetes instalados
+# Construimos la lista de paquetes dependiendo de la distro
+mapfile -t PACKAGE_LIST < <(
+	if [ "$ID" = "artix" ]; then
+		# Añadimos todos los paquetes menos fwupd
+		find "$HOME/.dotfiles/assets/packages" -name '*.json' \
+			! -name 'fwup.json' \
+			-exec jq -r '.[] | .[]' {} +
+		# Instalamos fwupd
+		jq -r '.artix[]' "$HOME/.dotfiles/assets/packages/fwup.json"
+	elif [ "$ID" = "arch" ]; then
+		# Añadimos los paquetes que no dependen de la distro
+		find "$HOME/.dotfiles/assets/packages" -name '*.json' \
+			! -name 'servicios.json' \
+			! -name 'fwup.json' \
+			-exec jq -r '.[] | .[]' {} +
+		# Añadimos los servicios filtrando los paquetes para openrc
+		jq -r '.[] | .[]' "$HOME/.dotfiles/assets/packages/servicios.json" |
+			grep -v openrc
+		# Instalamos fwupd
+		jq -r '.arch[]' "$HOME/.dotfiles/assets/packages/fwup.json"
+	fi
+)
+
+# Extraemos solo el nombre del paquete (sin prefijo repo/)
+REPO_PKGS=$(printf "%s\n" "${PACKAGE_LIST[@]}" | cut -d/ -f2)
+
+# Paquetes ya instalados
 INSTALLED_PKGS=$(yay -Qq)
-# Filtramos los paquetes que no están instalados (ignorando el repositorio)
-PKGS_TO_INSTALL=$(echo "$REPO_PKG" | cut -d/ -f2 | grep -vxF -f <(echo "$INSTALLED_PKGS"))
-# Si hay paquetes por instalar y estamos conectados a internet, los instalamos
-if [ -n "$PKGS_TO_INSTALL" ] && timeout -k 1s 3s ping gnu.org -c 1 >/dev/null 2>&1; then
+
+# Filtramos los paquetes que aún no están instalados
+PKGS_TO_INSTALL=$(comm -23 <(printf "%s\n" "$REPO_PKGS" | sort) <(printf "%s\n" "$INSTALLED_PKGS" | sort))
+
+# Si hay paquetes pendientes y tenemos internet, los instalamos
+if [ -n "$PKGS_TO_INSTALL" ] && timeout -k 1s 3s ping -q -c 1 gnu.org &>/dev/null; then
 	yay -Sy --noconfirm --needed --asexplicit $PKGS_TO_INSTALL
 fi
 
