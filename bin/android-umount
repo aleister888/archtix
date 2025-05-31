@@ -12,7 +12,7 @@ CHOSEN="$(
 [ -z "$CHOSEN" ] && exit
 
 # Intentar desmontar el dispositivo seleccionado
-if doas umount -l "$CHOSEN"; then
+if sudo umount -l "$CHOSEN"; then
 	notify-send "🤖 Dispositivo Android $CHOSEN desmontado"
 else
 	notify-send "🤖 Hubo un error al desmontar $CHOSEN"

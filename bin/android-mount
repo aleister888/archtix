@@ -27,7 +27,7 @@ CHOSEN="$(echo "$ANDDRIVES" | dmenu -p "Que dispositivo montar?")"
 NUMBER="${CHOSEN%%:*}"
 
 # Intentar montar el dispositivo Android
-if doas simple-mtpfs -o allow_other -o fsname="simple-mtpfs-$(escape "$CHOSEN")" --device "$NUMBER" "$MP"; then
+if sudo simple-mtpfs -o allow_other -o fsname="simple-mtpfs-$(escape "$CHOSEN")" --device "$NUMBER" "$MP"; then
 	notify-send "🤖 Android montado en $MP."
 else
 	notify-send "🤖 Hubo un error al montar $CHOSEN"

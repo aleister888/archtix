@@ -59,7 +59,7 @@ NEXT=${LEVELS_ARRAY[$INDEX]}
 
 [ -z "$NEXT" ] && exit
 
-echo "$NEXT" | doas tee $BRIGHT_DEV/brightness
+echo "$NEXT" | sudo tee $BRIGHT_DEV/brightness
 
 pw-play $SOUND
 

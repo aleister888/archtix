@@ -261,9 +261,9 @@ Ahora deberás hacer las siguientes modificaciones:
 	\setlength\itemsep{-0.3em}
 	\item Cambiar el chipset a \emph{Q35} y elegir el firmware \path{UEFI: x86_64: /usr/share/edk2/x64/OVMF_CODE.fd}
 	\item Ajustar la  \emph{topología} del procesador de la siguiente manera:
-	\begin{itemize}
-		\item 1 \emph{socket}, tantos \emph{centros} comos núcleos tenga tu procesador y tantos \emph{hilos} como hilos tenga tu procesador por núcleo (ej. para un procesador de 8 núcleos, 16 hilos, elegiríamos: \emph{1 Socket, 8 Centros, 2 Hilos}).
-	\end{itemize}
+	      \begin{itemize}
+		      \item 1 \emph{socket}, tantos \emph{centros} comos núcleos tenga tu procesador y tantos \emph{hilos} como hilos tenga tu procesador por núcleo (ej. para un procesador de 8 núcleos, 16 hilos, elegiríamos: \emph{1 Socket, 8 Centros, 2 Hilos}).
+	      \end{itemize}
 	\item Cambiar el bus de nuestro disco virtual de \emph{SATA} a \emph{VirtIO}.
 	\item Cambiar el modelo del \emph{NIC} a \emph{virtio}
 	\item Añadir el ISO con los drivers virtio.
@@ -304,10 +304,10 @@ Necesitamos instalar y configurar \emph{tmpfilesd} para que cada vez que iniciam
 
 \begin{verbatim}
 echo "f /dev/shm/looking-glass 0660 $USER kvm -" | \
-doas tee -a /etc/tmpfiles.d/looking-glass.conf
+sudo tee -a /etc/tmpfiles.d/looking-glass.conf
 \end{verbatim}
 \begin{verbatim}
-doas pacman -Sy --noconfirm etmpfiles
+sudo pacman -Sy --noconfirm etmpfiles
 \end{verbatim}
 
 \subsection{Añadir Gráfica y Looking Glass en el Guest}
@@ -359,24 +359,24 @@ Finalmente cambiamos el driver de vídeo de \emph{QXL} a \emph{None} y borramos 
 \noindent Para que esto funcione debemos reiniciar nuestro ordenador o ejecutar el comando.
 
 \begin{verbatim}
-doas install -g kvm -o $(whoami) -m 0660 /dev/null /dev/shm/looking-glass
+sudo install -g kvm -o $(whoami) -m 0660 /dev/null /dev/shm/looking-glass
 \end{verbatim}
 
 \begin{mybox}{Nota}
 
-Para más información sobre como configurar un VFIO passthought puede consultar:
+	Para más información sobre como configurar un VFIO passthought puede consultar:
 
-\vspace{-7.5pt}
+	\vspace{-7.5pt}
 
-\begin{itemize}
-\setlength\itemsep{-0.3em}
-\item \href{https://qqq.ninja/blog/post/vfio-on-arch/}
-{https://qqq.ninja/blog/post/vfio-on-arch/}
-\item \href{https://gitlab.com/risingprismtv/single-gpu-passthrough/-/wikis/home}
-{https://gitlab.com/risingprismtv/single-gpu-passthrough/-/wikis/home}
-\item \href{https://wiki.archlinux.org/title/PCI\_passthrough\_via\_OVMF}
-{https://wiki.archlinux.org/title/PCI\_passthrough\_via\_OVMF}
-\end{itemize}
+	\begin{itemize}
+		\setlength\itemsep{-0.3em}
+		\item \href{https://qqq.ninja/blog/post/vfio-on-arch/}
+		      {https://qqq.ninja/blog/post/vfio-on-arch/}
+		\item \href{https://gitlab.com/risingprismtv/single-gpu-passthrough/-/wikis/home}
+		      {https://gitlab.com/risingprismtv/single-gpu-passthrough/-/wikis/home}
+		\item \href{https://wiki.archlinux.org/title/PCI\_passthrough\_via\_OVMF}
+		      {https://wiki.archlinux.org/title/PCI\_passthrough\_via\_OVMF}
+	\end{itemize}
 \end{mybox}
 
 \section{VirtioFS}
@@ -396,43 +396,43 @@ Para compartir múltiples carpetas con nuestra máquina virtual, en lugar de uti
 \medskip
 Para ello, primero ejecutamos desde cmd como Administrador:
 \begin{center}
-{
-\fontsize{7.9}{9}\selectfont
-\texttt{
-\path{"}%
-C:\textbackslash Program Files (x86)\textbackslash WinFsp\textbackslash bin\textbackslash fsreg.bat%
-\path{"}
-virtiofs
-\path{"}%
-C:\textbackslash Program Files\textbackslash Virtio-Win\textbackslash VioFS\textbackslash virtiofs.exe%
-\path{"}
-\path{"}%
--t\space \%1\space -m\space \%2%
-\path{"}
-}
-}
+	{
+		\fontsize{7.9}{9}\selectfont
+		\texttt{
+			\path{"}%
+			C:\textbackslash Program Files (x86)\textbackslash WinFsp\textbackslash bin\textbackslash fsreg.bat%
+			\path{"}
+			virtiofs
+			\path{"}%
+			C:\textbackslash Program Files\textbackslash Virtio-Win\textbackslash VioFS\textbackslash virtiofs.exe%
+			\path{"}
+			\path{"}%
+			-t\space \%1\space -m\space \%2%
+			\path{"}
+		}
+	}
 \end{center}
 
 Una vez que tenemos todo instalado, creamos un script `.bat` que monte nuestras carpetas en la máquina invitada. Si tenemos dos carpetas cuyas rutas objetivo son ``documentos'' y ``videos'' y queremos montarlas en ``Y:'' y ``Z:'', respectivamente, podemos crear un script para montar ambas carpetas:
 \begin{center}
-{
-\fontsize{9}{9}\selectfont
-\texttt{
-\path{"}%
-C:\textbackslash Program Files (x86)\textbackslash WinFsp\textbackslash bin\textbackslash launchctl-x64.exe%
-\path{"}
-start virtiofs documentos documentos Y:
-}
-}\\
-{
-\fontsize{9}{9}\selectfont
-\texttt{
-\path{"}%
-C:\textbackslash Program Files (x86)\textbackslash WinFsp\textbackslash bin\textbackslash launchctl-x64.exe%
-\path{"}
-start virtiofs videos videos Z:
-}
-}
+	{
+		\fontsize{9}{9}\selectfont
+		\texttt{
+			\path{"}%
+			C:\textbackslash Program Files (x86)\textbackslash WinFsp\textbackslash bin\textbackslash launchctl-x64.exe%
+			\path{"}
+			start virtiofs documentos documentos Y:
+		}
+	}\\
+	{
+	\fontsize{9}{9}\selectfont
+	\texttt{
+		\path{"}%
+		C:\textbackslash Program Files (x86)\textbackslash WinFsp\textbackslash bin\textbackslash launchctl-x64.exe%
+		\path{"}
+		start virtiofs videos videos Z:
+	}
+	}
 \end{center}
 
 \section{Conexión bridge y RDP}
@@ -464,12 +464,12 @@ Ahora podemos configurar nuestra máquina invitada para acceder remotamente a el
 
 Para conectaros a la máquina virtual de nuestra red debemos configurar el Firewall de nuestro guest para permitir las conexiones entrantes de RDP, para ello ejecutaremos este comando en cmd como Administrador:
 \begin{centering}
-{
-\fontsize{9.75}{9}\selectfont
-\texttt{
-netsh advfirewall firewall add rule name=\path{"}RDP\path{"} protocol=TCP dir=in localport=3389 action=allow
-}
-}
+	{
+		\fontsize{9.75}{9}\selectfont
+		\texttt{
+			netsh advfirewall firewall add rule name=\path{"}RDP\path{"} protocol=TCP dir=in localport=3389 action=allow
+		}
+	}
 \end{centering}
 
 \medskip
@@ -500,19 +500,19 @@ Sustituye \emph{usuario} por el usuario de tu máquina, y \emph{255.255.255.255}
 Para instalar el firewall ejecuta:
 
 \begin{verbatim}
-doas sh -c 'pacman -Sy ufw-openrc; rc-update add ufw default; ufw enable'
+sudo sh -c 'pacman -Sy ufw-openrc; rc-update add ufw default; ufw enable'
 \end{verbatim}
 
 Podemos añadir unas reglas muy básicas a nuestro firewall \emph{(que se aplicarán cuando reiniciemos nuestro equipo)} con:
 
 \begin{verbatim}
-doas ufw limit 22/tcp; doas ufw allow 80/tcp
-doas ufw allow 443/tcp; doas ufw allow syncthing
-doas ufw default deny incoming; doas ufw default allow outgoing
+sudo ufw limit 22/tcp; sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp; sudo ufw allow syncthing
+sudo ufw default deny incoming; sudo ufw default allow outgoing
 \end{verbatim}
 
 \begin{mybox}{Nota}
-Si configuraste ssh con \emph{ssh-configure} el firewall ya se configuró automáticamente
+	Si configuraste ssh con \emph{ssh-configure} el firewall ya se configuró automáticamente
 \end{mybox}
 
 \section{Monitores de altas tasas de refresco}
@@ -536,13 +536,13 @@ if ((ev.xmotion.time - lasttime) <= (1000 / 144))
 Nuestra configuración de \texttt{zsh} tiene varios \emph{alias} configurados en:
 
 \begin{center}
-\path{~/.config/zsh/aliasrc}
+	\path{~/.config/zsh/aliasrc}
 \end{center}
 
 Para añadir alias fuera de la estructura del repositorio, de manera personal podemos crear un archivo con más funciones y abreviaciones en:
 
 \begin{center}
-\path{~/.config/useralias}
+	\path{~/.config/useralias}
 \end{center}
 
 \subsection*{Aviso de Uso}
