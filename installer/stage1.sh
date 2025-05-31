@@ -589,51 +589,69 @@ for DIR in dev proc sys run; do
 	mount --make-rslave /mnt/$DIR
 done
 
-# Creamos el usuario
-cat <<-EOF >/mnt/tmp/user_creation.sh
-	#!/bin/sh
-	echo "root:$ROOT_PASSWORD" | chpasswd
-	useradd -m -G wheel,lp $USERNAME
-	echo "$USERNAME:$USER_PASSWORD" | chpasswd
-EOF
-chmod +x /mnt/tmp/user_creation.sh
 if [ "$ID" = "artix" ]; then
-	artix-chroot /mnt /tmp/user_creation.sh
+	artix-chroot /mnt sh -c "
+		useradd -m -G wheel,lp $USERNAME
+		yes $ROOT_PASSWORD | passwd
+		yes $USER_PASSWORD | passwd $USERNAME
+	"
 elif [ "$ID" = "arch" ]; then
-	arch-chroot /mnt /tmp/user_creation.sh
+	arch-chroot /mnt sh -c "
+		useradd -m -G wheel,lp $USERNAME
+		yes $ROOT_PASSWORD | passwd
+		yes $USER_PASSWORD | passwd $USERNAME
+	"
 fi
 
 # Copiamos el repositorio a la nueva instalación
 cp -r "$(dirname "$0")/.." "/mnt/home/$USERNAME/.dotfiles"
 
-# Creamos el script para seguir instalando todo
-cat <<-EOF >/mnt/tmp/install.sh
-	#!/bin/sh
-	export \
-	USERNAME=$USERNAME \
-	FINAL_DPI=$FINAL_DPI \
-	SYSTEM_TIMEZONE=$SYSTEM_TIMEZONE \
-	ROOT_DISK=$ROOT_DISK \
-	ROOT_PART_NAME=$ROOT_PART_NAME \
-	CRYPT_NAME=$CRYPT_NAME \
-	VG_NAME=$VG_NAME \
-	HOSTNAME=$HOSTNAME \
-	GRAPHIC_DRIVER=$GRAPHIC_DRIVER \
-	CHOSEN_VIRT=$CHOSEN_VIRT \
-	CHOSEN_MUSIC=$CHOSEN_MUSIC \
-	CHOSEN_LATEX=$CHOSEN_LATEX \
-	CHOSEN_AUDIO_PROD=$CHOSEN_AUDIO_PROD
-
-	chown $USERNAME:$USERNAME -R \
-	   /home/$USERNAME/.dotfiles
-	cd /home/$USERNAME/.dotfiles/installer
-
-	./stage2.sh
-EOF
-chmod +x /mnt/tmp/install.sh
-
+# Corregimos el propietario del repositorio copiado y ejecutamos la siguiente
+# parte del script pasandole las variables correspondientes.
 if [ "$ID" = "artix" ]; then
-	artix-chroot /mnt /tmp/install.sh
+	artix-chroot /mnt sh -c "
+		export \
+		USERNAME=$USERNAME \
+		FINAL_DPI=$FINAL_DPI \
+		SYSTEM_TIMEZONE=$SYSTEM_TIMEZONE \
+		ROOT_DISK=$ROOT_DISK \
+		ROOT_PART_NAME=$ROOT_PART_NAME \
+		CRYPT_NAME=$CRYPT_NAME \
+		VG_NAME=$VG_NAME \
+		HOSTNAME=$HOSTNAME \
+		GRAPHIC_DRIVER=$GRAPHIC_DRIVER \
+		CHOSEN_VIRT=$CHOSEN_VIRT \
+		CHOSEN_MUSIC=$CHOSEN_MUSIC \
+		CHOSEN_LATEX=$CHOSEN_LATEX \
+		CHOSEN_AUDIO_PROD=$CHOSEN_AUDIO_PROD
+
+		chown $USERNAME:$USERNAME -R \
+		   /home/$USERNAME/.dotfiles
+		cd /home/$USERNAME/.dotfiles/installer
+
+		./stage2.sh
+	"
 elif [ "$ID" = "arch" ]; then
-	arch-chroot /mnt /tmp/install.sh
+	arch-chroot /mnt sh -c "
+		export \
+		USERNAME=$USERNAME \
+		FINAL_DPI=$FINAL_DPI \
+		SYSTEM_TIMEZONE=$SYSTEM_TIMEZONE \
+		ROOT_DISK=$ROOT_DISK \
+		ROOT_PART_NAME=$ROOT_PART_NAME \
+		CRYPT_NAME=$CRYPT_NAME \
+		VG_NAME=$VG_NAME \
+		HOSTNAME=$HOSTNAME \
+		GRAPHIC_DRIVER=$GRAPHIC_DRIVER \
+		CHOSEN_VIRT=$CHOSEN_VIRT \
+		CHOSEN_MUSIC=$CHOSEN_MUSIC \
+		CHOSEN_LATEX=$CHOSEN_LATEX \
+		CHOSEN_AUDIO_PROD=$CHOSEN_AUDIO_PROD
+
+		chown $USERNAME:$USERNAME -R \
+		   /home/$USERNAME/.dotfiles
+		cd /home/$USERNAME/.dotfiles/installer
+
+		./stage2.sh
+	"
 fi
