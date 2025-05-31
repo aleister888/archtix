@@ -36,7 +36,7 @@ static const char col_blue[]       = "#83A598";
 static const char col_purple[]     = "#D3869B";
 
 // Nombre de los espacios cuando están vacíos y cuando tienen ventanas:
-static const char *tags[] = { "", "", "󰈹", "", "", "", "", "󱁤", "󰸳", "10", "11", "", "", "󰇋", "󰇌", "󰇍", "󰇎", "󰇏"};
+static const char *tags[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "a", "b", "c", "d", "e", "f"};
 
 static const char *colors[][3] = {
 	// Colores:             Fuente      Fondo           Borde
