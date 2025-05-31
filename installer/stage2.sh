@@ -105,53 +105,25 @@ repos_conf() {
 	pacinstall reflector
 
 	# Escoger mirrors más rápidos de los repositorios de Arch
+	local MIRRORLIST_FILE
 	if [ "$ID" = "artix" ]; then
-		reflector --verbose --fastest 10 --age 6 \
-			--connection-timeout 1 --download-timeout 1 \
-			--threads "$(nproc)" \
-			--save /etc/pacman.d/mirrorlist-arch
+		MIRRORLIST_FILE="mirrorlist-arch"
 	elif [ "$ID" = "arch" ]; then
-		reflector --verbose --fastest 10 --age 6 \
-			--connection-timeout 1 --download-timeout 1 \
-			--threads "$(nproc)" \
-			--save /etc/pacman.d/mirrorlist
-		cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.bak
+		MIRRORLIST_FILE="mirrorlist"
 	fi
-
-	# Añadir chaotic AUR
-	sudo pacman-key --recv-key 3056513887B78AEB \
-		--keyserver keyserver.ubuntu.com
-	sudo pacman-key --lsign-key 3056513887B78AEB
-	sudo pacman -U \
-		'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst' --noconfirm
-	sudo pacman -U \
-		'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst' --noconfirm
-
-	cat <<-EOF | tee -a /etc/pacman.conf
-		[chaotic-aur]
-		Include = /etc/pacman.d/chaotic-mirrorlist
-	EOF
-
-	sudo pacman -Sy
+	reflector --verbose --fastest 10 --age 6 \
+		--connection-timeout 1 --download-timeout 1 \
+		--threads "$(nproc)" \
+		--save /etc/pacman.d/$MIRRORLIST_FILE
 
 	# Configurar cronie para actualizar automáticamente los mirrors de Arch
 	cat <<-EOF >/etc/crontab
 		SHELL=/bin/bash
 		PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
+		# Escoger los mejores repositorios para Arch Linux
+		@hourly root ping gnu.org -c 1 && reflector --latest 10 --connection-timeout 1 --download-timeout 1 --sort rate --save /etc/pacman.d/$MIRRORLIST_FILE
 	EOF
-
-	if [ "$ID" = "artix" ]; then
-		cat <<-EOF | tee -a /etc/crontab
-			# Escoger los mejores repositorios para Arch Linux
-			@hourly root ping gnu.org -c 1 && reflector --latest 10 --connection-timeout 1 --download-timeout 1 --sort rate --save /etc/pacman.d/mirrorlist-arch
-		EOF
-	elif [ "$ID" = "arch" ]; then
-		cat <<-EOF | tee -a /etc/crontab
-			# Escoger los mejores repositorios para Arch Linux
-			@hourly root ping gnu.org -c 1 && reflector --latest 10 --connection-timeout 1 --download-timeout 1 --sort rate --save /etc/pacman.d/mirrorlist
-		EOF
-	fi
 }
 
 # Cambiar la codificación del sistema a español
@@ -166,7 +138,7 @@ genlocale() {
 mkinitcpio_conf() {
 	local -r MKINITCPIO_CONF="/etc/mkinitcpio.conf"
 	local MODULES="vfat usb_storage btusb nvme"
-	local HOOKS="base udev autodetect microcode modconf kms keyboard keymap consolefont block encrypt lvm2"
+	local HOOKS="base udev autodetect microcode modconf kms keyboard keymap consolefont block lvm2 encrypt"
 	[ "$ID" = "artix" ] && HOOKS+=" resume"
 	HOOKS+=" filesystems fsck"
 	sed -i "s/^MODULES=.*/MODULES=($MODULES)/" "$MKINITCPIO_CONF"
