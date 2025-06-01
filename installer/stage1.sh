@@ -199,9 +199,14 @@ disk_setup() {
 basestrap_install() {
 	local BASESTRAP_PACKAGES
 
-	BASESTRAP_PACKAGES="base elogind-openrc openrc linux linux-firmware"
-	BASESTRAP_PACKAGES+=" opendoas mkinitcpio wget libnewt btrfs-progs"
-	BASESTRAP_PACKAGES+=" neovim lvm2-openrc"
+	BASESTRAP_PACKAGES="base linux linux-headers linux-firmware mkinitcpio"
+
+	BASESTRAP_PACKAGES+=" elogind-openrc openrc cronie cronie-openrc"
+	BASESTRAP_PACKAGES+=" lvm2 lvm2-openrc cups cups-openrc"
+	BASESTRAP_PACKAGES+=" networkmanager networkmanager-openrc"
+	BASESTRAP_PACKAGES+=" cryptsetup cryptsetup-openrc"
+	BASESTRAP_PACKAGES+=" acpid acpid-openrc"
+	BASESTRAP_PACKAGES+=" device-mapper-openrc"
 
 	# Instalamos los paquetes del grupo base-devel manualmente para luego
 	# poder borrar sudo facilmente. (Si en su lugar instalamos el grupo,
@@ -210,11 +215,14 @@ basestrap_install() {
 	BASESTRAP_PACKAGES+=" gc gcc groff guile libisl libmpc libtool m4 make"
 	BASESTRAP_PACKAGES+=" patch pkgconf texinfo which"
 
-	BASESTRAP_PACKAGES+=" linux-headers libjpeg-turbo wpa_supplicant usbutils"
-	BASESTRAP_PACKAGES+=" networkmanager networkmanager-openrc dosfstools git"
-	BASESTRAP_PACKAGES+=" cronie cronie-openrc cups cups-openrc freetype2"
-	BASESTRAP_PACKAGES+=" pciutils cryptsetup device-mapper-openrc dialog"
-	BASESTRAP_PACKAGES+=" cryptsetup-openrc acpid-openrc efibootmgr grub"
+	BASESTRAP_PACKAGES+=" efibootmgr grub wpa_supplicant btrfs-progs"
+
+	# Con estos paquetes podemos usar lspci y lsusb para dectectar si hay algún
+	# dispositivo bluetooth y debemos instalar bluez
+	BASESTRAP_PACKAGES+=" pciutils usbutils"
+
+	BASESTRAP_PACKAGES+=" git libjpeg-turbo dosfstools freetype2 dialog"
+	BASESTRAP_PACKAGES+=" wget libnewt neovim opendoas"
 
 	# Instalamos pipewire para evitar conflictos (p.e. se isntala jack2 y no
 	# pipewire-jack). Los paquetes para 32 bits se instalarán una vez
@@ -248,6 +256,9 @@ basestrap_install() {
 	fi
 
 	# shellcheck disable=SC2086
+	# Artix y Arch usan binarios con nombres distintos para instalar paquetes
+	# en el chroot. Además para Arch tenemos que filtrar los paquetes
+	# con openrc en el nombre
 	while true; do
 		if [ "$ID" = "artix" ]; then
 			basestrap /mnt $BASESTRAP_PACKAGES && break
