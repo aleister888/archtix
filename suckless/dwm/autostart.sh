@@ -117,10 +117,3 @@ fi
 
 # Limpiar directorio $HOME
 cleaner
-
-# Iniciar aplicaciones más usadas
-pgrep tauonmb || tauon &
-pgrep "$BROWSER" || eval "$BROWSER" &
-pgrep keepassxc || keepassxc &
-pgrep thunderbird || thunderbird &
-pgrep -f telegram-desktop || telegram-deskop &
