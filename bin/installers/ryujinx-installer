@@ -8,8 +8,8 @@ RUN_SCRIPT="$HOME/.local/bin/ryujinx"
 install() {
 	local REPO REPLY DOWNLOAD_URL FILENAME TAR_LOCATION
 	REPO="Ryubing/Canary-Releases"
-	REPLY="$(curl -s "https://api.github.com/repos/$REPO/releases/latest")"
-	DOWNLOAD_URL="$(echo "$REPLY" | jq -r '.assets[] | select(.name | test(".*linux_x64.*\\.tar\\.gz$")) | .browser_download_url')"
+	REPLY="$(curl "https://git.ryujinx.app/api/v4/projects/ryubing%2Fryujinx/releases")"
+	DOWNLOAD_URL="$(echo "$REPLY" | jq -r '.[] | .assets.links[] | select(.name | test("linux_x64.tar.gz")) | .url')"
 	FILENAME="$(basename "$DOWNLOAD_URL")"
 	TAR_LOCATION="/tmp/$FILENAME"
 

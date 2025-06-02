@@ -6,25 +6,22 @@ INSTALL_DIR="$HOME/.local/opt/eclipse"
 RUN_SCRIPT="$HOME/.local/bin/eclipse"
 
 install() {
-	# Obtener el año y el mes actual
-	local YEAR MONTH URL FILENAME DOWNLOAD_URL TAR_LOCATION
-	YEAR=$(date +'%Y')
-	MONTH=$(date +'%m')
+	VERSION_URL="https://www.eclipse.org/downloads/packages/"
+	# Obtener la última versión de Eclipse desde el sitio web
+	BASE_URL=$(
+		curl -s "$VERSION_URL" |
+			grep -oP '/technology/epp/downloads/release/[0-9]{4}-[0-9]{2}/R/eclipse-rcp-[0-9]{4}-[0-9]{2}-R-linux-gtk-x86_64.tar.gz' |
+			sort | tail -n 1
+	)
+	DOWNLOAD_URL="https://ftp.halifax.rwth-aachen.de/eclipse/$BASE_URL"
+	FILENAME="$(echo "$DOWNLOAD_URL" | grep -o "eclipse-rcp-.*")"
 
-	# Ajustar la versión de Eclipse según el mes actual
-	if [ "$MONTH" -ge 6 ]; then
-		# Si el mes es junio o posterior, usar la versión de junio de este año
-		RELEASE_MONTH="06"
-	else
-		# Si el mes es anterior a junio, usar la versión de diciembre del año anterior
-		RELEASE_MONTH="12"
-		YEAR=$((YEAR - 1)) # Restar 1 al año para obtener el año anterior
+	if [ -z "$DOWNLOAD_URL" ]; then
+		echo "No se pudo obtener la versión de Eclipse."
+		exit 1
 	fi
 
-	# Definir URL y nombre del archivo
-	URL="https://www.eclipse.org/downloads/download.php"
-	FILENAME="eclipse-java-$YEAR-$RELEASE_MONTH-R-linux-gtk-x86_64.tar.gz"
-	DOWNLOAD_URL="$URL?file=/technology/epp/downloads/release/$YEAR-$RELEASE_MONTH/R/$FILENAME&r=1"
+	# Definir la URL y el archivo correspondiente a la última versión
 	TAR_LOCATION="/tmp/$FILENAME"
 
 	# Descargar y descomprimir el archivo
