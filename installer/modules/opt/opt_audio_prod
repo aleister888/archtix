@@ -4,13 +4,3 @@
 
 xargs yay -S --noconfirm --disable-download-timeout --needed \
 	<"$HOME/.dotfiles/assets/packages/opt/audio_prod"
-
-# El paquete tuxguitar-bin guarda el archivo .desktop en un directorio no estándar.
-# Con esto enlazamos los archivos necesarios en /usr/share para que el sistema los reconozca.
-sudo ln -sf /opt/tuxguitar/share/applications/tuxguitar.desktop \
-	/usr/share/applications/
-[ ! -d /usr/share/icons/hicolor/96x96/apps ] &&
-	sudo mkdir -p /usr/share/icons/hicolor/96x96/apps
-sudo ln -sf /opt/tuxguitar/share/pixmaps/tuxguitar.png \
-	/usr/share/icons/hicolor/96x96/apps/
-sudo ln -sf /usr/bin/tuxguitar-bin /usr/bin/tuxguitar
