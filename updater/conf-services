@@ -31,7 +31,11 @@ user_service_add() {
 				"$HOME/.config/rc/runlevels/$RUNLEVEL/$SERVICE"
 		fi
 	elif [ "$ID" = "arch" ]; then
-		systemctl --user enable "$1"
+		if [ "$SERVICE" = "syslog-ng" ]; then
+			systemctl --user enable "${SERVICE}@default.service"
+		else
+			systemctl --user enable "$SERVICE"
+		fi
 	fi
 }
 
