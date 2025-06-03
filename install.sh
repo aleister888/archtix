@@ -2,9 +2,9 @@
 
 set -e
 
-export REPO_NAME="artix-installer"
+export REPO_NAME="archtix"
 export REPO_URL="https://github.com/aleister888/$REPO_NAME"
-REPO_DIR="/tmp/artix-installer"
+REPO_DIR="/tmp/archtix"
 
 [ ! -d /sys/firmware/efi ] && exit 1
 
