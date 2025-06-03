@@ -1,0 +1,14 @@
+[Unit]
+Description=Suspender el sistema cuando la batería está baja
+After=local-fs.target boot.target
+
+[Service]
+ExecStart=/usr/local/bin/auto-suspend-loop
+Restart=always
+RestartSec=10
+User=root
+Type=simple
+PIDFile=/var/run/auto-suspend.pid
+
+[Install]
+WantedBy=multi-user.target

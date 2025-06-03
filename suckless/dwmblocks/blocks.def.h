@@ -11,8 +11,10 @@ static const Block blocks[] = {
 	{"\x02^d^"                     ,"sb-bat",                                  1, 10},
 	// Espacio libre
 	{" \x03^c#D79921^ ^c#FABD2F^" ,"df -h /home | awk '/[0-9]/ {print $4}'", 60, 15},
+	// Icono de la distro
+	{" \x04^c#458588^"             ,"sb-distro-icon",                          0,  0},
 	// Version del kernel
-	{" \x04^c#458588^ ^c#83A598^" ,"uname -r | cut -d '-' -f 1",              0,  0},
+	{" \x04^c#83A598^"             ,"uname -r | cut -d '-' -f 1",              0,  0},
 	// Icono para el volumen
 	{" \x05^c#B16286^"             ,"sb-vol-icon",                             1, 25},
 	// Nivel de volumen
@@ -26,7 +28,7 @@ static const Block blocks[] = {
 	// Indicador Bloq Mayus
 	{"\x09^c#504945^"              ,"sb-bloq",                                 5,  2},
 	// Filtro de luz azul
-	{"\x0b"                        ,"sb-nighttime",                           60,  1},
+	{"\x0b^d^"                     ,"sb-nighttime",                           60,  1},
 	// Contador Pomodoro
 	{"\x08^d^"                     ,"sb-timer",                                1,  0},
 };

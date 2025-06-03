@@ -36,7 +36,8 @@ fi
 # de sudo puedan seguir funcionando
 echo "Instalando doas-sudo-shim..."
 if command -v yay &>/dev/null; then
-	su "$RUSER" -c "yay -Sy --noconfirm --disable-download-timeout --needed doas-sudo-shim"
+	su "$RUSER" -c "yay -Sy --noconfirm --disable-download-timeout --needed \
+		doas-sudo-shim"
 else
 	echo "Error: yay no está instalado." >&2
 	exit 1

@@ -16,7 +16,11 @@ service_add() {
 	if [ "$ID" = "artix" ]; then
 		sudo rc-update -q add "$1" "$2"
 	elif [ "$ID" = "arch" ]; then
-		sudo systemctl enable "$1"
+		if [ "$SERVICE" = "syslog-ng" ]; then
+			sudo systemctl enable "${SERVICE}@default.service"
+		else
+			sudo systemctl enable "$SERVICE"
+		fi
 	fi
 }
 # Activar servicio para el usuario
@@ -31,11 +35,7 @@ user_service_add() {
 				"$HOME/.config/rc/runlevels/$RUNLEVEL/$SERVICE"
 		fi
 	elif [ "$ID" = "arch" ]; then
-		if [ "$SERVICE" = "syslog-ng" ]; then
-			systemctl --user enable "${SERVICE}@default.service"
-		else
-			systemctl --user enable "$SERVICE"
-		fi
+		systemctl --user enable "$SERVICE"
 	fi
 }
 
@@ -50,7 +50,6 @@ SERVICES=(
 )
 
 USER_SERVICES=(
-	"dbus"
 	"pipewire"
 	"pipewire-pulse"
 	"wireplumber"
@@ -58,12 +57,15 @@ USER_SERVICES=(
 
 # Activar los servicios del sistema del runlevel default
 for SERVICE in "${SERVICES[@]}"; do
-	service_add "$SERVICE" default
+	service_add "$SERVICE" default >/dev/null 2>&1
 done
 
-[ "$ID" = "artix" ] && service_add elogind default
+if [ "$ID" = "artix" ]; then
+	service_add elogind default >/dev/null 2>&1
+	user_service_add dbus default >/dev/null 2>&1
+fi
 
 # Activar los servicios del usuario del runlevel default
 for USER_SERVICE in "${USER_SERVICES[@]}"; do
-	user_service_add "$USER_SERVICE" default
+	user_service_add "$USER_SERVICE" default >/dev/null 2>&1
 done

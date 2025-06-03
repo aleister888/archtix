@@ -1,9 +1,7 @@
 #!/bin/sh
 
-COLOR="d79921"
-
 if pgrep redshift >/dev/null 2>&1; then
-	printf "^c#%s^ ^d^ " $COLOR
+	printf "  "
 else
-	printf "^c#%s^ ^d^ " $COLOR
+	printf "  "
 fi

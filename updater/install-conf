@@ -83,7 +83,8 @@ if [ -e /sys/class/power_supply/BAT0 ]; then
 		# Activar el servicio
 		sudo rc-update add auto-suspend default >/dev/null
 	elif [ "$ID" = "arch" ]; then
-		# TODO Implementar autosuspensión para arch también
-		true
+		sudo install -m 555 "$HOME/.dotfiles/assets/system/services/auto-suspend/systemd-service" \
+			/etc/systemd/system/auto-suspend.service
+		sudo systemctl enable auto-suspend
 	fi
 fi
