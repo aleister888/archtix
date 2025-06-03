@@ -36,14 +36,19 @@ case $CHOSEN in
 	sleep 0.17
 	i3lock-fancy-rapid 4 4
 	;;
-"${OPTIONS[1]}") loginctl suspend ;;
+"${OPTIONS[1]}")
+	[ "$ID" = "artix" ] && loginctl suspend
+	[ "$ID" = "arch" ] && systemctl suspend
+	;;
 "${OPTIONS[2]}")
 	HORA=$(obtener_hora)
 	if [ $? -eq 0 ]; then
 		sudo /usr/local/bin/wakeat "$HORA" now
 	fi
 	;;
-"${OPTIONS[3]}") $TERMINAL $TERMTITLE "scratchpad" $TERMEXEC sudo pkill X ;;
+"${OPTIONS[3]}")
+	$TERMINAL $TERMTITLE "scratchpad" $TERMEXEC sudo pkill X
+	;;
 "${OPTIONS[4]}")
 	[ "$ID" = "artix" ] && sudo /usr/bin/openrc-shutdown -r now
 	[ "$ID" = "arch" ] && sudo systemctl reboot
@@ -52,7 +57,15 @@ case $CHOSEN in
 	[ "$ID" = "artix" ] && sudo /usr/bin/openrc-shutdown -p now
 	[ "$ID" = "arch" ] && sudo systemctl poweroff
 	;;
-"${OPTIONS[6]}") loginctl hibernate ;;
-"${OPTIONS[7]}") loginctl reboot --firmware-setup ;;
-"${OPTIONS[8]}") pkill dwm ;;
+"${OPTIONS[6]}")
+	[ "$ID" = "artix" ] && loginctl hibernate
+	[ "$ID" = "arch" ] && systemctl hibernate
+	;;
+"${OPTIONS[7]}")
+	[ "$ID" = "artix" ] && loginctl reboot --firmware-setup
+	[ "$ID" = "arch" ] && systemctl reboot --firmware-setup
+	;;
+"${OPTIONS[8]}")
+	pkill dwm
+	;;
 esac

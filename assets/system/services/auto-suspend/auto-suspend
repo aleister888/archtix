@@ -1,12 +1,17 @@
-#!/bin/sh
+#!/bin/bash
 # Este archivo no se linkea, se instala con install -m 755
 # Al hacer cambios no olvides volverlo a instalar con:
 # sudo install -m 755 "$HOME/.dotfiles/assets/system/auto-suspend" /usr/local/bin/auto-suspend
 
 # Verifica el nivel de batería
-battery_level=$(cat /sys/class/power_supply/BAT0/capacity)
-battery_status=$(cat /sys/class/power_supply/BAT0/status)
+BATTERY_LEVEL=$(cat /sys/class/power_supply/BAT0/capacity)
+BATTERY_STATUS=$(cat /sys/class/power_supply/BAT0/status)
 
-if [ "$battery_status" = "Discharging" ] && [ "$battery_level" -le 10 ]; then
-	/usr/bin/loginctl suspend
+if [ "$BATTERY_STATUS" = "Discharging" ] && [ "$BATTERY_LEVEL" -le 10 ]; then
+	source /etc/os-release
+	if [ "$ID" = "artix" ]; then
+		/usr/bin/loginctl suspend
+	elif [ "$ID" = "arch" ]; then
+		/usr/bin/systemctl suspend
+	fi
 fi
