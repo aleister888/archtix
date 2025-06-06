@@ -1,10 +1,6 @@
-<img src="https://archlinux.org/static/logos/archlinux-logo-dark-90dpi.png" align="left" height="90px" hspace="10px" vspace="0px">
+# ✨ Arch < dotfiles
 
-### Ar(tix|ch) < dotfiles
-
----
-
-Auto-instalador de Artix Linux (OpenRC) con dwm, dmenu y mi configuración personal.
+🛠️ **Auto-instalador para Arch y Artix Linux (OpenRC)** con `dwm`, `st`, `dmenu` y mi configuración personal.
 
 <p float="center">
 <img src="https://raw.githubusercontent.com/aleister888/archtix/refs/heads/main/assets/screenshots/screenshot1.jpg" width="49%" />
@@ -13,40 +9,40 @@ Auto-instalador de Artix Linux (OpenRC) con dwm, dmenu y mi configuración perso
 
 ---
 
-#### Instalación
+#### 🚀 Instalación
 
-- Ejecuta como root:
+🔧 Ejecuta como **root**:
 
 ```bash
 bash <(curl https://raw.githubusercontent.com/aleister888/archtix/main/install.sh)
 ```
 
 > [!NOTE]
-> La instalación toma unos `30-45 minutos` aproximadamente.
+> ⚠️ La instalación toma unos `30-45 minutos` aproximadamente.
 
 ---
 
-#### Características
+#### 🧩 Características
 
-- **LUKS y LVM**: `swap` y `/` encriptados (`/boot` sin encriptar)
-- Compatible solo con **UEFI**.
-- Configuración automática de `Xorg` y `eww` basada en el DPI y la resolución.
-- Entorno limpio y organizado según el estándar [XDG Base Directory](https://wiki.archlinux.org/title/XDG_Base_Directory).
+- 🔐 **LUKS y LVM**: `swap` y `/` encriptados (`/boot` sin encriptar)
+- 💻 Compatible solo con **UEFI**.
+- 🧠 Configuración automática de `Xorg` y `eww` basada en el DPI y la resolución.
+- 📁 Entorno organizado según el estándar [XDG Base Directory](https://wiki.archlinux.org/title/XDG_Base_Directory).
 
 ---
 
-#### Importante: Preparación del disco para encriptación
+#### ⚠️ Preparación del disco para encriptación
 
 > [!CAUTION]
-> Si activas la encriptación, **limpia el disco antes de usar el instalador** para proteger los datos residuales:
+> 📁 Si activas la encriptación, **limpia el disco antes de usar el instalador** para proteger los datos residuales:
 >
 > ```bash
 > dd if=/dev/urandom of=/dev/sdX
 > ```
 >
-> Este proceso puede tardar horas según el tamaño del disco.
+> 🕒 Este proceso puede tardar horas según el tamaño del disco.
 
-##### Alternativa
+##### 💡 Alternativa
 
 Tras la instalación, llena el espacio con un archivo temporal:
 
@@ -54,13 +50,13 @@ Tras la instalación, llena el espacio con un archivo temporal:
 dd if=/dev/zero of=/home/usuario/archivo
 ```
 
-Más detalles en: [Arch Wiki - dm-crypt](https://wiki.archlinux.org/title/Dm-crypt/Drive_preparation)
+📚 Más detalles en: [Arch Wiki - dm-crypt](https://wiki.archlinux.org/title/Dm-crypt/Drive_preparation)
 
 ---
 
-#### Créditos y Referencias
+#### 🙏 Créditos y Referencias
 
 Agradecimientos especiales a:
 
-- [Luke Smith](https://github.com/LukeSmithxyz) por la inspiración y sus scripts.
-- [suckless.org](https://suckless.org) por las herramientas utilizadas.
+- 👤 [Luke Smith](https://github.com/LukeSmithxyz) por la inspiración y sus scripts.
+- 🧪 [suckless.org](https://suckless.org) por las herramientas utilizadas (`dwm`, `dmenu`, etc).

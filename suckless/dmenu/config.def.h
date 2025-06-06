@@ -6,9 +6,9 @@ static int centered = 0;
 static int min_width = 500;
 
 static const char *fonts[] = {
-	"Iosevka Term SS05:pixelsize=24",
-	"Symbols Nerd Font Mono:pixelsize=20:antialias=true:autohint=true",
-	"Noto Color Emoji:pixelsize=24:regular"
+	"Iosevka Term SS05:pixelsize=26",
+	"Symbols Nerd Font Mono:pixelsize=22:antialias=true:autohint=true",
+	"Noto Color Emoji:pixelsize=26:regular"
 };
 
 static const char *prompt = NULL;
