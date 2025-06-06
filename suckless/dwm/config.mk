@@ -27,7 +27,7 @@ LIBS = -L${X11LIB} -lX11 ${XINERAMALIBS} \
 # Opciones de compilación
 CPPFLAGS = -DVERSION=\"${VERSION}\" ${XINERAMAFLAGS} -D_GNU_SOURCE
 CFLAGS = -march=native -flto=auto -O3 -Os ${INCS} ${CPPFLAGS} \
-	 -pipe -std=c99 -pedantic -Wall -Wno-deprecated-declarations -Wno-unused-function
+	 -pipe -std=c99 -pedantic -Wall -Wno-deprecated-declarations
 LDFLAGS = ${LIBS}
 
 # Compliador y enlazador

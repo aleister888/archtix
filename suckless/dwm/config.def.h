@@ -30,9 +30,9 @@ static const int ulineall              = 0;   // 1 == Barra solo en las etiqueta
 static const unsigned int ulinepad     = 4;   // Margen horizontal de la barra de selección
 static const unsigned int ulinestroke  = 3;   // Grosor/altura de la barra de selección
 static const unsigned int ulinevoffset = 3;   // Margen vertical de la barra de selección
-static const unsigned int gappih       = 10;  // Espacio interior horizontal entre ventanas
-static const unsigned int gappiv       = 10;  // Espacio interior vertical entre ventanas
-static const unsigned int gappoh       = 20;  // Espacio exterior horizontal entre ventanas y borde de la pantalla
+static const unsigned int gappih       = 15;  // Espacio interior horizontal entre ventanas
+static const unsigned int gappiv       = 15;  // Espacio interior vertical entre ventanas
+static const unsigned int gappoh       = 30;  // Espacio exterior horizontal entre ventanas y borde de la pantalla
 static const unsigned int gappov       = 30;  // Espacio exterior vertical entre ventanas y borde de la pantalla
 static       int smartgaps             = 0;   // 1 == Sin espacio exterior si hay solo una ventana
 
@@ -48,7 +48,13 @@ static const char col_blue[]       = "#83A598";
 static const char col_purple[]     = "#D3869B";
 
 // Nombre de los espacios cuando están vacíos y cuando tienen ventanas:
-static const char *tags[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "a", "b", "c", "d", "e", "f"};
+static const char *tags[] = {
+	"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "a", "b", "c", "d", "e", "f"
+};
+
+static const int taglayouts[] = {
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+};
 
 static const char *colors[][3] = {
 	// Colores:             Fuente      Fondo           Borde
@@ -139,19 +145,13 @@ static const Layout layouts[] = {
 	{ "><>",      NULL }, /* no layout function means floating behavior */
 	{ "H[]",      deck },
 
-	{ "|M|",      centeredmaster },
-	{ "TTT",      bstack },
 	{ "[@]",      spiral },
-
-	{ ">M>",      centeredfloatingmaster },
-	{ "===",      bstackhoriz },
-	{ "[\\]",     dwindle },
-
 	{ ":::",      gaplessgrid },
-	{ "###",      nrowgrid },
+	{ "|M|",      centeredmaster },
 
+	{ "[\\]",     dwindle },
 	{ "HHH",      grid },
-	{ "---",      horizgrid },
+	{ "TTT",      bstack },
 
 	{ NULL,       NULL },
 };
@@ -285,6 +285,9 @@ static const Key keys[] = {
 	// Mostrar/Ocultar barra
 	{ MODKEY,                       XK_b,      togglebar,        {0} },
 
+	// Mostrar/Ocultar márgenes
+	{ MODKEY|ShiftMask,             XK_b,      togglegaps,       {0} },
+
 	// Cambiar de espacio
 	{ MODKEY,                       XK_q,      shiftviewclients, { .i = -1 } },
 	{ MODKEY,                       XK_w,      shiftviewclients, { .i = +1 } },
@@ -337,12 +340,6 @@ static const Key keys[] = {
 	{ MODKEY|ShiftMask,       XK_KP_Home,      setlayout,        {.v = &layouts[7]} },
 	{ MODKEY|ShiftMask,         XK_KP_Up,      setlayout,        {.v = &layouts[8]} },
 	{ MODKEY|ShiftMask,      XK_KP_Prior,      setlayout,        {.v = &layouts[9]} },
-
-	{ MODKEY,               XK_KP_Divide,      setlayout,       {.v = &layouts[10]} },
-	{ MODKEY,             XK_KP_Multiply,      setlayout,       {.v = &layouts[11]} },
-
-	{ MODKEY|ShiftMask,     XK_KP_Divide,      setlayout,       {.v = &layouts[12]} },
-	{ MODKEY|ShiftMask,   XK_KP_Multiply,      setlayout,       {.v = &layouts[13]} },
 
 	// Teclas para cada espacio
 	TAGKEYS(                        XK_1,                        0)

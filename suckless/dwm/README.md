@@ -8,6 +8,7 @@ Puedes consultar los atajos de teclado leyendo el código en `config.def.h` (`st
 
 - Al iniciar dwm se ejecuta un script que inicia el entorno de escritorio: [dwm-autostart-20210120-cb3f58a.diff](http://dwm.suckless.org/patches/autostart/dwm-autostart-20210120-cb3f58a.diff)
 - Espacio entre las ventanas: [dwm-vanitygaps-6.2.diff](https://dwm.suckless.org/patches/vanitygaps/dwm-vanitygaps-6.2.diff)
+- Un layout predeterminado para cada tag [dwm-taglayouts-6.4.diff](https://dwm.suckless.org/patches/taglayouts/dwm-taglayouts-6.4.diff)
 - Las ventanas se mantienen en su espacio al reiniciar dwm: [dwm-preserveonrestart-6.3.diff](http://dwm.suckless.org/patches/preserveonrestart/dwm-preserveonrestart-6.3.diff)
 - Los ajustes de ventana son para cada espacio en vez de globales [dwm-pertag-20200914-61bb8b2.diff](http://dwm.suckless.org/patches/pertag/dwm-pertag-20200914-61bb8b2.diff)
 - Las ventanas se pueden re-dimensionar desde cualquiera de sus cuatro esquinas: [dwm-resizecorners-6.3.diff](https://github.com/bakkeby/patches/blob/master/dwm/dwm-resizecorners-6.3.diff)
