@@ -5,11 +5,11 @@
  *
  * font: see http://freedesktop.org/software/fontconfig/fontconfig-user.html
  */
-static char *font = "Iosevka Term SS05:pixelsize=20:antialias=true:autohint=true";
+static char *font = "Iosevka Term SS05:pixelsize=22:antialias=true:autohint=true";
 /* Spare fonts */
 static char *font2[] = {
-	"Symbols Nerd Font Mono:style=Regular:pixelsize=16:antialias=true:autohint=true",
-	"Noto Color Emoji:pixelsize=16:regular",
+	"Symbols Nerd Font Mono:style=Regular:pixelsize=18:antialias=true:autohint=true",
+	"Noto Color Emoji:pixelsize=18:regular",
 };
 
 static int borderpx = 0;

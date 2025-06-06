@@ -38,7 +38,7 @@ cmd open ${{
 			setsid -f libreoffice "$fx" 2>/dev/null ;;
 		*/pdf | */epub* | */vnd.comicbook*)
 			zathura "$f" 2>/dev/null ;;
-		text/* | */xml | */json | inode/x-empty | */x-shellscript | */x-desktop | */yaml | */sql)
+		text/* | */xml | */json | inode/x-empty | */x-shellscript | */x-desktop | */yaml | */sql | */x-php)
 			$EDITOR "$fx" ;;
 		image/x-eps)
 			HASH="$(stat --printf '%n\0%i\0%F\0%s\0%W\0%Y' -- "$(readlink -f "$f")" | sha256sum | awk '{print $1}')"

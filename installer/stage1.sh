@@ -346,12 +346,12 @@ calculate_dpi() {
 	"1080p")
 		WIDTH=1920
 		HEIGHT=1080
-		FACT="0.6"
+		FACT="0.75"
 		;;
 	"1440p")
 		WIDTH=2560
 		HEIGHT=1440
-		FACT="0.6"
+		FACT="1"
 		;;
 	"2160p")
 		WIDTH=3840

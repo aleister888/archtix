@@ -1,15 +1,6 @@
 Xcursor.theme: capitaine-cursors
 Xcursor.size: 64
 
-xmenu.font: Iosevka SS05:size=12
-xmenu.border: #545454
-xmenu.separator: #282828
-xmenu.selbackground: #222222
-xmenu.gap: 4
-xmenu.width: 64
-xmenu.height: 36
-xmenu.borderWidth: 4
-
 *background: #282828
 *foreground: #ebdbb2
 *color0:  #665C54

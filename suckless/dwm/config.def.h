@@ -8,9 +8,9 @@
 #define BROWSER "firefox" // Navegador Web
 
 static const char *fonts[] = {
-	"Symbols Nerd Font Mono:pixelsize=22:antialias=true:autohint=true",
-	"Iosevka Fixed SS05:pixelsize=22:bold",
-	"Noto Color Emoji:pixelsize=20:regular"
+	"Symbols Nerd Font Mono:pixelsize=24:antialias=true:autohint=true",
+	"Iosevka Fixed SS05:pixelsize=24:bold",
+	"Noto Color Emoji:pixelsize=22:regular"
 };
 
 static const unsigned int borderpx     = 3;   // Borde de las ventanas
@@ -26,6 +26,18 @@ static const float mfact               = 0.5; // Factor de escalado master [0.05
 static const int nmaster               = 1;   // Número de clientes en master
 static const int resizehints           = 1;   // ¿Respetar pistas de dibujado?
 static const int lockfullscreen        = 1;   // 1 == Fuerza el foco en las ventanas en pantalla completa
+static const int ulineall              = 0;   // 1 == Barra solo en las etiquetas activas, 0 == En todas las etiquetas
+static const unsigned int ulinepad     = 4;   // Margen horizontal de la barra de selección
+static const unsigned int ulinestroke  = 3;   // Grosor/altura de la barra de selección
+static const unsigned int ulinevoffset = 3;   // Margen vertical de la barra de selección
+static const unsigned int gappih       = 10;  // Espacio interior horizontal entre ventanas
+static const unsigned int gappiv       = 10;  // Espacio interior vertical entre ventanas
+static const unsigned int gappoh       = 20;  // Espacio exterior horizontal entre ventanas y borde de la pantalla
+static const unsigned int gappov       = 30;  // Espacio exterior vertical entre ventanas y borde de la pantalla
+static       int smartgaps             = 0;   // 1 == Sin espacio exterior si hay solo una ventana
+
+#define FORCE_VSPLIT 1  /* nrowgrid layout: force two clients to always split vertically */
+#include "vanitygaps.c"
 
 static const char background[]     = "#282828";
 static const char background_sel[] = "#3c3836";
@@ -52,6 +64,7 @@ typedef struct {
 	const char *name;
 	const void *cmd;
 } Sp;
+
 
 static const Rule rules[] = {
 	// Clase, Instancia y Título. Tag, ><>, Full, Term, Swallow, Mon, Scratch
@@ -119,16 +132,28 @@ static const Rule rules[] = {
 	{ NULL,  NULL,   "Media viewer",             0,  1,  0,  0,  0,  -1,    0 },
 };
 
-#include "layouts.c" // Código con los layouts
-
 static const Layout layouts[] = {
-	{ "[]=", tile },
-	{ "[M]", monocle },
-	{ "><>", NULL },
-	{ "[S]", stairs },
-	{ "[D]", deck },
-	{ "|M|", centeredmaster },
-	{ "|||", col },
+	{ "[]=",      tile },
+	{ "[M]",      monocle },
+
+	{ "><>",      NULL }, /* no layout function means floating behavior */
+	{ "H[]",      deck },
+
+	{ "|M|",      centeredmaster },
+	{ "TTT",      bstack },
+	{ "[@]",      spiral },
+
+	{ ">M>",      centeredfloatingmaster },
+	{ "===",      bstackhoriz },
+	{ "[\\]",     dwindle },
+
+	{ ":::",      gaplessgrid },
+	{ "###",      nrowgrid },
+
+	{ "HHH",      grid },
+	{ "---",      horizgrid },
+
+	{ NULL,       NULL },
 };
 
 #define MODKEY Mod1Mask // Alt como modificador
@@ -156,7 +181,6 @@ static const char *dmenucmd[] = { "dmenu_run",
 "-nf", foreground, "-sb", background_sel,
 "-sf", foreground, "-c","-l", DLINES, NULL };
 static const char *termcmd[]  = { TERM, NULL };      // Terminal
-static const char *layoutmenu_cmd = "layoutmenu.sh"; // Script para cambiar el layout
 static const char *scratchpadcmd[] = { "s", NULL };  // Tecla para los scratchpads
 static const char *spawnscratchpadcmd[] = { TERM, TERMT, "scratchpad", NULL }; // Comando para invocar un scratchpad
 
@@ -278,8 +302,6 @@ static const Key keys[] = {
 	{ MODKEY|ControlMask,           XK_u,      setmfact,         {.f = -0.075} },
 	{ MODKEY,                       XK_i,      setmfact,         {.f = +0.025} },
 	{ MODKEY|ControlMask,           XK_i,      setmfact,         {.f = +0.075} },
-	{ MODKEY|ShiftMask,             XK_u,      setcfact,         {.f = -0.25} },
-	{ MODKEY|ShiftMask,             XK_i,      setcfact,         {.f = +0.25} },
 
 	// Cerrar aplicación
 	{ MODKEY|ShiftMask,             XK_q,      killclient,       {0} },
@@ -302,17 +324,25 @@ static const Key keys[] = {
 	{ MODKEY|ControlMask,           XK_s,      togglesticky,     {0} },
 
 	// Cambiar la distribución de las ventanas
-	{ MODKEY,                       XK_e,      setlayout,        {.v = &layouts[0]} }, // Por defecto
-	{ MODKEY|ShiftMask,             XK_e,      setlayout,        {.v = &layouts[1]} }, // Una ventana
-	{ MODKEY,                       XK_r,      setlayout,        {.v = &layouts[2]} }, // Ventanas flotantes
-	{ MODKEY,                 XK_KP_Home,      setlayout,        {.v = &layouts[3]} }, // Stairs  (Teclado numérico)
-	{ MODKEY|ShiftMask,       XK_KP_Home,      setlayout,        {.v = &layouts[4]} }, // Deck    (Thinkpad)
-	{ MODKEY,                   XK_KP_Up,      setlayout,        {.v = &layouts[5]} }, // Cmaster (Teclado numérico)
-	{ MODKEY|ShiftMask,         XK_KP_Up,      setlayout,        {.v = &layouts[6]} }, // Columns (Teclado numérico)
-	{ MODKEY,                    XK_Home,      setlayout,        {.v = &layouts[3]} }, // Stairs  (Thinkpad)
-	{ MODKEY|ShiftMask,          XK_Home,      setlayout,        {.v = &layouts[4]} }, // Deck    (Thinkpad)
-	{ MODKEY,                     XK_End,      setlayout,        {.v = &layouts[5]} }, // Cmaster (Thinkpad)
-	{ MODKEY|ShiftMask,           XK_End,      setlayout,        {.v = &layouts[6]} }, // Columns (Thinkpad)
+	{ MODKEY,                       XK_e,      setlayout,        {.v = &layouts[0]} },
+	{ MODKEY|ShiftMask,             XK_e,      setlayout,        {.v = &layouts[1]} },
+
+	{ MODKEY,                       XK_r,      setlayout,        {.v = &layouts[2]} },
+	{ MODKEY|ShiftMask,             XK_r,      setlayout,        {.v = &layouts[3]} },
+
+	{ MODKEY,                 XK_KP_Home,      setlayout,        {.v = &layouts[4]} },
+	{ MODKEY,                   XK_KP_Up,      setlayout,        {.v = &layouts[5]} },
+	{ MODKEY,                XK_KP_Prior,      setlayout,        {.v = &layouts[6]} },
+
+	{ MODKEY|ShiftMask,       XK_KP_Home,      setlayout,        {.v = &layouts[7]} },
+	{ MODKEY|ShiftMask,         XK_KP_Up,      setlayout,        {.v = &layouts[8]} },
+	{ MODKEY|ShiftMask,      XK_KP_Prior,      setlayout,        {.v = &layouts[9]} },
+
+	{ MODKEY,               XK_KP_Divide,      setlayout,       {.v = &layouts[10]} },
+	{ MODKEY,             XK_KP_Multiply,      setlayout,       {.v = &layouts[11]} },
+
+	{ MODKEY|ShiftMask,     XK_KP_Divide,      setlayout,       {.v = &layouts[12]} },
+	{ MODKEY|ShiftMask,   XK_KP_Multiply,      setlayout,       {.v = &layouts[13]} },
 
 	// Teclas para cada espacio
 	TAGKEYS(                        XK_1,                        0)
@@ -345,9 +375,6 @@ static const Key keys[] = {
 
 static const Button buttons[] = {
 	// Click                Combinación     Botón           Función         Argumento
-	{ ClkLtSymbol,          0,              Button1,        layoutmenu,     {0} },
-	{ ClkLtSymbol,          0,              Button2,        layoutmenu,     {0} },
-	{ ClkLtSymbol,          0,              Button3,        layoutmenu,     {0} },
 	{ ClkStatusText,        0,              Button1,        spawn,          {.v = statuscmd } },
 	{ ClkClientWin,         MODKEY|ControlMask,Button1,     movemouse,      {0} },
 	{ ClkClientWin,         MODKEY|ControlMask,Button2,     togglefloating, {0} },

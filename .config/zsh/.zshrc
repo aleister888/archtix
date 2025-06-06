@@ -67,7 +67,7 @@ printf '\033[?1h\033=' >/dev/tty
 if [ "$ID" = "artix" ]; then
 	fastfetch -c screenfetch -l artix2_small
 elif [ "$ID" = "arch" ]; then
-	fastfetch -c screenfetch
+	fastfetch -c screenfetch -l arch3
 fi
 
 source "$HOME/.profile"
