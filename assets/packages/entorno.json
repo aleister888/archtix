@@ -49,7 +49,6 @@
     "eza",
     "ffmpegthumbnailer",
     "fzf",
-    "extra/gnuplot",
     "odt2txt",
     "pamixer",
     "parallel",
@@ -59,6 +58,11 @@
     "shellcheck-bin",
     "stow",
     "tree"
+  ],
+  "gnuplot": [
+    "extra/gnuplot",
+    "extra/wxwidgets-common",
+    "extra/wxwidgets-gtk3"
   ],
   "bandeja_sistema": [
     "network-manager-applet",
