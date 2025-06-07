@@ -81,7 +81,7 @@ if echo "$(
 fi
 
 # Filtro de luz azul
-redshift -l 40.42:-3.70 -t 5700:4600 -b 1:0.8 -m randr -v &
+pgrep redshift || redshift -l 40.42:-3.70 -t 5700:4600 -b 1:0.8 -m randr -v &
 
 pgrep dunst || dunst &               # Notificaciones
 pgrep udiskie || udiskie -t -a &     # Auto-montador de discos
