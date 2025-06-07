@@ -36,7 +36,6 @@ static const unsigned int gappoh       = 30;  // Espacio exterior horizontal ent
 static const unsigned int gappov       = 30;  // Espacio exterior vertical entre ventanas y borde de la pantalla
 static       int smartgaps             = 0;   // 1 == Sin espacio exterior si hay solo una ventana
 
-#define FORCE_VSPLIT 1  /* nrowgrid layout: force two clients to always split vertically */
 #include "vanitygaps.c"
 
 static const char background[]     = "#282828";
@@ -49,11 +48,26 @@ static const char col_purple[]     = "#D3869B";
 
 // Nombre de los espacios cuando están vacíos y cuando tienen ventanas:
 static const char *tags[] = {
-	"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "a", "b", "c", "d", "e", "f"
-};
-
+	"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "a", "b", "c", "d", "e", "f" };
 static const int taglayouts[] = {
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+	  0,   0,   0,   0,   1,   0,   1,   0,   0,    0,    0,    0,   0,   0,   0,   0,   0,   0 };
+
+static const Layout layouts[] = {
+	{ "[]=",      tile },
+	{ "[M]",      monocle },
+
+	{ "><>",      NULL }, /* no layout function means floating behavior */
+	{ "H[]",      deck },
+
+	{ "[@]",      spiral },
+	{ ":::",      gaplessgrid },
+	{ "|M|",      centeredmaster },
+
+	{ "[\\]",     dwindle },
+	{ "HHH",      grid },
+	{ "TTT",      bstack },
+
+	{ NULL,       NULL },
 };
 
 static const char *colors[][3] = {
@@ -136,24 +150,6 @@ static const Rule rules[] = {
 	{ TERMC,                   NULL,  NULL,      0,  0,  0,  1,  0,  -1,    0 },
 	{ NULL,  NULL,     "scratchpad",             0,  1,  0,  1,  0,  -1,  's' },
 	{ NULL,  NULL,   "Media viewer",             0,  1,  0,  0,  0,  -1,    0 },
-};
-
-static const Layout layouts[] = {
-	{ "[]=",      tile },
-	{ "[M]",      monocle },
-
-	{ "><>",      NULL }, /* no layout function means floating behavior */
-	{ "H[]",      deck },
-
-	{ "[@]",      spiral },
-	{ ":::",      gaplessgrid },
-	{ "|M|",      centeredmaster },
-
-	{ "[\\]",     dwindle },
-	{ "HHH",      grid },
-	{ "TTT",      bstack },
-
-	{ NULL,       NULL },
 };
 
 #define MODKEY Mod1Mask // Alt como modificador
