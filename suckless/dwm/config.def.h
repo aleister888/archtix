@@ -50,7 +50,7 @@ static const char col_purple[]     = "#D3869B";
 static const char *tags[] = {
 	"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "a", "b", "c", "d", "e", "f" };
 static const int taglayouts[] = {
-	  0,   0,   0,   0,   1,   0,   1,   0,   0,    0,    0,    0,   0,   0,   0,   0,   0,   0 };
+	  0,   0,   1,   0,   1,   0,   1,   0,   0,    0,    0,    0,   0,   0,   0,   0,   0,   0 };
 
 static const Layout layouts[] = {
 	{ "[]=",      tile },
@@ -250,8 +250,10 @@ static const Key keys[] = {
 	// Cambiar volumen
 	{ 0,         XF86XK_AudioLowerVolume,      spawn,            SHCMD("volinc -5; pkill -RTMIN+25 dwmblocks") },
 	{ MODKEY,                       XK_n,      spawn,            SHCMD("volinc -10; pkill -RTMIN+25 dwmblocks") },
+	{ MODKEY,               XK_KP_Divide,      spawn,            SHCMD("volinc -10; pkill -RTMIN+25 dwmblocks") },
 	{ 0,         XF86XK_AudioRaiseVolume,      spawn,            SHCMD("volinc 5; pkill -RTMIN+25 dwmblocks") },
 	{ MODKEY,                       XK_m,      spawn,            SHCMD("volinc 10; pkill -RTMIN+25 dwmblocks") },
+	{ MODKEY,             XK_KP_Multiply,      spawn,            SHCMD("volinc 10; pkill -RTMIN+25 dwmblocks") },
 	{ 0,                XF86XK_AudioMute,      spawn,            SHCMD("pactl set-sink-mute @DEFAULT_SINK@ toggle; pkill -RTMIN+25 dwmblocks") },
 	{ MODKEY|ControlMask,           XK_n,      spawn,            SHCMD("pactl set-sink-mute @DEFAULT_SINK@ toggle; pkill -RTMIN+25 dwmblocks") },
 	{ MODKEY|ControlMask,           XK_m,      spawn,            SHCMD("pactl set-sink-mute @DEFAULT_SINK@ toggle; pkill -RTMIN+25 dwmblocks") },

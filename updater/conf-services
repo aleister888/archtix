@@ -62,6 +62,9 @@ done
 
 if [ "$ID" = "artix" ]; then
 	service_add elogind default >/dev/null 2>&1
+	service_add local default >/dev/null 2>&1
+	service_add localmount default >/dev/null 2>&1
+	service_add netmount default >/dev/null 2>&1
 	user_service_add dbus default >/dev/null 2>&1
 fi
 
