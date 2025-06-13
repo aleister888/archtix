@@ -32,7 +32,7 @@ xhost +SI:localuser:root
 #############
 
 virtualmic() {
-	sleep 15 # Esperamos 10 segundos para que se carguen los sinks reales
+	sleep 15 # Esperamos 15 segundos para que se carguen los sinks reales
 	# Contador para evitar bucles infinitos
 	local COUNTER=0
 	# Salir si se encuentra el sink
@@ -98,17 +98,18 @@ if [ -x /usr/bin/joycond-cemuhook ] && ! pgrep -f joycond-cemuhook; then
 	/usr/bin/joycond-cemuhook &
 fi
 
-# Corregir el nivel del micrófono en portátiles
-if [ -e /sys/class/power_supply/BAT0 ]; then
-	MIC=$(pactl list short sources |
-		grep -E "alsa_input.pci-[0-9]*_[0-9]*_[0-9].\.[0-9].analog-stereo" |
-		awk '{print $1}')
-	pactl set-source-volume "$MIC" 40%
-fi
-
 # Esperar a que se incie wireplumber para activar el micrófono virtual
 # (Para compartir el audio de las aplicaciones através del micrófono)
 virtualmic &
+
+# Corregir el nivel del micrófono en portátiles
+if [ -e /sys/class/power_supply/BAT0 ]; then
+	sleep 15 # Esperamos 15 segundos para que se carguen los sinks reales
+	MIC=$(pactl list short sources |
+		grep -E "alsa_input.pci-[0-9]*_[0-9]*_[0-9].\.[0-9].analog-stereo" |
+		awk '{print $1}')
+	pactl set-source-volume "$MIC" 25%
+fi &
 
 # Servidor VNC Local (Solo para equipos que no lleven batería)
 if [ ! -e /sys/class/power_supply/BAT0 ]; then
