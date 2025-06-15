@@ -44,7 +44,6 @@ cmd open ${{
 			HASH="$(stat --printf '%n\0%i\0%F\0%s\0%W\0%Y' -- "$(readlink -f "$f")" | sha256sum | awk '{print $1}')"
 			CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/lf/thumb.$HASH"
 			[ ! -f "$CACHE.jpg" ] && gs -dSAFER -dBATCH -dNOPAUSE -sDEVICE=jpeg -r300 -dEPSCrop -sOutputFile="$CACHE.jpg" "$f" >/dev/null 2>&1
-			sleep "0.25s"
 			setsid -f nsxiv "$CACHE.jpg" 2>/dev/null
 			;;
 		image/*)

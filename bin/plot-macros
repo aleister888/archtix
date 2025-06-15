@@ -15,12 +15,15 @@ read -r CAL_TARGET FAT_TARGET CARB_TARGET PROT_TARGET < <(tail -n +2 "$TARGET_MA
 	awk -F',' '{gsub(/g/, "", $2); gsub(/g/, "", $3); gsub(/g/, "", $4); print $1,$2,$3,$4}')
 
 declare -A DAILY_DATA
-while IFS=',' read -r DATE _ _ _ CAL FAT_ CARBS PROT; do
+while IFS=',' read -r DATE _ _ _ CAL FAT_ CARBS PROT STATUS NOTES; do
 	# Limpiar espacios
 	CAL=${CAL//[[:space:]]/}
 	FAT_=${FAT_//[[:space:]]/}
 	CARBS=${CARBS//[[:space:]]/}
 	PROT=${PROT//[[:space:]]/}
+
+	# Nos saltamos las comidas "nolog"
+	[[ "$STATUS" = "nolog" ]] && continue
 
 	# Leer valores previos con valores por defecto
 	IFS=',' read -r OLD_CAL OLD_FAT OLD_CARBS OLD_PROT <<<"${DAILY_DATA[$DATE]-0,0,0,0}"

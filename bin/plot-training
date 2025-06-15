@@ -53,7 +53,7 @@ process_csv() {
 		[[ -z "$W" || -z "$R" ]] && continue
 		[[ -n "$W" && -n "$R" ]] && VOLUME=$(echo "scale=0; $W * $R / 1" | bc) || VOLUME=0
 		# Nos saltamos las series con "warm" o "nolog"
-		[[ "$STATUS" = warm || "$STATUS" = "nolog" ]] && continue
+		[[ "$STATUS" = "warm" || "$STATUS" = "nolog" ]] && continue
 
 		# Si no hay RPE, asignamos el valor por defecto
 		RPE="${RPE:-$DEFAULT_RPE}"
