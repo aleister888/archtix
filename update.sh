@@ -215,9 +215,9 @@ if [ ! -e "$CONF_DIR/qt5ct/qt5ct.conf" ] ||
 	EOF
 fi
 
-#############################
-# Ocultar archivos .desktop #
-#############################
+#####################
+# Archivos .desktop #
+#####################
 
 [ -d /usr/local/share/applications ] ||
 	sudo mkdir -p /usr/local/share/applications
@@ -265,6 +265,10 @@ for ENTRY in "${DESKTOPENT[@]}"; do
 			"/usr/local/share/applications/$ENTRY.desktop"
 	fi
 done >/dev/null &
+
+# Copiamos archivos .desktop
+cp -f "$ASSETDIR/desktop/rdp.desktop" \
+	"${XDG_DATA_HOME:-$HOME/.local/share}/applications/rdp.desktop"
 
 ####################################
 # Actualizar iconos y colores (lf) #

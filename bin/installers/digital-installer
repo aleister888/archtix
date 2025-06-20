@@ -4,6 +4,7 @@
 
 INSTALL_DIR="$HOME/.local/opt/Digital"
 RUN_SCRIPT="$HOME/.local/bin/digital"
+DESKTOP_FILE="$HOME/.local/share/applications/digital.desktop"
 
 install() {
 	local REPO REPLY DOWNLOAD_URL FILENAME ZIP_LOCATION
@@ -28,11 +29,26 @@ install() {
 		$INSTALL_DIR/Digital.sh
 	EOF
 	chmod +x "$RUN_SCRIPT"
+
+	cat <<-EOF >"$DESKTOP_FILE"
+		[Desktop Entry]
+		Type=Application
+		Name=Digital
+		Comment=Easy-to-use digital logic designer and circuit simulator
+		Exec=$RUN_SCRIPT
+		Icon=$INSTALL_DIR/icon.svg
+		Categories=Education;Electronics;
+		MimeType=text/x-digital;
+		Terminal=false
+		Keywords=simulator;digital;circuits;
+	EOF
+
 }
 
 uninstall() {
 	rm -rf "$INSTALL_DIR"
 	rm -f "$RUN_SCRIPT"
+	rm -f "$DESKTOP_FILE"
 }
 
 clean() {

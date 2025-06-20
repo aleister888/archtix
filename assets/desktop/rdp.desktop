@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Conexión RDP a Servidor
+Comment=Conectarse a escritorio remoto vía RDP
+Exec=rdp-connect
+Icon=network-workgroup
+Terminal=false
+Type=Application
+Categories=Network;

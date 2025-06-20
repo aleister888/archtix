@@ -49,11 +49,11 @@ process_csv() {
 
 	for ROW in "${ALL_ROWS[@]}"; do
 		IFS=',' read -r DATE W R RPE STATUS NOTES <<<"$ROW"
+		# Nos saltamos las series con "warm" o "nolog"
+		[[ "$STATUS" = "warm" || "$STATUS" = "nolog" ]] && continue
 		# Nos saltamos las entradas que no tienen anotado el peso o las repeticiones
 		[[ -z "$W" || -z "$R" ]] && continue
 		[[ -n "$W" && -n "$R" ]] && VOLUME=$(echo "scale=0; $W * $R / 1" | bc) || VOLUME=0
-		# Nos saltamos las series con "warm" o "nolog"
-		[[ "$STATUS" = "warm" || "$STATUS" = "nolog" ]] && continue
 
 		# Si no hay RPE, asignamos el valor por defecto
 		RPE="${RPE:-$DEFAULT_RPE}"

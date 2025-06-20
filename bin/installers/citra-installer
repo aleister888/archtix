@@ -2,8 +2,9 @@
 
 # Script para instalar/desinstalar Citra
 
-INSTALL_DIR="$HOME/.local/opt/Citra"
-RUN_SCRIPT="$HOME/.local/bin/citra"
+INSTALL_DIR="$HOME/.local/opt/Azahar"
+RUN_SCRIPT="$HOME/.local/bin/azahar"
+DESKTOP_FILE="$HOME/.local/share/applications/azahar.desktop"
 DS_TOOL="$HOME/.local/bin/3dstool"
 
 install_3dstool() {
@@ -56,6 +57,23 @@ install() {
 	EOF
 	chmod +x "$RUN_SCRIPT"
 
+	cat <<-EOF >"$DESKTOP_FILE"
+		[Desktop Entry]
+		Version=1.0
+		Type=Application
+		Name=Azahar
+		GenericName=3DS Emulator
+		GenericName[fr]=Émulateur 3DS
+		Comment=Nintendo 3DS video game console emulator
+		Comment[fr]=Émulateur de console de jeu Nintendo 3DS
+		Icon=$INSTALL_DIR/usr/share/icons/hicolor/scalable/apps/org.azahar_emu.Azahar.svg
+		TryExec=$RUN_SCRIPT
+		Exec=azahar %f
+		Categories=Game;Emulator;
+		MimeType=application/x-ctr-3dsx;application/x-ctr-cci;application/x-ctr-cia;application/x-ctr-cxi;
+		Keywords=3DS;Nintendo;
+	EOF
+
 	install_3dstool
 }
 
@@ -63,6 +81,7 @@ uninstall() {
 	rm -rf "$INSTALL_DIR"
 	rm -f "$RUN_SCRIPT"
 	rm -f "$DS_TOOL"
+	rm -f "$DESKTOP_FILE"
 	yay --noconfirm -Rcns projectctr-makerom-bin ctrtool
 }
 

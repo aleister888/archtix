@@ -4,6 +4,7 @@
 
 INSTALL_DIR="$HOME/.local/opt/eclipse"
 RUN_SCRIPT="$HOME/.local/bin/eclipse"
+DESKTOP_FILE="$HOME/.local/share/applications/eclipse.desktop"
 
 install() {
 	VERSION_URL="https://www.eclipse.org/downloads/packages/"
@@ -44,11 +45,25 @@ install() {
 		rm -rf $HOME/.p2
 	EOF
 	chmod +x "$RUN_SCRIPT"
+
+	cat <<-EOF >"$DESKTOP_FILE"
+		[Desktop Entry]
+		Name=Eclipse IDE
+		Type=Application
+		Exec=$RUN_SCRIPT
+		Terminal=false
+		Icon=$INSTALL_DIR/icon.xpm
+		Comment=Integrated Development Environment
+		Categories=Development;IDE;
+		StartupWMClass=Eclipse
+	EOF
+
 }
 
 uninstall() {
 	rm -rf "$INSTALL_DIR"
 	rm -f "$RUN_SCRIPT"
+	rm -f "$DESKTOP_FILE"
 }
 
 clean() {
