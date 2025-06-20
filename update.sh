@@ -267,7 +267,7 @@ for ENTRY in "${DESKTOPENT[@]}"; do
 done >/dev/null &
 
 # Copiamos archivos .desktop
-cp -f "$ASSETDIR/desktop/rdp.desktop" \
+cp -f "$HOME/.dotfiles/assets/desktop/rdp.desktop" \
 	"${XDG_DATA_HOME:-$HOME/.local/share}/applications/rdp.desktop"
 
 ####################################
