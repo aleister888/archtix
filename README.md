@@ -67,3 +67,4 @@ Agradecimientos especiales a:
 - Configurar SDDM
 - Configurar una barra de estado
 - Comprobaciones y limpieza de la transición
+- Añadir window swallowing
