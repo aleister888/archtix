@@ -8,10 +8,5 @@ BATTERY_LEVEL=$(cat /sys/class/power_supply/BAT0/capacity)
 BATTERY_STATUS=$(cat /sys/class/power_supply/BAT0/status)
 
 if [ "$BATTERY_STATUS" = "Discharging" ] && [ "$BATTERY_LEVEL" -le 10 ]; then
-	source /etc/os-release
-	if [ "$ID" = "artix" ]; then
-		/usr/bin/loginctl suspend
-	elif [ "$ID" = "arch" ]; then
-		/usr/bin/systemctl suspend
-	fi
+	/usr/bin/systemctl suspend
 fi

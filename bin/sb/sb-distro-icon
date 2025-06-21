@@ -1,9 +1,0 @@
-#!/bin/bash
-
-source /etc/os-release
-
-if [ "$ID" = "artix" ]; then
-	echo ""
-elif [ "$ID" = "arch" ]; then
-	echo "󰣇"
-fi

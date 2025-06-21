@@ -1,9 +1,0 @@
-#!/bin/sh
-
-# Alternar la barra del sistema
-
-if pgrep stalonetray; then
-	pkill stalonetray
-else
-	stalonetray -bg "#222222" -i 48
-fi

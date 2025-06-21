@@ -10,6 +10,6 @@ PLAYER="$(music-priority)"
 playerctl --player="$PLAYER" "$1"
 
 if [ "$1" != "play-pause" ]; then
-	dunstctl close-all
-	notify-send -i "$(music-metadata -c)" "$(music-metadata -S -t)"
+	makoctl dismiss -a
+	notify-send -i "$(music-metadata -c)" "$(music-metadata -t)"
 fi

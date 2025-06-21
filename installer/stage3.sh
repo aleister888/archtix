@@ -2,11 +2,9 @@
 # shellcheck disable=SC2068
 # shellcheck disable=SC2154
 
-# Auto-instalador para Artix OpenRC (Parte 3)
+# Auto-instalador para Arch Linux (Parte 3)
 # por aleister888 <pacoe1000@gmail.com>
 # Licencia: GNU GPLv3
-
-source /etc/os-release
 
 # Importamos todos los componentes en los que se separa el script
 PATH="$PATH:$(find ~/.dotfiles/installer/modules -type d | paste -sd ':' -)"
@@ -17,25 +15,9 @@ yayinstall() { # Instalar paquetes con yay
 
 # Guardamos nuestros paquetes a instalar en un array
 mapfile -t PACKAGES < <(
-	if [ "$ID" = "artix" ]; then
-		# Añadimos todos los paquetes menos fwupd
-		find "$HOME/.dotfiles/assets/packages" -name '*.json' \
-			! -name 'fwup.json' \
-			-exec jq -r '.[] | .[]' {} +
-		# Instalamos fwupd
-		jq -r '.artix[]' "$HOME/.dotfiles/assets/packages/fwup.json"
-	elif [ "$ID" = "arch" ]; then
-		# Añadimos los paquetes que no dependen de la distro
-		find "$HOME/.dotfiles/assets/packages" -name '*.json' \
-			! -name 'servicios.json' \
-			! -name 'fwup.json' \
-			-exec jq -r '.[] | .[]' {} +
-		# Añadimos los servicios filtrando los paquetes para openrc
-		jq -r '.[] | .[]' "$HOME/.dotfiles/assets/packages/servicios.json" |
-			grep -v openrc
-		# Instalamos fwupd
-		jq -r '.arch[]' "$HOME/.dotfiles/assets/packages/fwup.json"
-	fi
+	# Añadimos los paquetes que no dependen de la distro
+	find "$HOME/.dotfiles/assets/packages" -name '*.json' \
+		-exec jq -r '.[] | .[]' {} +
 )
 
 driver_add() {
@@ -62,10 +44,6 @@ driver_add() {
 			"nvidia-utils"
 			"opencl-nvidia"
 		)
-		[ "$ID" = "artix" ] &&
-			PACKAGES+=(
-				"nvidia-utils-openrc"
-			)
 		;;
 
 	intel)

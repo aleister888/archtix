@@ -1,0 +1,16 @@
+font=Iosevka Term SS05 14
+sort=-time
+layer=overlay
+anchor=top-right
+background-color=#1d2021
+text-color=#bbbbbb
+height=130
+width=400
+margin=30
+padding=10,10,10
+border-size=2
+border-color=#B8BB26
+border-radius=10
+max-icon-size=128
+default-timeout=3500
+markup=true

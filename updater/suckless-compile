@@ -8,9 +8,6 @@ set -o pipefail
 
 [ "$(id -u)" -eq 0 ] && exit 1
 
-# Obtener el DPI desde Xresources
-DPI="$(grep -oP "Xft.dpi:\K[0-9]*" "$HOME"/.config/Xresources)"
-
 # Directorio base para las aplicaciones suckless
 SUCKLESS_BASE="$HOME/.dotfiles/suckless"
 
@@ -21,22 +18,10 @@ compile_suckless_app() {
 
 	# Limpiar directorio
 	sudo make clean --directory "$SUCKLESS_DIR" >/dev/null 2>&1 || return 1
-
-	# Modificar config.h si el DPI es alto
-	if [ "$DPI" -ge 192 ] && [ "$APP" != "dwmblocks" ]; then
-		sed 's/pixelsize=[0-9]*/pixelsize=38/g' "$SUCKLESS_DIR"/config.def.h |
-			tee "$SUCKLESS_DIR"/config.h >/dev/null
-
-		if [ "$APP" = "dwm" ]; then
-			sed -i 's/user_bh.*=.*[0-9]*;/user_bh=24;/g' "$SUCKLESS_DIR/config.h"
-		fi
-	fi
-
-	# Compilar e instalar
 	sudo make install --directory "$SUCKLESS_DIR" >/dev/null 2>&1
 }
 
 # Recompilar aplicaciones suckless
-for app in dmenu dwm dwmblocks st; do
-	compile_suckless_app "$app" || echo "Error: Falló la compilación de $app."
+for APP in dmenu st; do
+	compile_suckless_app "$APP" || echo "Error: Falló la compilación de $APP."
 done

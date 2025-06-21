@@ -1,7 +1,5 @@
 #!/bin/bash
 
-source /etc/os-release
-
 # Script para configurar libvirt de forma que nuestro usuario pueda usar
 # virt-manager sin tener que introducir la contraseña cada vez
 
@@ -9,13 +7,8 @@ source /etc/os-release
 
 # Instalar y configurar libvirt
 virt_install() {
-	if [ "$ID" = "artix" ]; then
-		xargs yay -S --noconfirm --disable-download-timeout --needed \
-			<"$HOME/.dotfiles/assets/packages/opt/virt"
-	elif [ "$ID" = "arch" ]; then
-		grep -v openrc "$HOME/.dotfiles/assets/packages/opt/virt" |
-			xargs yay -S --noconfirm --disable-download-timeout --needed
-	fi
+	xargs yay -S --noconfirm --disable-download-timeout --needed \
+		<"$HOME/.dotfiles/assets/packages/opt/virt"
 
 	sudo install -m 755 "$HOME/.dotfiles/assets/desktop/looking-glass-client.desktop" \
 		/usr/local/share/applications/looking-glass-client.desktop
@@ -34,28 +27,14 @@ virt_install() {
 	sudo usermod -aG libvirt,libvirt-qemu,kvm "$USER"
 
 	# Activar los servicios necesarios
-	if [ "$ID" = "artix" ]; then
-		sudo rc-update add libvirtd default
-		sudo rc-update add virtlogd default
-	elif [ "$ID" = "arch" ]; then
-		sudo systemctl enable libvirtd
-		sudo systemctl enable virtlogd
-	fi
+	sudo systemctl enable libvirtd
+	sudo systemctl enable virtlogd
 }
 
 # Desinstalar libvirt por completo
 virt_uninstall() {
-	if [ "$ID" = "artix" ]; then
-		# Detener servicios
-		sudo rc-service libvirtd stop
-		sudo rc-service virtlogd stop
-		# Borrar servicios del runlevel default
-		sudo rc-update del libvirtd default
-		sudo rc-update del virtlogd default
-	elif [ "$ID" = "arch" ]; then
-		sudo systemctl disable libvirtd --now
-		sudo systemctl disable virtlogd --now
-	fi
+	sudo systemctl disable libvirtd --now
+	sudo systemctl disable virtlogd --now
 
 	# Borrar al usuario de los grupos
 	for GROUP in libvirt libvirt-qemu kvm; do

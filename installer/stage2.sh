@@ -1,11 +1,9 @@
 #!/bin/bash
 # shellcheck disable=SC2154
 
-# Auto-instalador para Artix OpenRC (Parte 2)
+# Auto-instalador para Arch Linux (Parte 2)
 # por aleister888 <pacoe1000@gmail.com>
 # Licencia: GNU GPLv3
-
-source /etc/os-release
 
 # Esta parte del script se ejecuta ya dentro de la instalación (chroot).
 
@@ -20,11 +18,7 @@ pacinstall() {
 }
 
 service_add() {
-	if [ "$ID" = "artix" ]; then
-		rc-update add "$1" default
-	elif [ "$ID" = "arch" ]; then
-		systemctl enable "$1"
-	fi
+	systemctl enable "$1"
 }
 
 # Instalamos GRUB
@@ -76,45 +70,17 @@ hostname_config() {
 
 # Configurar pacman
 repos_conf() {
-	if [ "$ID" = "artix" ]; then
-		# Activar lib32
-		sed -i '/#\[lib32\]/{s/^#//;n;s/^.//}' /etc/pacman.conf && pacman -Sy
-
-		# Instalar paquetes necesarios
-		pacinstall archlinux-mirrorlist archlinux-keyring artix-keyring \
-			artix-archlinux-support lib32-artix-archlinux-support pacman-contrib \
-			rsync lib32-elogind
-
-		# Activar repositorios de Arch
-		grep -q "^\[extra\]" /etc/pacman.conf ||
-			cat <<-EOF >>/etc/pacman.conf
-				[extra]
-				Include = /etc/pacman.d/mirrorlist-arch
-
-				[multilib]
-				Include = /etc/pacman.d/mirrorlist-arch
-			EOF
-
-		pacman -Sy --noconfirm && pacman-key --populate archlinux
-	elif [ "$ID" = "arch" ]; then
-		# Activar multilib
-		sed -i '/#\[multilib\]/{s/^#//;n;s/^.//}' /etc/pacman.conf
-		pacman -Sy --noconfirm
-	fi
+	# Activar multilib
+	sed -i '/#\[multilib\]/{s/^#//;n;s/^.//}' /etc/pacman.conf
+	pacman -Sy --noconfirm
 
 	pacinstall reflector
 
 	# Escoger mirrors más rápidos de los repositorios de Arch
-	local MIRRORLIST_FILE
-	if [ "$ID" = "artix" ]; then
-		MIRRORLIST_FILE="mirrorlist-arch"
-	elif [ "$ID" = "arch" ]; then
-		MIRRORLIST_FILE="mirrorlist"
-	fi
 	reflector --verbose --fastest 10 --age 6 \
 		--connection-timeout 1 --download-timeout 1 \
 		--threads "$(nproc)" \
-		--save /etc/pacman.d/$MIRRORLIST_FILE
+		--save /etc/pacman.d/mirrorlist
 
 	# Configurar cronie para actualizar automáticamente los mirrors de Arch
 	cat <<-EOF >/etc/crontab
@@ -122,7 +88,7 @@ repos_conf() {
 		PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
 		# Escoger los mejores repositorios para Arch Linux
-		@hourly root ping gnu.org -c 1 && reflector --latest 10 --connection-timeout 1 --download-timeout 1 --sort rate --save /etc/pacman.d/$MIRRORLIST_FILE
+		@hourly root ping gnu.org -c 1 && reflector --latest 10 --connection-timeout 1 --download-timeout 1 --sort rate --save /etc/pacman.d/mirrorlist
 	EOF
 }
 
@@ -168,12 +134,7 @@ if echo "$(
 	lsusb
 )" | grep -i bluetooth; then
 	pacinstall bluez bluez-utils bluez-obex
-	if [ "$ID" = "artix" ]; then
-		pacinstall bluez-openrc
-		service_add bluetoothd
-	elif [ "$ID" = "arch" ]; then
-		service_add bluetooth
-	fi
+	service_add bluetooth
 fi
 
 # Instalamos grub
@@ -199,18 +160,7 @@ grub-mkconfig -o /boot/grub/grub.cfg
 service_add NetworkManager
 service_add cronie
 service_add acpid
-if [ "$ID" = "artix" ]; then
-	service_add cupsd
-	rc-update add device-mapper boot
-	rc-update add lvm boot
-	rc-update add dmcrypt boot
-	rc-update add dmeventd boot
-elif [ "$ID" = "arch" ]; then
-	service_add cups
-fi
-
-# Hacemos que la swap se utilize despúes de montar todos los discos
-[ "$ID" = "artix" ] && sed -i '/rc_need="localmount"/s/^#//g' /etc/conf.d/swap
+service_add cups
 
 ln -sf /usr/bin/nvim /usr/local/bin/vim
 ln -sf /usr/bin/nvim /usr/local/bin/vi

@@ -1,6 +1,6 @@
 # ✨ Arch < dotfiles
 
-🛠️ **Auto-instalador para Arch y Artix Linux (OpenRC)** con `dwm`, `st`, `dmenu` y mi configuración personal.
+🛠️ **Auto-instalador para Arch Linux ** con `Hyprland`, `st`, `dmenu` y mi configuración personal.
 
 <p float="center">
 <img src="https://raw.githubusercontent.com/aleister888/archtix/refs/heads/main/assets/screenshots/screenshot1.jpg" width="49%" />
@@ -26,7 +26,6 @@ bash <(curl https://raw.githubusercontent.com/aleister888/archtix/main/install.s
 
 - 🔐 **LUKS y LVM**: `swap` y `/` encriptados (`/boot` sin encriptar)
 - 💻 Compatible solo con **UEFI**.
-- 🧠 Configuración automática de `Xorg` y `eww` basada en el DPI y la resolución.
 - 📁 Entorno organizado según el estándar [XDG Base Directory](https://wiki.archlinux.org/title/XDG_Base_Directory).
 
 ---
@@ -60,3 +59,11 @@ Agradecimientos especiales a:
 
 - 👤 [Luke Smith](https://github.com/LukeSmithxyz) por la inspiración y sus scripts.
 - 🧪 [suckless.org](https://suckless.org) por las herramientas utilizadas (`dwm`, `dmenu`, etc).
+
+---
+
+#### TODO
+
+- Configurar SDDM
+- Configurar una barra de estado
+- Comprobaciones y limpieza de la transición

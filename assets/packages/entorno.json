@@ -3,9 +3,15 @@
     "extra/j4-dmenu-desktop",
     "fastfetch",
     "feh",
-    "i3lock-fancy-rapid-git",
+    "grim",
+    "hyprland",
     "mediainfo",
+    "slurp",
+    "swaylock",
     "tk",
+    "uwsm",
+    "wl-clipboard",
+    "xdg-desktop-portal-hyprland",
     "yad",
     "yt-dlp",
     "zenity"
@@ -16,11 +22,10 @@
     "python-eyed3"
   ],
   "servicios": [
-    "dunst",
     "gnome-keyring",
-    "picom",
-    "polkit-gnome",
-    "redshift",
+    "mako",
+    "hyprpolkitagent",
+    "gammastep",
     "unclutter",
     "xautolock"
   ],
@@ -65,18 +70,16 @@
     "extra/wxwidgets-gtk3"
   ],
   "bandeja_sistema": [
-    "network-manager-applet",
-    "stalonetray"
+    "network-manager-applet"
   ],
   "aplicaciones_gui": [
-    "arandr",
-    "gcolor3",
+    "hyprpaper",
     "mpv",
     "mpv-mpris",
-    "nitrogen",
     "nsxiv",
     "qalculate-gtk",
-    "sxiv"
+    "sxiv",
+    "wl-color-picker"
   ],
   "aplicaciones_tui": [
     "htop",

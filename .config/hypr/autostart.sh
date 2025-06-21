@@ -12,7 +12,7 @@ XDG_RUNTIME_DIR=/run/user/$(id -u)
 export XDG_RUNTIME_DIR
 
 # Mostramos el fondo de pantalla
-nitrogen --restore
+hyprpaper
 
 # Cerrar instancias previas del script
 PROCESSLIST=/tmp/startScript_processes
@@ -23,9 +23,6 @@ grep -v "^$MY_ID$" "$PROCESSLIST" | while read -r ID; do
 done
 
 echo $MY_ID | tee $PROCESSLIST >/dev/null
-
-# Permite al usuario root conectarse al servidor X (Para usar el porta-papeles)
-xhost +SI:localuser:root
 
 #############
 # Funciones #
@@ -59,37 +56,6 @@ if [ -f "$XDG_CONFIG_HOME/Xresources" ]; then
 	xrdb -merge "$XDG_CONFIG_HOME/Xresources"
 fi
 
-# Ocultar el cursor si no se está usando
-pgrep unclutter || unclutter --start-hidden --timeout 2 &
-
-# Iniciar el compositor (Solo en maquinas real.)
-grep "Q35\|VMware" /sys/devices/virtual/dmi/id/product_name ||
-	pgrep picom || picom &
-
-# Servicios del sistema
-pgrep polkit-gnome || /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
-pgrep gnome-keyring || gnome-keyring-daemon -r -d --components=secrets &
-
-# Pasamos todas las variables del entorno de la sesión de dwm a dbus
-dbus-update-activation-environment --all
-
-# Si se detecta una tarjeta bluetooth, iniciar blueman-applet
-if echo "$(
-	lspci
-	lsusb
-)" | grep -i bluetooth; then
-	pgrep blueman-applet || blueman-applet &
-fi
-
-# Filtro de luz azul
-pgrep redshift || redshift -l 40.42:-3.70 -t 5700:4600 -b 1:0.8 -m randr -v &
-
-pgrep dunst || dunst &               # Notificaciones
-pgrep udiskie || udiskie -t -a &     # Auto-montador de discos
-pgrep dwmblocks || dwmblocks &       # Barra de estado
-pgrep nm-applet || nm-applet &       # Applet de red
-pgrep file-handler || file-handler & # Integración con dbus para lf
-
 # Joycond para emuladores
 if [ -x /usr/bin/joycond ] && ! pgrep -x joycond; then
 	/usr/bin/joycond &
@@ -110,11 +76,6 @@ if [ -e /sys/class/power_supply/BAT0 ]; then
 		awk '{print $1}')
 	pactl set-source-volume "$MIC" 25%
 fi &
-
-# Servidor VNC Local (Solo para equipos que no lleven batería)
-if [ ! -e /sys/class/power_supply/BAT0 ]; then
-	pgrep x0vncserver || x0vncserver -localhost -SecurityTypes none &
-fi
 
 # Iniciar hydroxide si está instalado
 # https://github.com/emersion/hydroxide?tab=readme-ov-file#usage

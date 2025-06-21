@@ -1,11 +1,9 @@
 #!/bin/bash
 # shellcheck disable=SC2068
 
-# Auto-instalador para Artix OpenRC (Parte 1)
+# Auto-instalador para Arch Linux (Parte 1)
 # por aleister888 <pacoe1000@gmail.com>
 # Licencia: GNU GPLv3
-
-source /etc/os-release
 
 # - Pasa como variables los siguientes parámetros al siguiente script:
 #   - Nombre del usuario regular ($USERNAME)
@@ -201,12 +199,7 @@ basestrap_install() {
 
 	BASESTRAP_PACKAGES="base linux linux-headers linux-firmware mkinitcpio"
 
-	BASESTRAP_PACKAGES+=" elogind-openrc openrc cronie cronie-openrc"
-	BASESTRAP_PACKAGES+=" lvm2 lvm2-openrc cups cups-openrc"
-	BASESTRAP_PACKAGES+=" networkmanager networkmanager-openrc"
-	BASESTRAP_PACKAGES+=" cryptsetup cryptsetup-openrc"
-	BASESTRAP_PACKAGES+=" acpid acpid-openrc"
-	BASESTRAP_PACKAGES+=" device-mapper-openrc"
+	BASESTRAP_PACKAGES+=" cronie lvm2 cups networkmanager cryptsetup acpid"
 
 	# Instalamos los paquetes del grupo base-devel manualmente para luego
 	# poder borrar sudo facilmente. (Si en su lugar instalamos el grupo,
@@ -256,19 +249,8 @@ basestrap_install() {
 	fi
 
 	# shellcheck disable=SC2086
-	# Artix y Arch usan binarios con nombres distintos para instalar paquetes
-	# en el chroot. Además para Arch tenemos que filtrar los paquetes
-	# con openrc en el nombre
 	while true; do
-		if [ "$ID" = "artix" ]; then
-			basestrap /mnt $BASESTRAP_PACKAGES && break
-		elif [ "$ID" = "arch" ]; then
-			FILTERED_PACKAGES=""
-			for PKG in $BASESTRAP_PACKAGES; do
-				[[ "$PKG" != *openrc* ]] && FILTERED_PACKAGES+="$PKG "
-			done
-			pacstrap /mnt $FILTERED_PACKAGES && break
-		fi
+		pacstrap /mnt $BASESTRAP_PACKAGES && break
 	done
 }
 
@@ -306,11 +288,7 @@ kb_layout_conf() {
 	EOF
 	# Si elegimos español, configurar el layout de la tty en español también
 	if [ "$FINAL_LAYOUT" == "es" ]; then
-		if [ "$ID" = "artix" ]; then
-			sed -i 's|keymap="us"|keymap="es"|' /etc/conf.d/keymaps
-		elif [ "$ID" = "arch" ]; then
-			echo "KEYMAP=es" | sudo tee -a /etc/vconsole.conf
-		fi
+		echo "KEYMAP=es" | sudo tee -a /etc/vconsole.conf
 	fi
 }
 
@@ -588,11 +566,7 @@ whip_msg "Hora del cafe" \
 basestrap_install
 
 # Creamos el fstab
-if [ "$ID" = "artix" ]; then
-	fstabgen -U /mnt >/mnt/etc/fstab
-elif [ "$ID" = "arch" ]; then
-	genfstab -U /mnt >/mnt/etc/fstab
-fi
+genfstab -U /mnt >/mnt/etc/fstab
 
 # Montamos los directorios necesarios para el chroot
 for DIR in dev proc sys run; do
@@ -600,69 +574,36 @@ for DIR in dev proc sys run; do
 	mount --make-rslave /mnt/$DIR
 done
 
-if [ "$ID" = "artix" ]; then
-	artix-chroot /mnt sh -c "
-		useradd -m -G wheel,lp $USERNAME
-		yes $ROOT_PASSWORD | passwd
-		yes $USER_PASSWORD | passwd $USERNAME
-	"
-elif [ "$ID" = "arch" ]; then
-	arch-chroot /mnt sh -c "
-		useradd -m -G wheel,lp $USERNAME
-		yes $ROOT_PASSWORD | passwd
-		yes $USER_PASSWORD | passwd $USERNAME
-	"
-fi
+arch-chroot /mnt sh -c "
+	useradd -m -G wheel,lp $USERNAME
+	yes $ROOT_PASSWORD | passwd
+	yes $USER_PASSWORD | passwd $USERNAME
+"
 
 # Copiamos el repositorio a la nueva instalación
 cp -r "$(dirname "$0")/.." "/mnt/home/$USERNAME/.dotfiles"
 
 # Corregimos el propietario del repositorio copiado y ejecutamos la siguiente
 # parte del script pasandole las variables correspondientes.
-if [ "$ID" = "artix" ]; then
-	artix-chroot /mnt sh -c "
-		export \
-		USERNAME=$USERNAME \
-		FINAL_DPI=$FINAL_DPI \
-		SYSTEM_TIMEZONE=$SYSTEM_TIMEZONE \
-		ROOT_DISK=$ROOT_DISK \
-		ROOT_PART_NAME=$ROOT_PART_NAME \
-		CRYPT_NAME=$CRYPT_NAME \
-		VG_NAME=$VG_NAME \
-		HOSTNAME=$HOSTNAME \
-		GRAPHIC_DRIVER=$GRAPHIC_DRIVER \
-		CHOSEN_VIRT=$CHOSEN_VIRT \
-		CHOSEN_MUSIC=$CHOSEN_MUSIC \
-		CHOSEN_LATEX=$CHOSEN_LATEX \
-		CHOSEN_AUDIO_PROD=$CHOSEN_AUDIO_PROD
+arch-chroot /mnt sh -c "
+	export \
+	USERNAME=$USERNAME \
+	FINAL_DPI=$FINAL_DPI \
+	SYSTEM_TIMEZONE=$SYSTEM_TIMEZONE \
+	ROOT_DISK=$ROOT_DISK \
+	ROOT_PART_NAME=$ROOT_PART_NAME \
+	CRYPT_NAME=$CRYPT_NAME \
+	VG_NAME=$VG_NAME \
+	HOSTNAME=$HOSTNAME \
+	GRAPHIC_DRIVER=$GRAPHIC_DRIVER \
+	CHOSEN_VIRT=$CHOSEN_VIRT \
+	CHOSEN_MUSIC=$CHOSEN_MUSIC \
+	CHOSEN_LATEX=$CHOSEN_LATEX \
+	CHOSEN_AUDIO_PROD=$CHOSEN_AUDIO_PROD
 
-		chown $USERNAME:$USERNAME -R \
-		   /home/$USERNAME/.dotfiles
-		cd /home/$USERNAME/.dotfiles/installer
+	chown $USERNAME:$USERNAME -R \
+	   /home/$USERNAME/.dotfiles
+	cd /home/$USERNAME/.dotfiles/installer
 
-		./stage2.sh
-	"
-elif [ "$ID" = "arch" ]; then
-	arch-chroot /mnt sh -c "
-		export \
-		USERNAME=$USERNAME \
-		FINAL_DPI=$FINAL_DPI \
-		SYSTEM_TIMEZONE=$SYSTEM_TIMEZONE \
-		ROOT_DISK=$ROOT_DISK \
-		ROOT_PART_NAME=$ROOT_PART_NAME \
-		CRYPT_NAME=$CRYPT_NAME \
-		VG_NAME=$VG_NAME \
-		HOSTNAME=$HOSTNAME \
-		GRAPHIC_DRIVER=$GRAPHIC_DRIVER \
-		CHOSEN_VIRT=$CHOSEN_VIRT \
-		CHOSEN_MUSIC=$CHOSEN_MUSIC \
-		CHOSEN_LATEX=$CHOSEN_LATEX \
-		CHOSEN_AUDIO_PROD=$CHOSEN_AUDIO_PROD
-
-		chown $USERNAME:$USERNAME -R \
-		   /home/$USERNAME/.dotfiles
-		cd /home/$USERNAME/.dotfiles/installer
-
-		./stage2.sh
-	"
-fi
+	./stage2.sh
+"

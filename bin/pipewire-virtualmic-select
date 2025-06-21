@@ -61,7 +61,7 @@ sink_edit() {
 
 	# Elegir el sink con dmenu mostrando solo la información esencial
 	DMENU_SELECTED=$(echo "$SINKS" | sed 's/:.*//g' | sort -u |
-		dmenu -l 10)
+		dmenu -c -l 10)
 	if [ -z "$DMENU_SELECTED" ]; then
 		# Salir del script si no se eligió ninguna opción
 		exit
@@ -88,7 +88,7 @@ sink_edit() {
 # Elegir si vincular o desvincular sinks
 ADD="Añadir sink al micrófono virtual"
 DEL="Quitar sink del micrófono virtual"
-CHOSEN=$(echo -e "$ADD\n$DEL" | dmenu -l 10)
+CHOSEN=$(echo -e "$ADD\n$DEL" | dmenu -c -l 10)
 if [ "$CHOSEN" = "$ADD" ]; then
 	[ -z "$DEVICES" ] &&
 		notify-send -i $ICON "No hay sinks que añadir" && exit

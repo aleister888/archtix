@@ -1,7 +1,5 @@
 #!/bin/bash
 
-source /etc/os-release
-
 # Función para obtener y validar la hora
 obtener_hora() {
 	local HORA
@@ -32,14 +30,8 @@ CHOSEN=$(printf "%s\n" "${OPTIONS[@]}" | dmenu -c -l ${#OPTIONS[@]})
 
 # Maneja la opción elegida usando un caso
 case $CHOSEN in
-"${OPTIONS[0]}")
-	sleep 0.17
-	i3lock-fancy-rapid 4 4
-	;;
-"${OPTIONS[1]}")
-	[ "$ID" = "artix" ] && loginctl suspend
-	[ "$ID" = "arch" ] && systemctl suspend
-	;;
+"${OPTIONS[0]}") swaylock ;;
+"${OPTIONS[1]}") systemctl suspend ;;
 "${OPTIONS[2]}")
 	HORA=$(obtener_hora)
 	if [ $? -eq 0 ]; then
@@ -49,23 +41,9 @@ case $CHOSEN in
 "${OPTIONS[3]}")
 	$TERMINAL $TERMTITLE "scratchpad" $TERMEXEC sudo pkill X
 	;;
-"${OPTIONS[4]}")
-	[ "$ID" = "artix" ] && sudo /usr/bin/openrc-shutdown -r now
-	[ "$ID" = "arch" ] && sudo systemctl reboot
-	;;
-"${OPTIONS[5]}")
-	[ "$ID" = "artix" ] && sudo /usr/bin/openrc-shutdown -p now
-	[ "$ID" = "arch" ] && sudo systemctl poweroff
-	;;
-"${OPTIONS[6]}")
-	[ "$ID" = "artix" ] && loginctl hibernate
-	[ "$ID" = "arch" ] && systemctl hibernate
-	;;
-"${OPTIONS[7]}")
-	[ "$ID" = "artix" ] && loginctl reboot --firmware-setup
-	[ "$ID" = "arch" ] && systemctl reboot --firmware-setup
-	;;
-"${OPTIONS[8]}")
-	pkill dwm
-	;;
+"${OPTIONS[4]}") sudo systemctl reboot ;;
+"${OPTIONS[5]}") sudo systemctl poweroff ;;
+"${OPTIONS[6]}") systemctl hibernate ;;
+"${OPTIONS[7]}") systemctl reboot --firmware-setup ;;
+"${OPTIONS[8]}") pkill Hyprland ;;
 esac

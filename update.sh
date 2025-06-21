@@ -1,11 +1,9 @@
 #!/bin/bash
 # shellcheck disable=SC2086
 
-# Instalador de ajustes para Artix OpenRC
+# Instalador de ajustes para Arch Linux
 # por aleister888 <pacoe1000@gmail.com>
 # Licencia: GNU GPLv3
-
-source /etc/os-release
 
 # Variables
 export DATA_DIR="${XDG_DATA_HOME:-$HOME/.local/share}"
@@ -20,8 +18,7 @@ OG_HASH=$(sha256sum "$0" | awk '{print $1}')
 
 # Si tenemos conexión a Internet y el repo. clonado, lo actualizamos
 if [ -d "$REPO_DIR/.git" ] && timeout -k 1s 3s ping gnu.org -c 1 >/dev/null 2>&1; then
-	sh -c "cd $REPO_DIR && git pull" >/dev/null ||
-		exit 1
+	sh -c "cd $REPO_DIR && git pull" >/dev/null
 fi
 
 # Guardamos el hash tras hacer pull
@@ -38,25 +35,8 @@ fi
 
 # Construimos la lista de paquetes dependiendo de la distro
 mapfile -t PACKAGE_LIST < <(
-	if [ "$ID" = "artix" ]; then
-		# Añadimos todos los paquetes menos fwupd
-		find "$HOME/.dotfiles/assets/packages" -name '*.json' \
-			! -name 'fwup.json' \
-			-exec jq -r '.[] | .[]' {} +
-		# Instalamos fwupd
-		jq -r '.artix[]' "$HOME/.dotfiles/assets/packages/fwup.json"
-	elif [ "$ID" = "arch" ]; then
-		# Añadimos los paquetes que no dependen de la distro
-		find "$HOME/.dotfiles/assets/packages" -name '*.json' \
-			! -name 'servicios.json' \
-			! -name 'fwup.json' \
-			-exec jq -r '.[] | .[]' {} +
-		# Añadimos los servicios filtrando los paquetes para openrc
-		jq -r '.[] | .[]' "$HOME/.dotfiles/assets/packages/servicios.json" |
-			grep -v openrc
-		# Instalamos fwupd
-		jq -r '.arch[]' "$HOME/.dotfiles/assets/packages/fwup.json"
-	fi
+	find "$HOME/.dotfiles/assets/packages" -name '*.json' \
+		-exec jq -r '.[] | .[]' {} +
 )
 
 # Extraemos solo el nombre del paquete (sin prefijo repo/)
@@ -92,8 +72,6 @@ fi
 "$HOME"/.dotfiles/updater/conf-services &
 # Añade integración con dbus para lf
 "$HOME"/.dotfiles/updater/lf-dbus &
-# Arreglos rápidos
-"$HOME"/.dotfiles/updater/quickfixes &
 wait
 # Compilar aplicaciones suckless
 "$HOME"/.dotfiles/updater/suckless-compile &
@@ -124,20 +102,15 @@ find "$CONF_DIR" -type l ! -exec test -e {} \; -delete &
 ln -sf ~/.dotfiles/suckless/dwm/autostart.sh \
 	$HOME/.local/share/dwm/autostart.sh
 
+mkdir -p ~/.config/xdg-desktop-portal/
+cat <<-EOF >~/.config/xdg-desktop-portal/portals.conf
+	[preferred]
+	default=hyprland
+EOF
+
 #########################
 # Configurar apariencia #
 #########################
-
-# Configurar el fondo de pantalla
-if [ ! -e "$CONF_DIR/nitrogen/bg-saved.cfg" ]; then
-	mkdir -p "$CONF_DIR/nitrogen"
-	cat <<-EOF >"$CONF_DIR/nitrogen/bg-saved.cfg"
-		[xin_-1]
-		file=$REPO_DIR/assets/wallpaper
-		mode=5
-		bgcolor=#000000"
-	EOF
-fi &
 
 # Configurar el tema del cursor
 if [ ! -e "$REPO_DIR/assets/configs/index.theme" ]; then
@@ -250,7 +223,6 @@ DESKTOPENT=(
 	"lf"
 	"linguist"
 	"lstopo"
-	"nitrogen"
 	"nvim"
 	"picom"
 	"qdbusviewer"

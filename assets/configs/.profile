@@ -22,6 +22,7 @@ export XCURSOR_PATH="/usr/share/icons:${XDG_DATA_HOME}/icons"
 export XCURSOR_PATH=/usr/share/icons/
 export XCURSOR_THEME=capitaine-cursors
 export XCURSOR_SIZE=64
+export HYPRCURSOR_SIZE=64
 
 # Usar el filechooser del portal GTK
 export GDK_SCALE=1
@@ -31,9 +32,6 @@ export GTK_THEME=Gruvbox-Dark
 # Hacer que las aplicaciones QT sigan los ajustes de QT5CT
 export QT_QPA_PLATFORMTHEME="qt5ct"
 
-# XDG
-export XDG_CURRENT_DESKTOP=X-Generic
-
 # Apps
 export OPENER="xdg-open"
 
@@ -41,6 +39,9 @@ export OPENER="xdg-open"
 export _JAVA_AWT_WM_NONREPARENTING=1
 
 # XDG
+export XDG_SESSION_TYPE=wayland
+export XDG_CURRENT_DESKTOP=Hyprland
+export XDG_SESSION_DESKTOP=Hyprland
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_CACHE_HOME="$HOME/.cache"

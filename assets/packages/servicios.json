@@ -26,8 +26,7 @@
     "earlyoom-openrc",
     "tlp",
     "tlp-openrc",
-    "xdm-openrc",
-    "xorg-xdm"
+    "sddm"
   ],
   "syslog-ng": [
     "hiredis",
@@ -41,5 +40,10 @@
     "net-snmp",
     "syslog-ng",
     "syslog-ng-openrc"
+  ],
+  "fwupd": [
+    "gnome-firmware",
+    "fwupd",
+    "fwupd-efi"
   ]
 }

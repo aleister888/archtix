@@ -3,7 +3,6 @@ source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
 source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 source /usr/share/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh
 source "${XDG_CONFIG_HOME:-$HOME/.config}"/zsh/aliasrc
-source /etc/os-release
 
 bindkey -e
 
@@ -64,10 +63,6 @@ setopt promptsubst
 
 printf '\033[?1h\033=' >/dev/tty
 
-if [ "$ID" = "artix" ]; then
-	fastfetch -c screenfetch -l artix2_small
-elif [ "$ID" = "arch" ]; then
-	fastfetch -c screenfetch -l arch3
-fi
+fastfetch -c screenfetch -l arch3
 
 source "$HOME/.profile"

@@ -3,8 +3,6 @@
 # Script para recompilar las aplicaciones suckless
 # - Invocado por /update.sh
 
-source /etc/os-release
-
 [ "$(id -u)" -eq 0 ] && exit 1
 
 ########
@@ -44,25 +42,6 @@ if [ ! -f "$HOME/.config/keepassxc/keepassxc.ini" ]; then
 		"$HOME"/.config/keepassxc/
 fi
 
-#############
-# Servicios #
-#############
-
-# xdm
-sudo cp -f "$HOME/.dotfiles/assets/system/services/xdm/Xresources" \
-	/etc/X11/xdm/
-sudo cp -f "$HOME/.dotfiles/assets/system/services/xdm/Xsetup_0" \
-	/etc/X11/xdm/
-# syslog-ng
-sudo cp -f "$HOME/.dotfiles/assets/system/services/syslog-ng/syslog-ng.conf" \
-	/etc/syslog-ng/
-
-# elogind
-if [ "$ID" = "artix" ]; then
-	sudo install -m 755 "$HOME/.dotfiles/assets/system/services/elogind/nm-restart" \
-		/lib/elogind/system-sleep/
-fi
-
 ##############
 # Miscelánea #
 ##############
@@ -72,19 +51,14 @@ echo "blacklist pcspkr" | sudo tee /etc/modprobe.d/nobeep.conf >/dev/null
 
 # Suspender de forma automática cuando la batería cae por debajo del 10%
 if [ -e /sys/class/power_supply/BAT0 ]; then
-	sudo install -m 755 "$HOME/.dotfiles/assets/system/services/auto-suspend/auto-suspend" \
+	sudo install -m 755 \
+		"$HOME/.dotfiles/assets/system/services/auto-suspend/auto-suspend" \
 		/usr/local/bin/
-	sudo install -m 755 "$HOME/.dotfiles/assets/system/services/auto-suspend/auto-suspend-loop" \
+	sudo install -m 755 \
+		"$HOME/.dotfiles/assets/system/services/auto-suspend/auto-suspend-loop" \
 		/usr/local/bin/
-	if [ "$ID" = "artix" ]; then
-		# Instalar los scripts y archivos del servicio de auto-suspensión
-		sudo install -m 755 "$HOME/.dotfiles/assets/system/services/auto-suspend/openrc-service" \
-			/etc/init.d/auto-suspend
-		# Activar el servicio
-		sudo rc-update add auto-suspend default >/dev/null
-	elif [ "$ID" = "arch" ]; then
-		sudo install -m 555 "$HOME/.dotfiles/assets/system/services/auto-suspend/systemd-service" \
-			/etc/systemd/system/auto-suspend.service
-		sudo systemctl enable auto-suspend
-	fi
+	sudo install -m 555 \
+		"$HOME/.dotfiles/assets/system/services/auto-suspend/systemd-service" \
+		/etc/systemd/system/auto-suspend.service
+	sudo systemctl enable auto-suspend
 fi

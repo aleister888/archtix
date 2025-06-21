@@ -1,3 +1,0 @@
-#!/bin/sh
-
-notify-send -t 4000 "$(cal)"

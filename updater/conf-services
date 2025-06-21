@@ -1,42 +1,19 @@
 #!/bin/bash
 
-source /etc/os-release
-
 [ "$(id -u)" -eq 0 ] && exit 1
-
-if [ "$ID" = "artix" ]; then
-	[ ! -d "$HOME/.config/rc/runlevels/default" ] &&
-		mkdir -p "$HOME/.config/rc/runlevels/default"
-	[ ! -d "$HOME/.config/rc/runlevels/shutdown" ] &&
-		mkdir -p "$HOME/.config/rc/runlevels/shutdown"
-fi
 
 # Activar servicio
 service_add() {
-	if [ "$ID" = "artix" ]; then
-		sudo rc-update -q add "$1" "$2"
-	elif [ "$ID" = "arch" ]; then
-		if [ "$SERVICE" = "syslog-ng" ]; then
-			sudo systemctl enable "${SERVICE}@default.service"
-		else
-			sudo systemctl enable "$SERVICE"
-		fi
+	if [ "$SERVICE" = "syslog-ng" ]; then
+		sudo systemctl enable "${SERVICE}@default.service"
+	else
+		sudo systemctl enable "$SERVICE"
 	fi
 }
 # Activar servicio para el usuario
 user_service_add() {
 	SERVICE="$1"
-	RUNLEVEL="$2"
-	if [ "$ID" = "artix" ]; then
-		if [ -d /run/user/1000/ ]; then
-			rc-update -q add "$SERVICE" "$RUNLEVEL" -U
-		else
-			ln -s "/etc/user/init.d/$SERVICE" \
-				"$HOME/.config/rc/runlevels/$RUNLEVEL/$SERVICE"
-		fi
-	elif [ "$ID" = "arch" ]; then
-		systemctl --user enable "$SERVICE"
-	fi
+	systemctl --user enable "$SERVICE"
 }
 
 [ "$(id -u)" -eq 0 ] && exit 1
@@ -46,7 +23,7 @@ SERVICES=(
 	"fwupd"
 	"syslog-ng"
 	"tlp"
-	"xdm"
+	"sddm"
 )
 
 USER_SERVICES=(
@@ -57,18 +34,10 @@ USER_SERVICES=(
 
 # Activar los servicios del sistema del runlevel default
 for SERVICE in "${SERVICES[@]}"; do
-	service_add "$SERVICE" default >/dev/null 2>&1
+	service_add "$SERVICE" >/dev/null 2>&1
 done
-
-if [ "$ID" = "artix" ]; then
-	service_add elogind default >/dev/null 2>&1
-	service_add local default >/dev/null 2>&1
-	service_add localmount default >/dev/null 2>&1
-	service_add netmount default >/dev/null 2>&1
-	user_service_add dbus default >/dev/null 2>&1
-fi
 
 # Activar los servicios del usuario del runlevel default
 for USER_SERVICE in "${USER_SERVICES[@]}"; do
-	user_service_add "$USER_SERVICE" default >/dev/null 2>&1
+	user_service_add "$USER_SERVICE" >/dev/null 2>&1
 done
